@@ -72,13 +72,13 @@ const UniversityListTable = ({Univerisities, showHideCourse}) => {
             Header: 'Show',
             Cell: (cell) => {
                 switch (cell.cell.row.original.hidden) {
-                    case 'no':
+                    case 'yes':
                         return <AiFillEyeInvisible onClick={()=>{
                           handleupdateshow(cell.cell.row.original);
                           // console.log(cell.cell.original,"ddd")
                         }} style={{cursor:'pointer',fontSize:'22px'}}/>;
 
-                    case 'yes':
+                    case 'no':
                         return <AiFillEye onClick={()=>{
                           handleupdateshow(cell.cell.row.original);
                         }}  style={{cursor:'pointer',fontSize:'22px'}}/>;
