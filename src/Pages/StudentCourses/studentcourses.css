@@ -1,0 +1,26 @@
+.courses_student {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100% !important;
+  flex-wrap: wrap;
+  row-gap: 30px;
+  padding: 10px;
+}
+
+.courses_student>div {
+  width: 23%;
+  text-align: center;
+  background-color: white;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+
+@media (max-width:767px) {
+  .courses_student>div {
+    width: 48%;
+    text-align: center;
+    background-color: white;
+  }
+}

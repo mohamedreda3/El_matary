@@ -1,0 +1,23 @@
+ul.subjects_av li.active {
+    background: #ffe4c4;
+}
+
+ul.subjects_av li:hover {
+    background: #ffe4c4;
+}
+ul.subjects_av li {
+    width: fit-content;
+    text-align: center;
+    padding: 4px 22px;
+    border: 0.1px solid;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: .5s ease-in-out;
+}
+ul.subjects_av {
+    width: 100%;
+    list-style: none;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+}
