@@ -1,13 +1,13 @@
-import React, {useEffect, useState} from 'react';
-import {DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown} from 'reactstrap';
+import React, { useEffect, useState } from 'react';
+import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from 'reactstrap';
 // import TableContainer from "./../../../../components/Common/TableContainer";
 // import { CourseData } from "../../../../CommonData/Data/Course";
-import {Navigate, useLocation, useNavigate} from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import TableContainer from '../../../components/Common/TableContainer';
 import axios from 'axios';
-import {Loader} from 'rsuite';
-import {toastPlacements} from 'rsuite/esm/toaster/ToastContainer';
-const UnitListTable = ({Units, courseData, showHideUnit}) => {
+import { Loader } from 'rsuite';
+import { toastPlacements } from 'rsuite/esm/toaster/ToastContainer';
+const UnitListTable = ({ Units, courseData, showHideUnit }) => {
     const navigate = useNavigate();
 
 
@@ -21,26 +21,26 @@ const UnitListTable = ({Units, courseData, showHideUnit}) => {
             accessor: 'unit_name',
             Filter: false
         }, {
-            Header: 'Status',
+            Header: 'Hidden',
             Cell: (cell) => {
                 switch (cell.cell.row.original.hidden) {
                     case 'no':
                         return <span className="badge badge-pill badge-soft-success font-size-12">
                             {
-                            cell.cell.row.original.hidden
-                        }</span>;
+                                cell.cell.row.original.hidden
+                            }</span>;
 
                     case 'yes':
                         return <span className="badge badge-pill badge-soft-warning font-size-12">
                             {
-                            cell.cell.row.original.hidden
-                        }</span>;
+                                cell.cell.row.original.hidden
+                            }</span>;
 
                     default:
                         return <span className="badge badge-pill badge-soft-success font-size-12">
                             {
-                            cell.cell.row.original.hidden
-                        }</span>
+                                cell.cell.row.original.hidden
+                            }</span>
                 }
             }
         }, {
@@ -83,7 +83,6 @@ const UnitListTable = ({Units, courseData, showHideUnit}) => {
             }
         },
     ]
-    console.log(Units)
 
     return (
         <React.Fragment> {
@@ -91,7 +90,7 @@ const UnitListTable = ({Units, courseData, showHideUnit}) => {
                 data={Units}
                 isGlobalFilter={true}
                 customPageSize={10}
-                className="Invoice table"/> : !Units.length ? <h2>No Units</h2> : <Loader/>
+                className="Invoice table" /> : !Units.length ? <h2>No Units</h2> : <Loader />
         } </React.Fragment>
     )
 }

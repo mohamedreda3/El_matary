@@ -41,21 +41,33 @@ const Courses = () => {
     }
 
     const showHideCourse = async (send_data) => {
+        console.log(send_data)
         const courses = await axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/show_hide_course.php", JSON.stringify(send_data));
         console.log(courses);
-        if (courses.status) {
+        if (courses.status == 'success') {
             toast.success(courses.message);
-            await getCourses();
-        } else {
+            getCourses();
+            console.log("getCourses");
+        }
+        else if (courses.status == 'error') {
             toast.error(courses.message);
         }
+        else {
+            toast.error("Something Went Error");
+        }
+        // if (courses.status) {
+        //     toast.success(courses.message);
+        //     await getCourses();
+        // } else {
+        //     toast.error(courses.message);
+        // }
     }
 
 
     useEffect(() => {
         getCourses();
     }, [])
-
+ 
     return (
         <React.Fragment>
             <div className="page-content">
@@ -81,40 +93,15 @@ const Courses = () => {
                                                         </button>
                                                     </div>
                                                 </Col>
-                                                <Col className="col-sm-auto">
-                                                    <div className="d-flex gap-1">
-                                                        <div className="input-group">
-                                                            <Flatpickr className="form-control" placeholder="dd M, yyyy"
-                                                                options={
-                                                                    {
-                                                                        mode: "range",
-                                                                        dateFormat: "Y-m-d"
-                                                                    }
-                                                                }
-                                                                id="datepicker-range" />
-                                                            <span className="input-group-text">
-                                                                <i className="bx bx-calendar-event"></i>
-                                                            </span>
-                                                        </div>
 
-                                                        <UncontrolledDropdown className="dropdown" direction="start">
-                                                            <DropdownToggle tag="a" className="btn btn-link text-body shadow-none">
-                                                                <i className="bx bx-dots-horizontal-rounded"></i>
-                                                            </DropdownToggle>
-                                                            <DropdownMenu className="dropdown-menu-end">
-                                                                <DropdownItem>Action</DropdownItem>
-                                                                <DropdownItem>Another action</DropdownItem>
-                                                                <DropdownItem>Something else here</DropdownItem>
-                                                            </DropdownMenu>
-                                                        </UncontrolledDropdown>
-                                                    </div>
-                                                </Col>
                                             </Row>
                                         </div>
                                     </div>
                                     <div id="table-invoices-list">
                                         <CourseListTable Courses={Courses}
-                                            showHideCourse={showHideCourse} />
+                                            showHideCourse={showHideCourse}
+                                            getCourses={getCourses}
+                                        />
                                     </div>
                                 </CardBody>
                             </Card>

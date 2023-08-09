@@ -1,5 +1,7 @@
+// import RichTextEditor from 'react-richtext';
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import './tweets.css'
 import {
   Row,
   Col,
@@ -31,15 +33,27 @@ import { toast } from "react-toastify";
 import axios from "axios"
 import { useEffect } from "react";
 import TweetsTableList from "../Lessons/LessonsTabel/TweetsTableList";
-const Tweets = ({ CourseId, unitId }) => {
+import { Button } from "rsuite";
+import { AiOutlinePlus } from "react-icons/ai";
+import ReactQuill from "react-quill";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+const Tweets = ({ CourseId, unitId,allunitdata }) => {
   const [type, setType] = useState(false);
   const [videoLink, setVideoLink] = useState(false);
-
+  const [twetslistedit,settwetslistedit]=useState([]);
+  const [tweetsedis,settweetsedis]=useState([]);
   // console.log(data)
   const [modal, setmodal] = useState(false);
-
+  const [tweetanswerlist,settweetanswerlist]=useState([
+    {id:'0',tweet_value:''}
+  ]);
+  const [edittweets,setedittweets]=useState([]);
+  const [writelist,settwritelist]=useState([
+    {id:'0',tweet_value:''}
+  ]);
   /* ====================   Files   ===================*/
   const [selectedFiles, setselectedFiles] = useState([]);
+
 
   function handleAcceptedFiles(files) {
     files.map((file) =>
@@ -88,20 +102,36 @@ const Tweets = ({ CourseId, unitId }) => {
     }
     const get = await axios.post("https://camp-coding.tech/dr_elmatary/admin/tweets/select_tweets.php", data_send)
     setTweets(get.message);
+    // console.log(get.message)
   }
   const addTweet = async (e) => {
+    // console.log(tweetanswerlist);
+    const tweets=[...tweetanswerlist];
+    // console.log(tweets)
+    let tweetstxt='';
+    for(let i=0;i<tweets.length;i++){
+      if(i==0){
+        tweetstxt+=tweets[i]?.tweet_value;
+      }
+      else {
+        tweetstxt+='//camp//'+tweets[i]?.tweet_value+'//camp//';
+      }
+    }
+    console.log(tweetstxt);
     const data_send = {
-      "tweet_value": e.currentTarget.tweet_value.value,
+      "tweet_value": tweetstxt,
       "tweet_title": e.currentTarget.tweet_title.value,
       "course_id": CourseId,
       "unit_id": unitId
     }
+    // console.log(data_send);
     console.log(data_send);
     const add = await axios.post("https://camp-coding.tech/dr_elmatary/admin/tweets/insert_tweets.php", data_send);
     console.log(add);
     if (add.status == "success") {
-      toast.success(add.message);
-      await getTweets()
+      toast.success("Added");
+      await getTweets();
+      setmodal(false)
     } else {
       toast.error(add.message)
     }
@@ -117,12 +147,26 @@ const Tweets = ({ CourseId, unitId }) => {
       toast.error(tweets_1.message);
     }
   }
+  const [convertedText, setConvertedText] = useState("");
 
   const editTweet = async (e) => {
+
+    const tweets=[...edittweets];
+    // console.log(tweets)
+    let tweetstxt='';
+    for(let i=0;i<tweets.length;i++){
+      if(i==0){
+        tweetstxt+=tweets[i]?.tweet_value;
+      }
+      else {
+        tweetstxt+='//camp//'+tweets[i]?.tweet_value+'//camp//';
+      }
+    }
+
     const data_send = {
       "course_id": CourseId,
       "unit_id": unitId,
-      "tweet_value": e.currentTarget.tweet_answar.value,
+      "tweet_value": tweetstxt,
       "tweet_title": e.currentTarget.tweet_title.value,
       "tweet_id": item.tweet_id
     }
@@ -131,6 +175,7 @@ const Tweets = ({ CourseId, unitId }) => {
     if (edit.status == "success") {
       toast.success(edit.message);
       await getTweets();
+      setEdit(false)
     } else {
       toast.error(edit.message);
     }
@@ -140,6 +185,16 @@ const Tweets = ({ CourseId, unitId }) => {
   useEffect(() => { getTweets() }, [])
   const columns =
     [
+      {
+        Header: "No",
+        Cell: (cell) => {
+          return (
+            <b>
+              {cell.cell.row.index + 1}
+            </b>
+          )
+        }
+      },
       {
         Header: 'Tweet ID',
         accessor: 'tweet_id',
@@ -152,23 +207,47 @@ const Tweets = ({ CourseId, unitId }) => {
       },
       {
         Header: 'Tweet Answer',
-        accessor: 'tweet_value',
+        Cell:(cell)=>{
+          return <p >
+            {cell.cell.row.original.tweet_value.split("//camp//")
+            .map((item,index)=>{
+            if(index<4){
+              return (
+                <p dangerouslySetInnerHTML={{ __html:item}}></p>
+              )
+            }
+            else return null
+            })}
+          </p>
+        }
       },
       {
-        Header: 'Status',
+        Header: 'Show',
         Cell: (cell) => {
           switch (cell.cell.row.original.hidden) {
             case 'no':
-              return <span className="badge badge-pill badge-soft-success font-size-12">
-                {
-                  cell.cell.row.original.hidden
-                }</span>;
+              return <div style={{ cursor:'pointer' }} onClick={()=>{
+            const item = cell.cell.row.original;
+                    const send_data = {
+                      hidden_value: item.hidden == "no" ? "yes" : "no",
+                      tweet_id: item.tweet_id
+                    }
+              showHideTweets(send_data)
+          }}>
+            <Visibility className="shown"/>
+          </div>;
 
             case 'yes':
-              return <span className="badge badge-pill badge-soft-warning font-size-12">
-                {
-                  cell.cell.row.original.hidden
-                }</span>;
+              return <div style={{ cursor:'pointer' }} onClick={()=>{
+                const item = cell.cell.row.original;
+                    const send_data = {
+                      hidden_value: item.hidden == "no" ? "yes" : "no",
+                      tweet_id: item.tweet_id
+                    }
+                    showHideTweets(send_data)
+              }}>
+            <VisibilityOff className="hidden"/>
+          </div>;
 
             default:
               return <span className="badge badge-pill badge-soft-success font-size-12">
@@ -188,15 +267,48 @@ const Tweets = ({ CourseId, unitId }) => {
                   <i className="bx bx-dots-horizontal-rounded"></i>
                 </DropdownToggle>
                 <DropdownMenu className="dropdown-menu-end">
-                  <DropdownItem onClick={() => { setEdit(true); setItem(cell.cell.row.original); }}>Edit</DropdownItem>
-                  <DropdownItem onClick={() => {
+                  <DropdownItem
+                    onClick={() =>
+                      {
+                        setEdit(true);
+                        setItem(cell.cell.row.original);
+                        // console.log(cell.cell.row.original)
+                        // let tweet_value=cell.cell.row.original.tweet_value;
+                        let push1=[];
+                        let pusharr=[];
+                        let tweetslist=cell.cell.row.original.tweet_value.split('//camp//');
+                        for(let k=0;k<tweetslist.length;k++){
+                          if(tweetslist[k]!==""){
+                            push1.push(tweetslist[k])
+                          }
+                        }
+                        for(let i=0 ;i<push1.length;i++){
+                          let obj={
+                            id:i,
+                            tweet_value:push1[i]
+                          }
+                          console.log(obj)
+                          pusharr=[...pusharr,obj]
+                          if(obj.id!==""){
+                            setedittweets([...edittweets,obj]);
+                          }
+                        }
+                        setedittweets(pusharr);
+                        // console.log(pusharr);
+                        // settwetslistedit()
+                        // settwetslistedit([...pushedlist])
+                      }}
+                    >
+                      Edit
+                  </DropdownItem>
+                  {/* <DropdownItem onClick={() => {
                     const item = cell.cell.row.original;
                     const send_data = {
                       hidden_value: item.hidden == "no" ? "yes" : "no",
                       tweet_id: item.tweet_id
                     }
                     showHideTweets(send_data)
-                  }}>Hide/Show</DropdownItem>
+                  }}>Hide/Show</DropdownItem> */}
                   <DropdownItem onClick={()=>handlecopyitem(cell.cell.row.original)}>Copy</DropdownItem>
                 </DropdownMenu>
               </UncontrolledDropdown>
@@ -224,11 +336,26 @@ const Tweets = ({ CourseId, unitId }) => {
         }
       })
   }
+  const handlesavetxt=(e,i,txt)=>{
+    // console.log(i)
+    // console.log(txt)
+    // console.log(e);
+    const list = [...tweetanswerlist];
+    list[i][txt] = e;
+    settweetanswerlist(list);
+  }
+  const handlesavetxtedit=(e,i,txt)=>{
+    // console.log(i)
+    // console.log(txt)
+    // console.log(e);
+    const list = [...edittweets];
+    list[i][txt] = e;
+    setedittweets(list);
+  }
   return (
     <React.Fragment>
       <Container fluid={true}>
-        <Breadcrumbs title="tweets" breadcrumbItem="Tweets List" />
-
+      <Breadcrumbs title="Lessons" breadcrumbItem={allunitdata.unit_name + " - Tweets List"} />
         <Row>
           <Col lg={12}>
             <Card>
@@ -323,15 +450,41 @@ const Tweets = ({ CourseId, unitId }) => {
                   <Input name="tweet_title" type="text" />
                 </div>
                 <div className="mb-3">
-                  <Label className="form-label">Answer</Label>
-                  <textarea
-                    style={{ height: "100px" }}
-                    id="hours"
-                    name="tweet_value"
-                    placeholder="Enter Explanation"
-                    type="number"
-                    className="form-control"
-                  ></textarea>
+                  <div className="add_newanstwee">
+                    <Label className="form-label">Answer</Label>
+                    <AiOutlinePlus
+                      onClick={()=>{
+                        settweetanswerlist([...tweetanswerlist,{id:tweetanswerlist.length,tweet_value:""}])
+                      }}
+                    />
+                  </div>
+                  {
+                    tweetanswerlist.map((item,index)=>{
+                      return(
+                        <div className="tweet_ans">
+                          <ReactQuill
+                            theme='snow'
+                            value={item.tweet_value}
+                            onChange={(e)=>{
+                              // console.log(item.id);
+                              handlesavetxt(e,index,'tweet_value');
+                            }}
+                            style={{minHeight: '300px'}}
+                          />
+                          {index!==0?
+                            ( <Button onClick={()=>{
+                              // console.log(item.id)
+                              settweetanswerlist(tweetanswerlist.filter((it)=>item.id!==it.id))
+                            }} color="red" appearance="primary">
+                                Delete
+                              </Button>)
+                              :
+                            (null)
+                          }
+                        </div>
+                      )
+                    })
+                  }
                 </div>
               </Col>
             </Row>
@@ -366,8 +519,15 @@ const Tweets = ({ CourseId, unitId }) => {
                   <Input type="text" name="tweet_title" defaultValue={item?.tweet_title} />
                 </div>
                 <div className="mb-3">
-                  <Label className="form-label">Answer</Label>
-                  <textarea
+                  <div className="add_newanstwee">
+                    <Label className="form-label">Answer</Label>
+                    <AiOutlinePlus
+                      onClick={()=>{
+                        setedittweets([...edittweets,{id:edittweets.length,tweet_value:""}])
+                      }}
+                    />
+                  </div>
+                  {/* <textarea
                     style={{ height: "100px" }}
                     id="hours"
                     name="tweet_answar"
@@ -375,7 +535,36 @@ const Tweets = ({ CourseId, unitId }) => {
                     type="number"
                     className="form-control"
                     defaultValue={item?.tweet_value}
-                  ></textarea>
+                  ></textarea> */}
+                  {/* {console.log(tweetsedis,"dfdf")} */}
+                  {
+                    edittweets.map((item,index)=>{
+                      return(
+                        <div className="tweet_ans">
+                          {console.log(item,"Ererer")}
+                          <ReactQuill
+                            theme='snow'
+                            value={item.tweet_value}
+                            onChange={(e)=>{
+                              // console.log(item.id);
+                              handlesavetxtedit(e,index,'tweet_value');
+                            }}
+                            style={{minHeight: '300px'}}
+                          />
+                          {index!==0?
+                            ( <Button onClick={()=>{
+                              // console.log(item.id)
+                              setedittweets(edittweets.filter((it)=>item.id!==it.id))
+                            }} color="red" appearance="primary">
+                                Delete
+                              </Button>)
+                              :
+                            (null)
+                          }
+                        </div>
+                      )
+                    })
+                  }
                 </div>
               </Col>
             </Row>

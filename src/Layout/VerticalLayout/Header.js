@@ -20,6 +20,7 @@ const Header = (props) => {
     const dispatch = useDispatch();
 
     function tToggle() {
+        document.body.classList.toggle("sm-body")
         var body = document.body;
         if (window.screen.width <= 998) {
             body.classList.toggle("sidebar-enable");
@@ -75,26 +76,9 @@ const Header = (props) => {
                     </div>
 
                     <div className="d-flex">
-                        <div className="dropdown d-inline-block d-lg-none">
-                            <button type="button" className="btn header-item"
-                                aria-haspopup={true} aria-expanded={false}>
-                                <i className="icon-sm" data-feather="search"></i>
-                                <FeatherIcon icon="search" />
-                            </button>
-                            <div className="dropdown-menu dropdown-menu-lg dropdown-menu-end p-0">
-                                <form className="p-2">
-                                    <div className="search-box">
-                                        <div className="position-relative">
-                                            <input type="text" className="form-control rounded bg-light border-0" placeholder="Search..." />
-                                            <i className="mdi mdi-magnify search-icon"></i>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
 
-                        <LanguageDropdown />
-                        <NotificationDropdown />
+
+                
 
                         <div className="dropdown d-none d-sm-inline-block">
 

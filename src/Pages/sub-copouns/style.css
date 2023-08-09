@@ -5,6 +5,7 @@ ul.subjects_av li.active {
 ul.subjects_av li:hover {
     background: #ffe4c4;
 }
+
 ul.subjects_av li {
     width: fit-content;
     text-align: center;
@@ -14,10 +15,25 @@ ul.subjects_av li {
     cursor: pointer;
     transition: .5s ease-in-out;
 }
+
 ul.subjects_av {
     width: 100%;
     list-style: none;
     display: flex;
     gap: 14px;
     align-items: center;
+}
+
+.rs-picker.rs-picker-date.rs-picker-default.rs-picker-toggle-wrapper.rs-picker-has-value.rs-picker-cleanable,
+.rs-picker.rs-picker-date.rs-picker-default.rs-picker-toggle-wrapper.rs-picker-cleanable {
+    width: 100% !important;
+}
+
+.shown {
+    color: green !important;
+}
+
+
+.hidden {
+    color: red !important;
 }

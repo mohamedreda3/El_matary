@@ -60,7 +60,7 @@ const Unit = () => {
         const units = await axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/add_unit.php", send_data);
         console.log(units);
         if (units.status) {
-            toast.success(units.message);
+            toast.success("Added");
             await getUnits();
         } else {
             toast.error(units.message);
@@ -84,11 +84,13 @@ const Unit = () => {
     if (!location.state) {
         return navigate("/courses-list");
     }
+    console.log(location.state);
     return (
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Units" breadcrumbItem="Unit List" />
+                    {/* breadcrumbItem={loation?.state?.coursedata?.course_name + " Unit List"} */}
+                    <Breadcrumbs title="Units" breadcrumbItem={location?.state?.coursedata?.course_name + " - Unit List"} />
 
                     <Row>
                         <Col lg={12}>
@@ -110,34 +112,7 @@ const Unit = () => {
                                                         </button>
                                                     </div>
                                                 </Col>
-                                                <Col className="col-sm-auto">
-                                                    <div className="d-flex gap-1">
-                                                        <div className="input-group">
-                                                            <Flatpickr className="form-control" placeholder="dd M, yyyy"
-                                                                options={
-                                                                    {
-                                                                        mode: "range",
-                                                                        dateFormat: "Y-m-d"
-                                                                    }
-                                                                }
-                                                                id="datepicker-range" />
-                                                            <span className="input-group-text">
-                                                                <i className="bx bx-calendar-event"></i>
-                                                            </span>
-                                                        </div>
-
-                                                        <UncontrolledDropdown className="dropdown" direction="start">
-                                                            <DropdownToggle tag="a" className="btn btn-link text-body shadow-none">
-                                                                <i className="bx bx-dots-horizontal-rounded"></i>
-                                                            </DropdownToggle>
-                                                            <DropdownMenu className="dropdown-menu-end">
-                                                                <DropdownItem>Action</DropdownItem>
-                                                                <DropdownItem>Another action</DropdownItem>
-                                                                <DropdownItem>Something else here</DropdownItem>
-                                                            </DropdownMenu>
-                                                        </UncontrolledDropdown>
-                                                    </div>
-                                                </Col>
+                                              
                                             </Row>
                                         </div>
                                     </div>

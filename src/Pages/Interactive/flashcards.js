@@ -29,8 +29,11 @@ import { useCallback } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import FlashCardsTableList from "../Lessons/LessonsTabel/FlashCardsTableList";
+import "./interactive.css";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
-const Flash_Cards = ({ CourseId, unitId }) => {
+const Flash_Cards = ({ CourseId, unitId,allunitdata }) => {
+  console.log(unitId)
   const [type, setType] = useState(false);
   const [videoLink, setVideoLink] = useState(false);
 
@@ -59,8 +62,8 @@ const Flash_Cards = ({ CourseId, unitId }) => {
   }
   const addFlashCard = async (e) => {
     const data_send = {
-      "flash_card_side_1": e.currentTarget.flashCard_value.value,
-      "flash_card_side_2": e.currentTarget.flashCard_title.value,
+      "flash_card_side_1": e.currentTarget.flashCard_title.value,
+      "flash_card_side_2": e.currentTarget.flashCard_value.value,
       "course_id": CourseId,
       "unit_id": unitId,
       "author": ""
@@ -69,8 +72,12 @@ const Flash_Cards = ({ CourseId, unitId }) => {
     const add = await axios.post("https://camp-coding.tech/dr_elmatary/admin/flash_cards/add_flash_cards.php", data_send);
     console.log(add);
     if (add.status == "success") {
-      toast.success(add.message);
-      await getFlashCards()
+      toast.success("Added");
+      await getFlashCards();
+      setSide1(false);
+      setSide2(false);
+      setIsBack(false);
+      setModal(false)
     } else {
       toast.error(add.message)
     }
@@ -100,34 +107,68 @@ const Flash_Cards = ({ CourseId, unitId }) => {
     if (edit.status == "success") {
       toast.success(edit.message);
       await getFlashCards();
+      setSide3(false);
+      setSide4(false);
+      setIsEditBack(false);
+      setEdit(false)
     } else {
       toast.error(edit.message);
     }
   }
 
-  const handlecopyitem=(data)=>{
-    const data_send={
-      flash_card_id:data.flash_card_id
+  const handlecopyitem = (data) => {
+    const data_send = {
+      flash_card_id: data.flash_card_id
     }
     console.log(data_send)
-    axios.post("https://camp-coding.tech/dr_elmatary/admin/flash_cards/make_copy_from_flash_cards.php",JSON.stringify(data_send))
-    .then((res)=>{
-        if(res.status=='success'){
+    axios.post("https://camp-coding.tech/dr_elmatary/admin/flash_cards/make_copy_from_flash_cards.php", JSON.stringify(data_send))
+      .then((res) => {
+        if (res.status == 'success') {
           toast.success(res.message);
           getFlashCards()
         }
-        else if(res.status=='error'){
+        else if (res.status == 'error') {
           toast.error(res.message);
         }
         else {
           toast.error("Something Went Error");
         }
-    })
+      })
   }
   // editFlashCard
-  useEffect(() => { getFlashCards() }, [])
+  useEffect(() => { getFlashCards() }, []);
+  const [side1, setSide1] = useState(false);
+  const [side2, setSide2] = useState(false);
+  const [isBack, setIsBack] = useState(false);
+  const [side3, setSide3] = useState(false);
+  const [side4, setSide4] = useState(false);
+  const [isEditBack, setIsEditBack] = useState(false);
+
+  useEffect(() => {
+    setIsBack(true)
+  }, [side2]);
+  useEffect(() => {
+    setIsBack(false)
+  }, [side1]);
+
+  useEffect(() => {
+    setIsEditBack(true)
+  }, [side4]);
+  useEffect(() => {
+    setIsEditBack(false)
+  }, [side3]);
   const columns =
     [
+      {
+        Header: "No",
+        Cell: (cell) => {
+          return (
+            <b>
+              {cell.cell.row.index + 1}
+            </b>
+          )
+        }
+      },
       {
         Header: 'FlashCard ID',
         accessor: 'flash_card_id',
@@ -142,30 +183,66 @@ const Flash_Cards = ({ CourseId, unitId }) => {
         Header: 'Flash Card Side 2',
         accessor: 'flash_card_side_2',
       },
+      // {
+      //   Header: 'Hidden',
+      //   Cell: (cell) => {
+      //     switch (cell.cell.row.original.hidden) {
+      //       case 'no':
+      //         return <span className="badge badge-pill badge-soft-success font-size-12">
+      //           {
+      //             cell.cell.row.original.hidden
+      //           }</span>;
+
+      //       case 'yes':
+      //         return <span className="badge badge-pill badge-soft-warning font-size-12">
+      //           {
+      //             cell.cell.row.original.hidden
+      //           }</span>;
+
+      //       default:
+      //         return <span className="badge badge-pill badge-soft-success font-size-12">
+      //           {
+      //             cell.cell.row.original.hidden
+      //           }</span>
+      //     }
+      //   }
+      // },
+
       {
-        Header: 'Status',
-        Cell: (cell) => {
-          switch (cell.cell.row.original.hidden) {
-            case 'no':
-              return <span className="badge badge-pill badge-soft-success font-size-12">
-                {
-                  cell.cell.row.original.hidden
-                }</span>;
+    Header: 'Show',
+    Cell: (cell) => {
+      switch (cell.cell.row.original.hidden) {
+        case 'no':
+          return <div style={{ cursor:'pointer' }} onClick={()=>{
+            const item = cell.cell.row.original;
+                    const send_data = {
+                      hidden_value: item.hidden == "no" ? "yes" : "no",
+                      flash_card_id: item.flash_card_id
+                    }
+                    showHideFlashCards(send_data)
+          }}>
+            <Visibility className="shown"/>
+          </div>;
 
-            case 'yes':
-              return <span className="badge badge-pill badge-soft-warning font-size-12">
-                {
-                  cell.cell.row.original.hidden
-                }</span>;
+        case 'yes':
+          return <div style={{ cursor:'pointer' }} onClick={()=>{const item = cell.cell.row.original;
+                    const send_data = {
+                      hidden_value: item.hidden == "no" ? "yes" : "no",
+                      flash_card_id: item.flash_card_id
+                    }
+                    showHideFlashCards(send_data)}}>
+            <VisibilityOff className="hidden"/>
+          </div>;
 
-            default:
-              return <span className="badge badge-pill badge-soft-success font-size-12">
-                {
-                  cell.cell.row.original.hidden
-                }</span>
-          }
-        }
-      },
+        default:
+          return <span className="badge badge-pill badge-soft-success font-size-12">
+            {
+              cell.cell.row.original.hidden
+            }</span>
+      }
+    }
+  },
+
       {
         Header: 'Action',
         Cell: (cell) => {
@@ -177,19 +254,19 @@ const Flash_Cards = ({ CourseId, unitId }) => {
                 </DropdownToggle>
                 <DropdownMenu className="dropdown-menu-end">
                   <DropdownItem onClick={() => { setEdit(true); setItem(cell.cell.row.original); }}>Edit</DropdownItem>
-                  <DropdownItem onClick={() => {
+                  {/* <DropdownItem onClick={() => {
                     const item = cell.cell.row.original;
                     const send_data = {
                       hidden_value: item.hidden == "no" ? "yes" : "no",
                       flash_card_id: item.flash_card_id
                     }
                     showHideFlashCards(send_data)
-                  }}>Hide/Show</DropdownItem>
+                  }}>Hide/Show</DropdownItem> */}
                   <DropdownItem
-                    onClick={()=>{
-                      handlecopyitem(cell.cell.row .original)
+                    onClick={() => {
+                      handlecopyitem(cell.cell.row.original)
                     }}
-                  
+
                   >Copy</DropdownItem>
                 </DropdownMenu>
               </UncontrolledDropdown>
@@ -201,7 +278,7 @@ const Flash_Cards = ({ CourseId, unitId }) => {
   return (
     <React.Fragment>
       <Container fluid={true}>
-        <Breadcrumbs title="flashcards" breadcrumbItem="Flash Cards List" />
+      <Breadcrumbs title="Flash Cards" breadcrumbItem={allunitdata?.unit_name + " - Flash List"} />
 
         <Row>
           <Col lg={12}>
@@ -292,20 +369,24 @@ const Flash_Cards = ({ CourseId, unitId }) => {
           >
             <Row>
               <Col md={12}>
-                <div className="mb-3">
-                  <Label className="form-label">Tweet Title</Label>
-                  <Input name="flashCard_title" type="text" />
+                <div class={isBack ? "card-flid back" : "card-flid"}>
+                  <div class="card-inner">
+                    <div class="card-front">
+                      {side1}
+                    </div>
+
+                    <div class="card-back">
+                      {side2}
+                    </div>
+                  </div>
                 </div>
                 <div className="mb-3">
-                  <Label className="form-label">Answer</Label>
-                  <textarea
-                    style={{ height: "100px" }}
-                    id="hours"
-                    name="flashCard_value"
-                    placeholder="Enter Explanation"
-                    type="number"
-                    className="form-control"
-                  ></textarea>
+                  <Label className="form-label">Side 1</Label>
+                  <Input name="flashCard_title" type="text" onChange={(e) => setSide1(e.currentTarget.value)} />
+                </div>
+                <div className="mb-3">
+                  <Label className="form-label">Side 2</Label>
+                  <Input name="flashCard_value" type="text" onChange={(e) => setSide2(e.currentTarget.value)} />
                 </div>
               </Col>
             </Row>
@@ -323,7 +404,7 @@ const Flash_Cards = ({ CourseId, unitId }) => {
       </Modal>
       <Modal isOpen={edit} toggle={() => setEdit(false)}>
         <ModalHeader toggle={() => setEdit(false)} tag="h4">
-          Edit Written FlashCard
+          Edit Flash Card
         </ModalHeader>
         <ModalBody>
           <Form
@@ -334,22 +415,26 @@ const Flash_Cards = ({ CourseId, unitId }) => {
             }}
           >
             <Row>
+
               <Col md={12}>
-                <div className="mb-3">
-                  <Label className="form-label">FlashCard Title</Label>
-                  <Input type="text" name="flashCard_title" defaultValue={item?.flash_card_side_1} />
+                <div class={isEditBack ? "card-flid back" : "card-flid"}>
+                  <div class="card-inner">
+                    <div class="card-front">
+                      {side3 ? side3 : item?.flash_card_side_1}
+                    </div>
+
+                    <div class="card-back">
+                      {side4 ? side4 : item?.flash_card_side_2}
+                    </div>
+                  </div>
                 </div>
                 <div className="mb-3">
-                  <Label className="form-label">Answer</Label>
-                  <textarea
-                    style={{ height: "100px" }}
-                    id="hours"
-                    name="flashCard_answar"
-                    placeholder="Enter Explanation"
-                    type="number"
-                    className="form-control"
-                    defaultValue={item?.flash_card_side_2}
-                  ></textarea>
+                  <Label className="form-label">flash card side 1</Label>
+                  <Input type="text" name="flashCard_title" defaultValue={item?.flash_card_side_1} onChange={(e) => setSide3(e.currentTarget.value)} />
+                </div>
+                <div className="mb-3">
+                  <Label className="form-label">flash card side 2</Label>
+                  <Input type="text" name="flashCard_answar" defaultValue={item?.flash_card_side_2} onChange={(e) => setSide4(e.currentTarget.value)} />
                 </div>
               </Col>
             </Row>

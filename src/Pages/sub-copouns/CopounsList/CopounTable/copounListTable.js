@@ -24,7 +24,7 @@ const CopounListTable = ({Copouns, showHideCopoun}) => {
             Filter: false
         },
         {
-            Header: 'Status',
+            Header: 'Hidden',
             Cell: (cell) => {
                 switch (cell.cell.row.original.hidden) {
                     case 'no':

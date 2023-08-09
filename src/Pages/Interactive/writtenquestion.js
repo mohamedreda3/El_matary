@@ -29,7 +29,11 @@ import { useCallback } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import QuestionsTableList from "../Lessons/LessonsTabel/QuestionsTableList";
-const WrittenQuestions = ({ CourseId, unitId }) => {
+import { AiOutlinePlus } from "react-icons/ai";
+import { Button } from "rsuite";
+import ReactQuill from "react-quill";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+const WrittenQuestions = ({ CourseId, allunitdata,unitId }) => {
   const [type, setType] = useState(false);
   const [videoLink, setVideoLink] = useState(false);
 
@@ -44,17 +48,31 @@ const WrittenQuestions = ({ CourseId, unitId }) => {
   }, [modal]);
 
   const addQuestion = async (e) => {
+    const questions=[...questionslist];
+    // console.log(tweets)
+    let questionstxt='';
+    for(let i=0;i<questions.length;i++){
+      if(i==0){
+        questionstxt+=questions[i]?.wq_value;
+      }
+      else {
+        questionstxt+='//camp//'+questions[i]?.wq_value+'//camp//';
+      }
+    }
+    console.log(questionstxt);
     const data_send = {
-      "wq_value": e.currentTarget.question_answar.value,
+      "wq_value": questionstxt,
       "wq_title": e.currentTarget.question_title.value,
       "course_id": CourseId,
       "unit_id": unitId
     }
+    console.log(data_send)
     const add = await axios.post("https://camp-coding.tech/dr_elmatary/admin/wqs/insert_wqs.php", data_send);
     console.log(add);
     if (add.status == "success") {
-      toast.success(add.message)
+      toast.success("Added")
       getQuestions()
+      setModal(false);
     } else {
       toast.error(add.message)
     }
@@ -79,6 +97,10 @@ const WrittenQuestions = ({ CourseId, unitId }) => {
   const [edit, setEdit] = useState(false);
   const [questions, setQuestions] = useState(false);
   const [item, setItem] = useState(false);
+  const [questionslist,setquestionslist]=useState([
+    {id:'0',wq_value:''}
+  ])
+  const [editedwritten,seteditedwritten]=useState([]);
   const getQuestions = async () => {
     const data_send = {
       "course_id": CourseId,
@@ -100,10 +122,22 @@ const WrittenQuestions = ({ CourseId, unitId }) => {
   }
 
   const editQuestion = async (e) => {
+
+    const questions=[...editedwritten];
+    // console.log(tweets)
+    let questionstxt='';
+    for(let i=0;i<questions.length;i++){
+      if(i==0){
+        questionstxt+=questions[i]?.wq_value;
+      }
+      else {
+        questionstxt+='//camp//'+questions[i]?.wq_value+'//camp//';
+      }
+    }
     const data_send = {
       "course_id": CourseId,
       "unit_id": unitId,
-      "wq_value": e.currentTarget.question_answar.value,
+      "wq_value": questionstxt,
       "wq_title": e.currentTarget.question_title.value,
       "wq_id": item.wq_id
     }
@@ -112,6 +146,7 @@ const WrittenQuestions = ({ CourseId, unitId }) => {
     if (edit.status == "success") {
       toast.success(edit.message);
       await getQuestions();
+      setEdit(false);
     } else {
       toast.error(edit.message);
     }
@@ -121,6 +156,16 @@ const WrittenQuestions = ({ CourseId, unitId }) => {
   useEffect(() => { getQuestions() }, [])
   const columns =
     [
+      {
+        Header: "No",
+        Cell: (cell) => {
+          return (
+            <b>
+              {cell.cell.row.index + 1}
+            </b>
+          )
+        }
+      },
       {
         Header: 'Question ID',
         accessor: 'wq_id',
@@ -133,23 +178,46 @@ const WrittenQuestions = ({ CourseId, unitId }) => {
       },
       {
         Header: 'Question Answer',
-        accessor: 'wq_value',
+        Cell:(cell)=>{
+          return <p >
+            {cell.cell.row.original.wq_value.split("//camp//").map((item,index)=>{
+              if(index<4){
+                return (
+                  <p dangerouslySetInnerHTML={{ __html:item}}></p>
+                )
+              }
+              else return null
+            })}
+          </p>
+        }
       },
       {
-        Header: 'Status',
+        Header: 'Hidden',
         Cell: (cell) => {
           switch (cell.cell.row.original.hidden) {
             case 'no':
-              return <span className="badge badge-pill badge-soft-success font-size-12">
-                {
-                  cell.cell.row.original.hidden
-                }</span>;
+              return <div style={{ cursor:'pointer' }}onClick={() => {
+                const item = cell.cell.row.original;
+                const send_data = {
+                  hidden_value: item.hidden == "no" ? "yes" : "no",
+                  wq_id: item.wq_id
+                }
+                showHideQuestions(send_data)
+              }}>
+                <Visibility className="shown"/>
+              </div>;
 
             case 'yes':
-              return <span className="badge badge-pill badge-soft-warning font-size-12">
-                {
-                  cell.cell.row.original.hidden
-                }</span>;
+              return <div style={{ cursor:'pointer' }} onClick={() => {
+                const item = cell.cell.row.original;
+                const send_data = {
+                  hidden_value: item.hidden == "no" ? "yes" : "no",
+                  wq_id: item.wq_id
+                }
+                showHideQuestions(send_data)
+              }}>
+              <VisibilityOff className="hidden"/>
+            </div>;
 
             default:
               return <span className="badge badge-pill badge-soft-success font-size-12">
@@ -169,15 +237,42 @@ const WrittenQuestions = ({ CourseId, unitId }) => {
                   <i className="bx bx-dots-horizontal-rounded"></i>
                 </DropdownToggle>
                 <DropdownMenu className="dropdown-menu-end">
-                  <DropdownItem onClick={() => { setEdit(true); setItem(cell.cell.row.original); }}>Edit</DropdownItem>
                   <DropdownItem onClick={() => {
+                    setEdit(true);
+                    setItem(cell.cell.row.original);
+                    let push1=[];
+                    let pusharr=[];
+
+                        let tweetslist=cell.cell.row.original.wq_value.split('//camp//');
+                        for(let k=0;k<tweetslist.length;k++){
+                          if(tweetslist[k]!==""){
+                            push1.push(tweetslist[k])
+                          }
+                        }
+
+                        for(let i=0 ;i<push1.length;i++){
+                          let obj={
+                            id:i,
+                            wq_value:push1[i]
+                          }
+                          console.log(obj)
+                          pusharr=[...pusharr,obj]
+                          if(obj.id!==""){
+                            seteditedwritten([...editedwritten,obj]);
+                          }
+                        }
+                        seteditedwritten(pusharr);
+                        // console.log(pusharr);
+                        // console.log(pusharr)
+                  }}>Edit</DropdownItem>
+                  {/* <DropdownItem onClick={() => {
                     const item = cell.cell.row.original;
                     const send_data = {
                       hidden_value: item.hidden == "no" ? "yes" : "no",
                       wq_id: item.wq_id
                     }
                     showHideQuestions(send_data)
-                  }}>Hide/Show</DropdownItem>
+                  }}>Hide/Show</DropdownItem> */}
                   <DropdownItem onClick={()=>handlecopyitem(cell.cell.row.original)}>Copy</DropdownItem>
                 </DropdownMenu>
               </UncontrolledDropdown>
@@ -206,11 +301,32 @@ const WrittenQuestions = ({ CourseId, unitId }) => {
         }
       })
   }
+  const handlesavetxt=(e,i,txt)=>{
+    console.log(i)
+    console.log(e)
+    // console.log(i)
+    // console.log(txt)
+    // console.log(e);
+    const list = [...questionslist];
+    list[i][txt] = e;
+    setquestionslist(list);
+    // console.log(list)
+  }
+  const handlesavetxtedit=(e,i,txt)=>{
+    console.log(i)
+    console.log(e)
+    // console.log(i)
+    // console.log(txt)
+    // console.log(e);
+    const list = [...editedwritten];
+    list[i][txt] = e;
+    setquestionslist(list);
+    // console.log(list)
+  }
   return (
     <React.Fragment>
       <Container fluid={true}>
-        <Breadcrumbs title="WrittenQuestions" breadcrumbItem="WrittenQuestions List" />
-
+      <Breadcrumbs title="Questions" breadcrumbItem={allunitdata.unit_name + " - questions List"} />
         <Row>
           <Col lg={12}>
             <Card>
@@ -273,7 +389,7 @@ const WrittenQuestions = ({ CourseId, unitId }) => {
       </Container>
       <Modal isOpen={modal} toggle={toggle}>
         <ModalHeader toggle={toggle} tag="h4">
-          Add New WrittenQuestion
+          Add New Written Question
         </ModalHeader>
         <ModalBody>
           <Form
@@ -290,15 +406,40 @@ const WrittenQuestions = ({ CourseId, unitId }) => {
                   <Input type="text" name="question_title" />
                 </div>
                 <div className="mb-3">
-                  <Label className="form-label">Answer</Label>
-                  <textarea
-                    style={{ height: "100px" }}
-                    id="hours"
-                    name="question_answar"
-                    placeholder="Enter Explanation"
-                    type="number"
-                    className="form-control"
-                  ></textarea>
+                <div className="add_newanstwee">
+                    <Label className="form-label">Answer</Label>
+                    <AiOutlinePlus
+                      onClick={()=>{
+                        setquestionslist([...questionslist,{id:questionslist.length,wq_value:""}])
+                      }}
+                    />
+                  </div>
+                  {
+                    questionslist.map((item,index)=>{
+                      return(
+                        <div className="tweet_ans">
+                          <ReactQuill
+                            theme='snow'
+                            value={item.wq_value}
+                            onChange={(e)=>{
+                              // console.log(item.id);
+                              handlesavetxt(e,index,'wq_value');
+                            }}
+                          />
+                          {index!==0?
+                            ( <Button onClick={()=>{
+                              // console.log(item.id)
+                              setquestionslist(questionslist.filter((it)=>item.id!==it.id))
+                            }} color="red" appearance="primary">
+                                Delete
+                              </Button>)
+                              :
+                            (null)
+                          }
+                        </div>
+                      )
+                    })
+                  }
                 </div>
               </Col>
             </Row>
@@ -335,16 +476,42 @@ const WrittenQuestions = ({ CourseId, unitId }) => {
                   <Input type="text" name="question_title" defaultValue={item?.wq_title} />
                 </div>
                 <div className="mb-3">
-                  <Label className="form-label">Answer</Label>
-                  <textarea
-                    style={{ height: "100px" }}
-                    id="hours"
-                    name="question_answar"
-                    placeholder="Enter Explanation"
-                    type="number"
-                    className="form-control"
-                    defaultValue={item?.wq_value}
-                  ></textarea>
+                <div className="add_newanstwee">
+                    <Label className="form-label">Answer</Label>
+                    <AiOutlinePlus
+                      onClick={()=>{
+                        seteditedwritten([...editedwritten,{id:editedwritten.length,wq_value:""}])
+                      }}
+                    />
+                  </div>
+                  {
+                    editedwritten.map((item,index)=>{
+                      return(
+                        <div className="tweet_ans">
+                          {console.log(item,"Ererer")}
+                          <ReactQuill
+                            theme='snow'
+                            value={item.wq_value}
+                            onChange={(e)=>{
+                              // console.log(item.id);
+                              handlesavetxtedit(e,index,'wq_value');
+                            }}
+                            style={{minHeight: '300px'}}
+                          />
+                          {index!==0?
+                            ( <Button onClick={()=>{
+                              // console.log(item.id)
+                              seteditedwritten(editedwritten.filter((it)=>item.id!==it.id))
+                            }} color="red" appearance="primary">
+                                Delete
+                              </Button>)
+                              :
+                            (null)
+                          }
+                        </div>
+                      )
+                    })
+                  }
                 </div>
               </Col>
             </Row>

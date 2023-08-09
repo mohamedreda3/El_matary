@@ -19,7 +19,7 @@ import {
     ModalBody,
     ModalHeader
 } from "reactstrap";
-
+import './unit.css'
 // Import Flatepicker
 import "flatpickr/dist/themes/material_blue.css";
 import Flatpickr from "react-flatpickr";
@@ -39,18 +39,19 @@ const Grade = () => {
     const [showadduni,setshowadduni]=useState(false);
     const [gradename,setgradename]=useState("");
     const location = useLocation();
-
-    const getUnits = async () => {
-        const send_data = {
-            course_id: location?.state?.universitydata?.course_id
-        };
-        try {
-            const units = await axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/select_course_units.php", send_data);
-            console.log(units);
-            setUnits([...units]);
-        } catch (err) {
-            console.log(err);
-        }
+    const {universitydata}=location.state;
+    console.log(universitydata)
+    // console.log(universitydata)
+    const [grades,setgrades]=useState([]);
+    const getgrades = async () => {
+        axios.get("https://camp-coding.tech/dr_elmatary/admin/universities/select_universities_grade.php")
+        .then((res)=>{
+          console.log(res)
+          let universities=[];
+          universities=[...res.message];
+          let newdata= universities.filter((item,index)=>item.university_id==universitydata.university_id);
+          setgrades(newdata[0]?.grades);
+        })
     }
 
 
@@ -63,24 +64,26 @@ const Grade = () => {
             unit_name: e.currentTarget.unit_name.value
         };
         const units = await axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/add_unit.php", send_data);
-        console.log(units);
+        // console.log(units);
         if (units.status) {
             toast.success(units.message);
-            await getUnits();
+            await getgrades();
+            setIsModalOpen(false)
         } else {
             toast.error(units.message);
         }
         setIsModalOpen(false);
     };
     useEffect(() => {
-        getUnits();
+        getgrades();
     }, []);
 
     const showHideUnit = async (send_data) => {
         const units = await axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/show_hide_unit.php", JSON.stringify(send_data));
+        // console.log(units)
         if (units.status) {
             toast.success(units.message);
-            await getUnits();
+
         } else {
             toast.error(units.message);
         }
@@ -96,12 +99,17 @@ const Grade = () => {
         return;
       }
       const data_send={
-        gradename
+        university_id:universitydata.university_id,
+        grade_name:gradename
       }
-      axios.post("",JSON.stringify(data_send))
+      // console.log(data_send)
+      axios.post("https://camp-coding.tech/dr_elmatary/admin/universities/insert_grade.php",JSON.stringify(data_send))
       .then((res)=>{
+        // console.log(res)
         if(res.status=='success'){
-          window.location.reload();
+          // window.location.reload();
+          getgrades();
+          setshowadduni(false)
           toast.success(res.message);
         }
         else if(res.status=='error'){
@@ -137,43 +145,19 @@ const Grade = () => {
                                                                 }
                                                             }>
                                                             <i className="mdi mdi-plus me-1"></i>
-                                                            Add Unit
+                                                            add grade
                                                         </button>
                                                     </div>
                                                 </Col>
-                                                <Col className="col-sm-auto">
-                                                    <div className="d-flex gap-1">
-                                                        <div className="input-group">
-                                                            <Flatpickr className="form-control" placeholder="dd M, yyyy"
-                                                                options={
-                                                                    {
-                                                                        mode: "range",
-                                                                        dateFormat: "Y-m-d"
-                                                                    }
-                                                                }
-                                                                id="datepicker-range" />
-                                                            <span className="input-group-text">
-                                                                <i className="bx bx-calendar-event"></i>
-                                                            </span>
-                                                        </div>
-
-                                                        <UncontrolledDropdown className="dropdown" direction="start">
-                                                            <DropdownToggle tag="a" className="btn btn-link text-body shadow-none">
-                                                                <i className="bx bx-dots-horizontal-rounded"></i>
-                                                            </DropdownToggle>
-                                                            <DropdownMenu className="dropdown-menu-end">
-                                                                <DropdownItem>Action</DropdownItem>
-                                                                <DropdownItem>Another action</DropdownItem>
-                                                                <DropdownItem>Something else here</DropdownItem>
-                                                            </DropdownMenu>
-                                                        </UncontrolledDropdown>
-                                                    </div>
-                                                </Col>
+                                        
                                             </Row>
                                         </div>
                                     </div>
-                                    <div id="table-invoices-list">
-                                        <GradeListTable Units={Units}
+                                    <div id="table-invoices-list grade_table">
+                                        <GradeListTable grades={grades}
+                                            updatedata={()=>{
+                                              getgrades();
+                                            }}
                                             showHideUnit={showHideUnit}
                                             universitydata={
                                                 location.state.universitydata
@@ -185,7 +169,7 @@ const Grade = () => {
                     </Row>
                 </Container>
 
-                <Modal title="add unit"
+                <Modal title="add grade"
                     isOpen={isModalOpen}>
                     <form action="#"
                         style={
@@ -229,7 +213,7 @@ const Grade = () => {
                                 { margin: "10px 0 0 auto" }
                             }>
                             {" "}
-                            Add Unit{" "} </button>
+                            add grade{" "} </button>
                     </form>
                 </Modal>
 
@@ -269,7 +253,7 @@ const Grade = () => {
 
 
                         <div className="input_Field">
-                            <label htmlFor="">University Name</label>
+                            <label htmlFor="">Grade Name</label>
                             <Input
                               onChange={(e)=>{
                                 setgradename(e.target.value)
@@ -284,7 +268,7 @@ const Grade = () => {
                                 type="text"
                                 name="new_title"
                                 id="new_title"
-                                placeholder="Enter Course Price"
+                                placeholder="Enter Grade Name"
                             />
 
                         </div>

@@ -1,5 +1,7 @@
 import React from "react";
 import {
+  Card,
+  CardBody,
   DropdownItem,
   DropdownMenu,
   DropdownToggle,
@@ -8,9 +10,9 @@ import {
 import TableContainer from "../../../../components/Common/TableContainer";
 import { useNavigate } from "react-router-dom";
 
-const VideoListTable = ({videos, columns}) => {
+const VideoListTable = ({ videos, columns }) => {
   const navigate = useNavigate();
- 
+
   return (
     <React.Fragment>
       <TableContainer

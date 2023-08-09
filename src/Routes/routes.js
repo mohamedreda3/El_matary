@@ -191,7 +191,7 @@ const authProtectedRoutes = [
   { path: "/e-book/add-book", component: <AddBook /> },
   { path: "/e-book", component: <Books /> },
   { path: '/addques', component: <AddQuestions /> },
-  { path: '/interactive', component: <Interactive /> },
+  // { path: '/interactive', component: <Interactive /> },
   { path: '/exam', component: <Exam /> },
   { path: '/questions', component: <Question /> },
   { path: '/subscription', component: <Subscription /> },

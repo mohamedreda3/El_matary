@@ -169,12 +169,12 @@ const AddMaterial = () => {
                             <Col lg={4}>
                               <div className="mb-3">
                                 <label className="form-label" htmlFor="videoId">
-                                  Video Id
+                                  Video Source ID
                                 </label>
                                 <input
                                   id="videoId"
                                   name="videoLink"
-                                  placeholder="Enter video id"
+                                  placeholder="Enter Video Source ID"
                                   type="text"
                                   className="form-control"
                                   style={{ margin: "10px" }}

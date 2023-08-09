@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import classnames from "classnames";
 import "./style.css"
 import {
@@ -18,7 +18,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 import { useRef } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
-import { Loader } from "rsuite";
+import { DatePicker, Loader } from "rsuite";
 
 const AddCopoun = () => {
     document.title = "Add Copoun | Matary - React Admin & Dashboard Template";
@@ -40,46 +40,68 @@ const AddCopoun = () => {
         setmodal(!modal);
     }
 
-    const [subjects, setSubjects] = useState([
-        {
-            id: 1,
-            name: "Math",
-            selected: false
-        }, {
-            id: 2,
-            name: "Math2",
-            selected: false
-        }, {
-            id: 3,
-            name: "Math3",
-            selected: false
-        }
-    ]);
+    const [subjects, setSubjects] = useState(
+        [
+            {
+                id: 1,
+                name: "Math",
+                selected: false
+            }, {
+                id: 2,
+                name: "Math2",
+                selected: false
+            }, {
+                id: 3,
+                name: "Math3",
+                selected: false
+            }
+        ]
+    );
+    const [Courses, setCourses] = useState(false)
+
+    const getCourses = async () => {
+        const courses = await axios.get("https://camp-coding.tech/dr_elmatary/admin/courses/select_courses.php");
+
+        const co = courses.map((item) => {
+            return {
+                id: item.course_id,
+                name: item.course_name,
+                selected: false
+            }
+        });
+        console.log(co);
+
+        setCourses([...co])
+    }
+    useEffect(() => {
+        getCourses();
+    }, [])
+
     const copounDate = useRef();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false)
     const addCopoun = async (e) => {
-        setLoading(true);// e.preventDefault();
+        setLoading(true);
+        e.preventDefault();
+        // alert("Submitted")
         const data_send = {
             "copoun_name": copounDate.current.copoun_name.value,
             "copoun_quantity": copounDate.current.copoun_quantity.value,
-            "subjects": subjects && subjects.length ? subjects.filter((item) => item.selected).map((item) => item.id).join("*") : null,
+            "subjects": Courses && Courses.length ? Courses.filter((item) => item.selected).map((item) => item.id).join("*") : null,
             "phone_number": copounDate.current.phone_number.value,
             "end_date": copounDate.current.end_date.value
         }
 
-
         const allPropertiesNotEmpty = Object.values(data_send).every((value) => value !== null && value !== undefined && value !== "");
 
-        if(allPropertiesNotEmpty){
-        const link = `https://camp-coding.tech/dr_elmatary/admin/subscription/create_cards.php?courses_ids=${data_send.subjects}&card_count=${data_send.copoun_quantity}&title=${data_send.copoun_name}&support_no=${data_send.phone_number}&end_date=${data_send.end_date}`
+        if (allPropertiesNotEmpty) {
+            const link = `https://camp-coding.tech/dr_elmatary/admin/subscription/create_cards.php?courses_ids=${data_send.subjects}&card_count=${data_send.copoun_quantity}&title=${data_send.copoun_name}&support_no=${data_send.phone_number}&end_date=${data_send.end_date}`
 
-        const url = await axios.get(link);
-        toast.success("Card Created Successfully");
-        window.open(link, "_blank");
-        }else{
+            const url = await axios.get(link);
+            toast.success("Card Created Successfully");
+            window.open(link, "_blank");
+        } else {
             toast.error("Add All Card Data");
-
         }
         setLoading(false)
     }
@@ -129,8 +151,12 @@ const AddCopoun = () => {
                                         id="checkout-billinginfo-collapse">
                                         <div className="p-4 border-top">
                                             <form ref={copounDate}
+                                                autocomplete="on"
                                                 onSubmit={
-                                                    (e) => addCopoun(e)
+                                                    (e) => {
+                                                        e.preventDefault();
+                                                        addCopoun(e)
+                                                    }
                                                 }>
                                                 <div className="mb-3">
                                                     <label className="form-label" htmlFor="copoun_name">
@@ -142,7 +168,8 @@ const AddCopoun = () => {
                                                     <label className="form-label" htmlFor="end_date">
                                                         Copoun End Date
                                                     </label>
-                                                    <input id="end_date" name="end_date" placeholder="Enter Copoun End Date" type="date" className="form-control" />
+                                                    {/* <input id="end_date" name="end_date" placeholder="Enter Copoun End Date" type="date" className="form-control" /> */}
+                                                    <DatePicker id="end_date" name="end_date" />
                                                 </div>
                                                 <Row>
                                                     <Col lg={4}
@@ -177,17 +204,17 @@ const AddCopoun = () => {
                                                     </label>
                                                     <ul className="subjects_av">
                                                         {
-                                                            subjects && subjects.length ? subjects.map((item, index) => {
+                                                            Courses && Courses.length ? Courses.map((item, index) => {
                                                                 return <li key={index}
                                                                     className={
                                                                         item.selected ? "btn btn-success" : "btn"
                                                                     }
                                                                     onClick={
                                                                         () => {
-                                                                            subjects.map(
+                                                                            Courses.map(
                                                                                 (s_item, index) => s_item.id == item.id ? s_item.selected = !s_item.selected : item
                                                                             )
-                                                                            setSubjects([...subjects])
+                                                                            setCourses([...Courses])
                                                                         }
                                                                     }>
                                                                     {
@@ -200,7 +227,24 @@ const AddCopoun = () => {
                                                             </h2>
                                                         } </ul>
                                                 </div>
-
+                                                <Row className="mb-4">
+                                                    <Col className="col text-end">
+                                                        <Link to="#" className="btn btn-danger me-1">
+                                                            {" "}
+                                                            <i className="bx bx-x me-1"></i>
+                                                            Cancel{" "} </Link>
+                                                        {!loading ?
+                                                            <button to="#" className="btn btn-success" data-bs-toggle="modal" data-bs-target="#success-btn"
+                                                                onClick={
+                                                                    (e) => {
+                                                                        addCopoun(e)
+                                                                    }
+                                                                }>
+                                                                {" "}
+                                                                <><i className=" bx bx-file me-1"></i>
+                                                                    Save </> </button> : <Loader size="sm" />}
+                                                    </Col>
+                                                </Row>
                                             </form>
                                         </div>
                                     </Collapse>
@@ -210,24 +254,7 @@ const AddCopoun = () => {
                         </Col>
                     </Row>
 
-                    <Row className="mb-4">
-                        <Col className="col text-end">
-                            <Link to="#" className="btn btn-danger me-1">
-                                {" "}
-                                <i className="bx bx-x me-1"></i>
-                                Cancel{" "} </Link>
-                            {!loading ?
-                                <Link to="#" className="btn btn-success" data-bs-toggle="modal" data-bs-target="#success-btn"
-                                    onClick={
-                                        () => {
-                                            addCopoun();
-                                        }
-                                    }>
-                                    {" "}
-                                    <><i className=" bx bx-file me-1"></i>
-                                        Save </> </Link> : <Loader size="lg"/>}
-                        </Col>
-                    </Row>
+
                 </Container>
             </div>
             <Modal isOpen={modal}

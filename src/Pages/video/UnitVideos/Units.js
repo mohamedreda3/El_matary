@@ -20,19 +20,24 @@ import {
     Input,
     Button,
 } from "reactstrap";
-
-// Import Flatepicker
+import "./unit.css"
+import { TbFreeRights } from 'react-icons/tb';
+import { MdOutlinePaid } from 'react-icons/md';
+import { BiEdit } from 'react-icons/bi';
+// BiEdit
 import "flatpickr/dist/themes/material_blue.css";
 import Flatpickr from "react-flatpickr";
-
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 // Breadcrumb
 import Breadcrumbs from "../../../components/Common/Breadcrumb";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { useEffect } from "react";
-import { MenuItem, Select } from "@mui/material";
+import { Icon, MenuItem, Select } from "@mui/material";
 // import VideoListTable from "../BooksList/VideoTable/bookListTable";
 import VideoListTable from "../VideosList/VideoTable/videoListTable";
+import CopyToClipboard from "react-copy-to-clipboard";
+import { Copy } from "feather-icons-react/build/IconComponents";
 const UnitVideo = () => {
     document.title = "Courses | Matary - React Admin & Dashboard Template";
     const navigate = useNavigate();
@@ -40,16 +45,13 @@ const UnitVideo = () => {
     const [UnitVideos, setUnitVideos] = useState(false)
     const location = useLocation();
 
-    const [showupdate,setshowupdate]=useState(false);
-    const showHideUnitVideo = async (send_data) => {
-        const units = await axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/show_hide_unit.php", JSON.stringify(send_data));
-    }
+    const [showupdate, setshowupdate] = useState(false);
 
     const [selectedCourse, setSelectedCourse] = useState(false);
     const [Units, setUnits] = useState(false);
 
-    const [rowdata,setrowdata]=useState({});
-
+    const [rowdata, setrowdata] = useState({});
+    const [Editted, setEditted] = useState(false)
 
     const getUnits = async () => {
         const send_data = {
@@ -66,51 +68,58 @@ const UnitVideo = () => {
     }
 
 
-    const HandleUpdateVideo=()=>{
-      const data_send={
-        unit_video_id:rowdata.unit_video_id,
-        new_title:rowdata.new_title,
-        source_video_id:rowdata.source_video_id,
-        unit_id:rowdata.unit_id,
-        course_id:rowdata.course_id,
-      }
-      axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/update_videos_info.php",JSON.stringify(data_send))
-      .then((res)=>{
-        if(res.status=='success'){
-          toast.success(res.message);
+    const HandleUpdateVideo = () => {
+        const data_send = {
+            unit_video_id: rowdata.unit_video_id,
+            new_title: rowdata.new_title,
+            source_video_id: rowdata.source_video_id,
+            unit_id: rowdata.unit_id,
+            course_id: rowdata.course_id,
         }
-        else if(res.status=='error'){
-          toast.error(res.message);
-        }
-        else{
-          toast.error("something went error");
-        }
-      }).catch(err=>console.log(err))
+        axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/update_videos_info.php", JSON.stringify(data_send))
+            .then((res) => {
+                if (res.status == 'success') {
+                    toast.success(res.message);
+                    selectVideoData();
+                    setShowEdit(false);
+                }
+                else if (res.status == 'error') {
+                    toast.error(res.message);
+                }
+                else {
+                    toast.error("something went error");
+                }
+            }).catch(err => console.log(err))
     }
 
-    const handleupdatefree=(data)=>{
-      const data_send={
-        unit_video_id:data.unit_video_id,
-        free_value:data.free=='no'?'yes':'no'
-      }
-      axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/update_free_video.php",JSON.stringify(data_send))
-      .then((res)=>{
-        if(res.status=='success'){
-          toast.success(res.message);
+    const handleupdatefree = (data) => {
+        const data_send = {
+            unit_video_id: data.unit_video_id,
+            free_value: data.free == 'no' ? 'yes' : 'no'
         }
-        else if(res.status=='error'){
-          toast.error(res.message);
-        }
-        else{
-          toast.error("something went error");
-        }
-      }).catch(err=>console.log(err))
+        axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/update_free_video.php", JSON.stringify(data_send))
+            .then((res) => {
+                if (res.status == 'success') {
+                    toast.success(res.message);
+                    selectVideoData()
+                }
+                else if (res.status == 'error') {
+                    toast.error(res.message);
+                }
+                else {
+                    toast.error("something went error");
+                }
+            }).catch(err => console.log(err))
     }
+
+
 
     useEffect(() => {
         getUnits();
-    }, [selectedCourse])
+    }, [selectedCourse]);
 
+
+    const [videoShow, setVideoShow] = useState(false)
 
     const [Videos, setVideos] = useState([]);
     const [showAssign, setShowAssign] = useState(false);
@@ -119,142 +128,129 @@ const UnitVideo = () => {
     const [selectedUnit, setSelectedUnit] = useState(false)
     const [Courses, setCourses] = useState(false);
 
-    const handleupdatestatus=(data)=>{
-      console.log(data)
-      const data_send={
-        unit_video_id:data.unit_video_id,
-        hidden_value:data.hidden=='no'?'yes':'no'
-      }
-      axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/update_videos_hidden.php",JSON.stringify(data_send))
-      .then((res)=>{
-        console.log(res)
-        if(res.status=='success'){
-          toast.success(res.message);
+    const handleupdatestatus = (data) => {
+        console.log(data)
+        const data_send = {
+            unit_video_id: data.unit_video_id,
+            hidden_value: data.hidden == 'no' ? 'yes' : 'no'
         }
-        else if(res.status=='error'){
-          toast.error(res.message);
-        }
-        else{
-          toast.error("something went error");
-        }
-      }).catch(err=>console.log(err))
-      console.log(data_send)
+        axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/update_videos_hidden.php", JSON.stringify(data_send))
+            .then((res) => {
+                console.log(res)
+                if (res.status == 'success') {
+                    toast.success(res.message);
+                    selectVideoData()
+                }
+                else if (res.status == 'error') {
+                    toast.error(res.message);
+                }
+                else {
+                    toast.error("something went error");
+                }
+            }).catch(err => console.log(err))
+        console.log(data_send)
     }
 
     const getCourses = async () => {
         const courses = await axios.get("https://camp-coding.tech/dr_elmatary/admin/courses/select_courses.php");
-        setCourses([...courses])
+        setCourses([...courses]);
     }
 
+
+    const [video_data, setVideoData] = useState(location.state);
+    const [Video, setVideo] = useState(false);
+
+    const selectVideoData = async () => {
+        const videos_data = await axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/select_video_data.php", { video_id: video_data?.video_id ? video_data?.video_id : video_data?.source_video_id ? video_data?.source_video_id : null });
+        setVideoData(videos_data.message);
+    }
+
+    useEffect(() => {
+        selectVideoData();
+    }, [])
+
+    useEffect(() => {
+        setVideo(video_data?.assign_data)
+    }, [video_data])
 
     if (!location.state) {
-        return navigate("/videos-list");
+        return navigate("/videos");
     }
 
-    let videoData = location.state;
-    const columns = [{
-        Header: "Video ID",
-        accessor: "source_video_id",
-        Filter: false,
-    }, {
-        Header: "Video Title",
-        accessor: "new_title",
-    },
-    {
-        Header: "Course Name",
-        accessor: "course_name",
-        Filter: false,
-    },
-    {
-        Header: 'Free',
-        Cell: (cell) => {
-            switch (cell.cell.row.original.free) {
-                case 'no':
-                    return <span className="badge badge-pill badge-soft-success font-size-12">
-                        {
-                            cell.cell.row.original.free
-                        }</span>;
-
-                case 'yes':
-                    return <span className="badge badge-pill badge-soft-warning font-size-12">
-                        {
-                            cell.cell.row.original.free
-                        }</span>;
-
-                default:
-                    return <span className="badge badge-pill badge-soft-success font-size-12">
-                        {
-                            cell.cell.row.original.free
-                        }</span>
+    // let videoData = location.state;
+    const columns = [
+        {
+            Header: "Video Title",
+            Cell: (cell) => {
+                return <p>
+                    <span> Video Title :  </span>
+                    <em>{cell.cell.row.original.new_title}</em>
+                </p>
             }
-        }
-    }, {
-        Header: 'Status',
-        Cell: (cell) => {
-            switch (cell.cell.row.original.hidden) {
-                case 'no':
-                    return <span className="badge badge-pill badge-soft-success font-size-12">
-                        {
-                            cell.cell.row.original.hidden
-                        }</span>;
-
-                case 'yes':
-                    return <span className="badge badge-pill badge-soft-warning font-size-12">
-                        {
-                            cell.cell.row.original.hidden
-                        }</span>;
-
-                default:
-                    return <span className="badge badge-pill badge-soft-success font-size-12">
-                        {
-                            cell.cell.row.original.hidden
-                        }</span>
+        },
+        {
+            Header: "Course Name",
+            Cell: (cell) => {
+                return <p>
+                    <span> Course Name :  </span>
+                    <em>{cell.cell.row.original.course_name}</em>
+                </p>
             }
-        }
-    },
-    {
-        Header: 'Action',
-        Cell: (cell) => {
-            return (
-                <>
-                    <UncontrolledDropdown>
-                        <DropdownToggle className="btn btn-light btn-sm" tag="button" data-bs-toggle="dropdown" direction="start">
-                            <i className="bx bx-dots-horizontal-rounded"></i>
-                        </DropdownToggle>
-                        <DropdownMenu className="dropdown-menu-end">
-                            <DropdownItem
-                              onClick={()=>{
-                                setshowupdate(true);
-                                setrowdata(cell.cell.row.original);
-                                console.log(cell.cell.row.original)
-                              }}
-                            >Update</DropdownItem>
-                            {/* new_title */}
-                            <DropdownItem onClick={
-                                () => {
-                                    handleupdatestatus(cell.cell.row.original)
-                                    // console.log(cell.cell.row.original.hidden)
-                                }
-                            }>Show/Hide</DropdownItem>
-                            <DropdownItem onClick={
-                                () => {
-                                    handleupdatefree(cell.cell.row.original)
-                                    // console.log(cell.cell.row.original.hidden)
-                                }
-                            }>Free/paid</DropdownItem>
-                        </DropdownMenu>
-                    </UncontrolledDropdown>
-                </>
-            )
-        }
-    },
+        },
+        {
+            Header: 'Action',
+            Cell: (cell) => {
+                return (
+                    <>
+                        <UncontrolledDropdown className="DropVidUn">
+                            <DropdownToggle className="btn btn-light btn-sm" tag="button" data-bs-toggle="dropdown" direction="start">
+                                <i className="bx bx-dots-horizontal-rounded"></i>
+                            </DropdownToggle>
+                            <DropdownMenu className="dropdown-menu-end">
+                                <DropdownItem
+                                    onClick={() => {
+                                        setshowupdate(true);
+                                        setrowdata(cell.cell.row.original);
+                                        console.log(cell.cell.row.original)
+                                    }}
+                                ><BiEdit /></DropdownItem>
+
+                                <DropdownItem onClick={
+                                    () => {
+                                        handleupdatestatus(cell.cell.row.original)
+                                    }
+                                }>
+                                    {
+                                        cell.cell.row.original.hidden == "yes" ? <VisibilityOff className="hidden" /> : <Visibility className="shown" />
+                                    }
+                                </DropdownItem>
+
+                                <DropdownItem onClick={
+                                    () => {
+                                        handleupdatefree(cell.cell.row.original)
+                                    }
+                                }>
+                                    {
+                                        cell.cell.row.original.free == "yes" ? <TbFreeRights className="hidden" /> : <MdOutlinePaid className="shown" />
+                                    }
+
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </UncontrolledDropdown>
+                    </>
+                )
+            }
+        },
     ]
-    const Video = videoData.assign_data;
-    console.log(videoData);
+
+
+
+    // const Video = video_data.assign_data;
+
     const AssignVideo = async (e) => {
         const data_send = {
             "new_title": e.currentTarget.new_title.value, // not req
-            "source_video_id": videoData.video_id,
+            "source_video_id": video_data.video_id,
             "unit_id": selectedUnit,
             "course_id": selectedCourse
         }
@@ -262,7 +258,7 @@ const UnitVideo = () => {
         const assign = await axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/assign_videos_to_unit.php", data_send);
         if (assign.status == "success") {
             toast.success("Assigned");
-            window.location.reload()
+            selectVideoData()
         } else {
             toast.error(assign.message);
         }
@@ -271,11 +267,32 @@ const UnitVideo = () => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Videos" breadcrumbItem="Video Unit List" />
+                    <Breadcrumbs title="Videos" breadcrumbItem={video_data?.video_title + " Unit List"} />
+                    <Card className="video_details">
+                        <CardBody id="video_details">
+                            <p className="src_id">
+                                <span> Video Source ID :   <em>{video_data?.video_id}</em></span>
+                                <CopyToClipboard text={video_data?.video_id} style={{ marginLeft: "14px", cursor: "pointer" }} onCopy={() => toast.success("Copied")}>
+                                    <strong><Copy /></strong>
+                                </CopyToClipboard>
+                            </p>
+                            <div className="details">
+                                <p>
+                                    <span> -Video Title :  </span>
+                                    <em>{video_data?.video_title}</em>
+                                </p>
+                                <p>
+                                    <span> -Total Assigned Units :  </span>
+                                    <em>{video_data?.assign_data?.length}</em>
+                                </p>
+
+                            </div>
+                            <button className="btn btn-primary" onClick={() => setVideoShow(true)}>Show Video</button>
+                        </CardBody>
+                    </Card>
                     <Row>
                         <div className="videoData">
                             <div className="media">
-                                <video src={videoData.vimeo_data}></video>
                                 <div className="textData">
 
                                 </div>
@@ -309,45 +326,16 @@ const UnitVideo = () => {
                                                         </button>
                                                     </div>
                                                 </Col>
-                                                <Col className="col-sm-auto">
-                                                    <div className="d-flex gap-1">
-                                                        <div className="input-group">
-                                                            <Flatpickr
-                                                                className="form-control"
-                                                                placeholder="dd M, yyyy"
-                                                                options={{
-                                                                    mode: "range",
-                                                                    dateFormat: "Y-m-d",
-                                                                }}
-                                                                id="datepicker-range"
-                                                            />
-                                                            <span className="input-group-text">
-                                                                <i className="bx bx-calendar-event"></i>
-                                                            </span>
-                                                        </div>
 
-                                                        <UncontrolledDropdown
-                                                            className="dropdown"
-                                                            direction="start"
-                                                        >
-                                                            <DropdownToggle
-                                                                tag="a"
-                                                                className="btn btn-link text-body shadow-none"
-                                                            >
-                                                                <i className="bx bx-dots-horizontal-rounded"></i>
-                                                            </DropdownToggle>
-                                                            <DropdownMenu className="dropdown-menu-end">
-                                                                <DropdownItem>Action</DropdownItem>
-                                                                <DropdownItem>Another action</DropdownItem>
-                                                                <DropdownItem>Something else here</DropdownItem>
-                                                            </DropdownMenu>
-                                                        </UncontrolledDropdown>
-                                                    </div>
-                                                </Col>
                                             </Row>
+
                                         </div>
                                     </div>
-                                    <div id="table-invoices-list">
+
+
+
+                                    <div id="table-invoices-list" className="unitVideosList">
+
                                         {Video && Video.length ?
                                             <VideoListTable videos={Video} columns={columns} /> : <div>
                                                 <h2>No Units</h2>
@@ -360,6 +348,7 @@ const UnitVideo = () => {
                     </Row>
                 </Container>
             </div>
+
             <Modal isOpen={showupdate}>
                 <ModalHeader
                     tag="h4">
@@ -392,7 +381,7 @@ const UnitVideo = () => {
                             }
                         }>
                         <div className="input_Field">
-                          <label htmlFor="">Old Title</label>
+                            <label htmlFor="">Old Title</label>
                             <Input style={
                                 {
                                     width: "100%",
@@ -402,8 +391,8 @@ const UnitVideo = () => {
                             }
                                 type="text"
                                 name="new_title"
-                                onChange={(e)=>{
-                                  setrowdata({...rowdata,new_title:e.target.value})
+                                onChange={(e) => {
+                                    setrowdata({ ...rowdata, new_title: e.target.value })
                                 }}
                                 value={rowdata.new_title}
                                 id="new_title"
@@ -412,8 +401,8 @@ const UnitVideo = () => {
 
                         </div>
                         <Button type="submit" color="danger">
-                      Update
-                    </Button>
+                            Update
+                        </Button>
                     </form>
 
                 </ModalBody>
@@ -519,8 +508,44 @@ const UnitVideo = () => {
 
                 </ModalBody>
             </Modal>
+            {/* ====================================================================== */}
+            <Modal isOpen={videoShow} className="modal-body">
+                <ModalHeader
+                    tag="h4">
+                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+                        <h4>  Video </h4>
+                        <CloseButton onClick={
+                            () => {
+                                setShowAssign(false);
+                                setSelectedCourse(false)
+                                setUnits(false);
+                                setVideoShow(false);
+                            }
+                        }
+                            style={
+                                { marginLeft: "auto" }
+                            } />
+                    </div>
+                </ModalHeader>
+                <ModalBody>
+                    <div className="fideos">
+                        <div className="videoB_body">
+                            <h3>Vimeo</h3>
+                            {console.log("Video", video_data)}
+                            {video_data?.vimeo_data && video_data?.vimeo_data.length ? <iframe src={video_data?.vimeo_data} width="370"></iframe> : <h5>No Video</h5>}
+                        </div>
+                        <div className="videoB_body">
+                            <h3>Publitio</h3>
+                            {video_data?.publitio_data && video_data?.publitio_data.length ? <iframe src={video_data?.publitio_data} width="370"></iframe> : <h5>No Video</h5>}
+
+                        </div>
+                    </div>
+                </ModalBody>
+            </Modal>
+            {/* ====================================================================== */}
+
             <ToastContainer />
-        </React.Fragment>
+        </React.Fragment >
     );
 };
 

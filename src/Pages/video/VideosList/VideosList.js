@@ -30,6 +30,9 @@ import VideoListTable from "./VideoTable/videoListTable";
 import axios from "axios";
 import { Loader, SelectPicker } from "rsuite";
 import { MenuItem, Select } from "@mui/material";
+import { ToastContainer, toast } from "react-toastify";
+import CopyToClipboard from "react-copy-to-clipboard";
+import { ContentCopyOutlined } from "@mui/icons-material";
 
 
 const Videos = () => {
@@ -55,6 +58,32 @@ const Videos = () => {
     setCourses([...courses])
   }
 
+  /* {
+    "new_title" : "new title", // not req
+    "source_video_id" : "2",
+    "unit_id" : "1",
+    "course_id" :"2"
+    } */
+
+  const [selectedUnit, setSelectedUnit] = useState(false);
+  const AssignVideo = async (e) => {
+    const data_send = {
+      "new_title": e.currentTarget.new_title.value, // not req
+      "course_id": selectedCourse,
+      "unit_id": selectedUnit,
+      "source_video_id": item.video_id
+    }
+    console.log(data_send);
+    const assign = await axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/assign_videos_to_unit.php", data_send);
+    if (assign.status == "success") {
+      toast.success("Assigned");
+      getVideos();
+      setShowAssign(false)
+    } else {
+      toast.error(assign.message);
+    }
+  }
+
   const [selectedCourse, setSelectedCourse] = useState(false);
   const [Units, setUnits] = useState(false);
   const getUnits = async () => {
@@ -74,49 +103,77 @@ const Videos = () => {
     getUnits();
   }, [selectedCourse])
 
-  const columns = [{
-    Header: "Video ID",
-    accessor: "video_id",
-    Filter: false,
-  }, {
-    Header: "Video Title",
-    accessor: "video_title",
-  }, {
-    Header: "Video Duration",
-    accessor: "video_duration",
-    Filter: false,
-  },
-  {
-    Header: 'Action',
-    Cell: (cell) => {
-      return (
-        <>
-          <UncontrolledDropdown>
-            <DropdownToggle className="btn btn-light btn-sm" tag="button" data-bs-toggle="dropdown" direction="start">
-              <i className="bx bx-dots-horizontal-rounded"></i>
-            </DropdownToggle>
-            <DropdownMenu className="dropdown-menu-end">
-              <DropdownItem onClick={
-                () => {
-                  console.log(cell.cell.row.original);
-                  setItem(cell.cell.row.original);
-                  setShowAssign(true)
-                  getCourses();
-                }
-              }>Assign</DropdownItem>
-              <DropdownItem onClick={
-                () => {
-                  navigate("/videos/unit-videos", { state: cell.cell.row.original });
-                }
-              }>View</DropdownItem>
-              <DropdownItem>Delete</DropdownItem>
-            </DropdownMenu>
-          </UncontrolledDropdown>
-        </>
-      )
-    }
-  },
+
+
+  const columns = [
+    {
+      Header: "No",
+      Cell: (cell) => {
+        return (
+          <b>
+            {cell.cell.row.index + 1}
+          </b>
+        )
+      }
+    }, {
+      Header: "Video Source ID",
+      accessor: "video_id",
+      Cell: (cell) => {
+        return (
+          <>
+            <CopyToClipboard style={{ padding: "0 14px", cursor: "pointer", width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center" }} text={cell.cell.row.original?.video_id} onCopy={() => toast.success("Copied")}>
+              <span style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <b>{cell.cell.row.original?.video_id}</b>
+                <em><ContentCopyOutlined /></em>
+              </span>
+            </CopyToClipboard>
+
+          </>
+        )
+      }
+    }, {
+      Header: "Video Title",
+      accessor: "video_title",
+    }, {
+      Header: "Video Duration",
+      accessor: "video_duration",
+      Filter: false,
+    },
+    {
+      Header: "View Video",
+      Cell: (cell) => {
+        return (
+
+          <button class="btn btn-success" onClick={
+            () => {
+              navigate("/videos/unit-videos", { state: cell.cell.row.original });
+            }
+          }>View</button>
+
+        )
+      }
+    },
+    {
+      Header: 'Action',
+      Cell: (cell) => {
+        return (
+          <>
+            <button className="btn btn-primary" onClick={
+              () => {
+                console.log(cell.cell.row.original);
+                setItem(cell.cell.row.original);
+                setShowAssign(true)
+                getCourses();
+              }
+            }>Assign</button>
+
+          </>
+        )
+      }
+    },
   ]
+
+
   return (
     <React.Fragment>
       <div className="page-content">
@@ -145,46 +202,13 @@ const Videos = () => {
                             </button>
                           </div>
                         </Col>
-                        <Col className="col-sm-auto">
-                          <div className="d-flex gap-1">
-                            <div className="input-group">
-                              <Flatpickr
-                                className="form-control"
-                                placeholder="dd M, yyyy"
-                                options={{
-                                  mode: "range",
-                                  dateFormat: "Y-m-d",
-                                }}
-                                id="datepicker-range"
-                              />
-                              <span className="input-group-text">
-                                <i className="bx bx-calendar-event"></i>
-                              </span>
-                            </div>
-
-                            <UncontrolledDropdown
-                              className="dropdown"
-                              direction="start"
-                            >
-                              <DropdownToggle
-                                tag="a"
-                                className="btn btn-link text-body shadow-none"
-                              >
-                                <i className="bx bx-dots-horizontal-rounded"></i>
-                              </DropdownToggle>
-                              <DropdownMenu className="dropdown-menu-end">
-                                <DropdownItem>Action</DropdownItem>
-                                <DropdownItem>Another action</DropdownItem>
-                                <DropdownItem>Something else here</DropdownItem>
-                              </DropdownMenu>
-                            </UncontrolledDropdown>
-                          </div>
-                        </Col>
                       </Row>
+
                     </div>
                   </div>
                   <div id="table-invoices-list">
-                    {Videos ?
+
+                    {Videos && Videos.length ?
                       <VideoListTable videos={Videos} columns={columns} /> : <Loader />
                     }
                   </div>
@@ -224,6 +248,7 @@ const Videos = () => {
             onSubmit={
               (e) => {
                 e.preventDefault();
+                AssignVideo(e);
               }
             }>
             <div className="input_Field">
@@ -275,6 +300,7 @@ const Videos = () => {
                   name="unit_id"
                   id="unit_id"
                   placeholder="Choose Unit"
+                  onChange={(e) => setSelectedUnit(e.target.value)}
                   required>
                   {
                     Units.map((item, index) => {
@@ -293,6 +319,8 @@ const Videos = () => {
 
         </ModalBody>
       </Modal>
+      <ToastContainer />
+
     </React.Fragment>
   );
 };

@@ -41,24 +41,7 @@ const ProfileMenu = (props) => {
           />
         </DropdownToggle>
         <DropdownMenu className="dropdown-menu-end pt-0">
-          <DropdownItem tag="a" href="/userprofile">
-            {" "}
-            <i className="bx bx-user-circle text-muted font-size-18 align-middle me-1" />
-            <span className="align-middle">{props.t("My Account")} </span>
-          </DropdownItem>
-          <DropdownItem tag="a" href="/apps-chat">
-            <i className="bx bx-chat text-muted font-size-18 align-middle me-1" />
-            <span className="align-middle">{props.t("Chat")}</span>
-          </DropdownItem>
-          <DropdownItem tag="a" href="/pages-faqs">
-            <i className="bx bx-buoy text-muted font-size-18 align-middle me-1" />
-            <span className="align-middle">{props.t("Support")}</span>
-          </DropdownItem>
-          <div className="dropdown-divider"></div>
-          <DropdownItem tag="a" href="/auth-lock-screen">
-            <i className="bx bx-lock text-muted font-size-18 align-middle me-1" />
-            <span className="align-middle">{props.t("Lock screen")}</span>
-          </DropdownItem>
+
           <DropdownItem tag="a" href="/logout">
             <i className="bx bx-log-out text-muted font-size-18 align-middle me-1" />
             <span className="align-middle">{props.t("Logout")}</span>

@@ -1,6 +1,8 @@
 import React from 'react';
 import Routes from "./Routes";
 import 'react-toastify/dist/ReactToastify.css';
+import 'rsuite/dist/rsuite.min.css';
+
 // Import Scss
 import './assets/scss/theme.scss';
 

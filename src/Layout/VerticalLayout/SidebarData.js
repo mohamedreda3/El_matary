@@ -43,21 +43,14 @@ const SidebarData = [
       // { sublabel: "Add Product", link: "/ecommerce-add-product" },
     ],
   },
-  {
-    label: "Books",
-    icon: "bx bx-store icon nav-icon",
-    subItem: [
-      { sublabel: "Books", link: "/e-book" },
-      { sublabel: "Add Book", link: "/e-book/add-book" },
-      // { sublabel: "Product Detail", link: "/ecommerce-product-detail/1" },
-      // { sublabel: "Orders", link: "/ecommerce-orders" },
-      // { sublabel: "Customers", link: "/ecommerce-customers" },
-      // { sublabel: "Cart", link: "/ecommerce-cart" },
-      // { sublabel: "Checkout", link: "/ecommerce-checkout" },
-      // { sublabel: "Shops", link: "/ecommerce-shops" },
-      // { sublabel: "Add Product", link: "/ecommerce-add-product" },
-    ],
-  },
+  // {
+  //   label: "Books",
+  //   icon: "bx bx-store icon nav-icon",
+  //   subItem: [
+  //     { sublabel: "Books", link: "/e-book" },
+  //     { sublabel: "Add Book", link: "/e-book/add-book" },
+  //   ],
+  // },
   {
     label: "Videos",
     icon: "bx bx-store icon nav-icon",
@@ -90,20 +83,13 @@ const SidebarData = [
   },
 //  { path: "/grade", component: <Grade /> },
   // { path: "/universities", component: <Universities />}
-  {
-    label: "Interactive",
-    icon: "bx bx-store icon nav-icon",
-    subItem: [
-      { sublabel: "Interactive", link: "/interactive" },
-      // { sublabel: "Product Detail", link: "/ecommerce-product-detail/1" },
-      // { sublabel: "Orders", link: "/ecommerce-orders" },
-      // { sublabel: "Customers", link: "/ecommerce-customers" },
-      // { sublabel: "Cart", link: "/ecommerce-cart" },
-      // { sublabel: "Checkout", link: "/ecommerce-checkout" },
-      // { sublabel: "Shops", link: "/ecommerce-shops" },
-      // { sublabel: "Add Product", link: "/ecommerce-add-product" },
-    ],
-  },
+  // {
+  //   label: "Interactive",
+  //   icon: "bx bx-store icon nav-icon",
+  //   subItem: [
+  //     { sublabel: "Interactive", link: "/interactive" },
+  //   ],
+  // },
 
   {
     label: "Subscription",
@@ -159,11 +145,11 @@ const SidebarData = [
 
   // interactive
   // e-book
-  {
-    label: "Add Material",
-    icon: "bx bx-tachometer icon nav-icon",
-    url: "/add-material"
-  },
+  // {
+  //   label: "Add Material",
+  //   icon: "bx bx-tachometer icon nav-icon",
+  //   url: "/add-material"
+  // },
   // {
   //   label: "Applications",
   //   isMainMenu: true,

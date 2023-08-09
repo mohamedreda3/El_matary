@@ -17,6 +17,15 @@ import {
     Input,
     CloseButton
 } from "reactstrap";
+import {
+    Form,
+    Button,
+    ButtonToolbar,
+    RadioGroup,
+    Radio,
+    SelectPicker,
+    InputPicker,
+} from 'rsuite';
 
 // Import Flatepicker
 import "flatpickr/dist/themes/material_blue.css";
@@ -28,63 +37,47 @@ import StudntListTable from "./StudentTable/StudntTable";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { useEffect } from "react";
-
+import "./style.css"
 const Student = () => {
     document.title = "Courses | Matary - React Admin & Dashboard Template";
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [Units, setUnits] = useState(false)
-    const location = useLocation();
-
-    const getUnits = async () => {
-        const send_data = {
-            course_id: location?.state?.coursedata?.course_id
-        };
-        try {
-            const units = await axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/select_course_units.php", send_data);
-            console.log(units);
-            setUnits([...units]);
-        } catch (err) {
-            console.log(err);
-        }
+    const [student, setStudent] = useState(false);
+    const [university, setUniversity] = useState(false);
+    const [grades, setGrades] = useState(false);
+    const getUnversity = async () => {
+        const univ = await axios.get("https://camp-coding.tech/dr_elmatary/admin/universities/select_universities_grade.php");
+        setUniversity(univ?.message)
+        console.log(univ);
     }
 
-
-    const showModal = () => {
-        setIsModalOpen(true);
-    };
-    const handleOk = async (e) => {
-        const send_data = {
-            course_id: location?.state?.coursedata.course_id,
-            unit_name: e.currentTarget.unit_name.value
-        };
-        const units = await axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/add_unit.php", send_data);
-        console.log(units);
-        if (units.status) {
-            toast.success(units.message);
-            await getUnits();
-        } else {
-            toast.error(units.message);
-        }
-        setIsModalOpen(false);
-    };
     useEffect(() => {
-        getUnits();
+        getUnversity()
     }, []);
-
-    const showHideUnit = async (send_data) => {
-        const units = await axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/show_hide_unit.php", JSON.stringify(send_data));
-        if (units.status) {
-            toast.success(units.message);
-            await getUnits();
-        } else {
-            toast.error(units.message);
+    const [univ_id, setUnivId] = useState();
+    const [data_send, setDataSend] = useState({
+        "university_id": "all", //all - 1
+        "grade_id": "all", //all - 1
+        "have_sub": "all" //all - yes - no
+    })
+    useEffect(() => {
+        if (university && university.length) {
+            setGrades(university.filter((item) => item.university_id == univ_id)[0]?.grades);
+            setDataSend({
+                ...data_send,
+                university_id: univ_id ? univ_id : "all"
+            })
         }
+    }, [univ_id]);
+
+
+
+    const getStudents = async (e) => {
+        const student = await axios.post("https://camp-coding.tech/dr_elmatary/admin/students/select_students.php", data_send);
+        setStudent(student?.message)
+        console.log(student);
     }
 
-    // if (!location.state) {
-    //     return navigate("/courses-list");
-    // }
     return (
         <React.Fragment>
             <div className="page-content">
@@ -95,60 +88,49 @@ const Student = () => {
                         <Col lg={12}>
                             <Card>
                                 <CardBody>
-                                    <div className="position-relative">
-                                        <div className="modal-button mt-2">
-                                            <Row className="align-items-start">
-                                                <Col className="col-sm">
-                                                    <div>
-                                                        <button type="button" className="btn btn-success mb-4" data-bs-toggle="modal" data-bs-target="#addCourseModal"
-                                                            onClick={
-                                                                () => {
-                                                                    showModal();
-                                                                }
-                                                            }>
-                                                            <i className="mdi mdi-plus me-1"></i>
-                                                            Add Unit
-                                                        </button>
-                                                    </div>
-                                                </Col>
-                                                <Col className="col-sm-auto">
-                                                    <div className="d-flex gap-1">
-                                                        <div className="input-group">
-                                                            <Flatpickr className="form-control" placeholder="dd M, yyyy"
-                                                                options={
-                                                                    {
-                                                                        mode: "range",
-                                                                        dateFormat: "Y-m-d"
-                                                                    }
-                                                                }
-                                                                id="datepicker-range" />
-                                                            <span className="input-group-text">
-                                                                <i className="bx bx-calendar-event"></i>
-                                                            </span>
-                                                        </div>
+                                    <div className="filter_stu">
+                                        <div>
+                                            <Form className="stu_her" onChange={formValue => formValue}>
+                                                {university && university.length ?
+                                                    <Form.Group controlId="inputPicker">
+                                                        <Form.ControlLabel>Unveristy:</Form.ControlLabel>
+                                                        <Form.Control name="university_id" accepter={InputPicker} data={university.map((item) => { return { label: item.university_name, value: item.university_id } })} onChange={(e) => setUnivId(e)} />
+                                                    </Form.Group> : null
+                                                }
+                                                {grades && grades.length ?
+                                                    <Form.Group controlId="inputPicker">
+                                                        <Form.ControlLabel>Grades:</Form.ControlLabel>
+                                                        <Form.Control name="grade_id" accepter={InputPicker} data={grades.map((item) => { return { label: item.grade_name, value: item.grade_id } })}
+                                                            onChange={(e) => {
+                                                                setDataSend({
+                                                                    ...data_send,
+                                                                    grade_id: e ? e : "all"
+                                                                })
+                                                            }}
+                                                        />
+                                                    </Form.Group> : null
+                                                }
+                                                <Form.Group controlId="radio">
 
-                                                        <UncontrolledDropdown className="dropdown" direction="start">
-                                                            <DropdownToggle tag="a" className="btn btn-link text-body shadow-none">
-                                                                <i className="bx bx-dots-horizontal-rounded"></i>
-                                                            </DropdownToggle>
-                                                            <DropdownMenu className="dropdown-menu-end">
-                                                                <DropdownItem>Action</DropdownItem>
-                                                                <DropdownItem>Another action</DropdownItem>
-                                                                <DropdownItem>Something else here</DropdownItem>
-                                                            </DropdownMenu>
-                                                        </UncontrolledDropdown>
-                                                    </div>
-                                                </Col>
-                                            </Row>
+                                                    <Form.ControlLabel>have_sub :</Form.ControlLabel>
+                                                    <Form.Control name="have_sub" onChange={(e) => {
+                                                        setDataSend({
+                                                            ...data_send,
+                                                            have_sub: e ? e : "all"
+                                                        })
+                                                    }} accepter={RadioGroup}>
+                                                        <Radio value="all">All</Radio>
+                                                        <Radio value="yes">Yes</Radio>
+                                                        <Radio value="no">No</Radio>
+                                                    </Form.Control>
+                                                </Form.Group>
+                                            </Form>
+                                            <button className="btn btn-success" onClick={() => getStudents()}>Show Students</button>
                                         </div>
                                     </div>
-                                    <div id="table-invoices-list">
-                                        <StudntListTable Units={Units}
-                                            showHideUnit={showHideUnit}
-                                            courseData={
-                                                location?.state?.coursedata
-                                            } />
-                                    </div>
+                                    <div id="table-invoices-list">{student && student.length ?
+                                        <StudntListTable Units={student} getStudents={() => getStudents()} /> : null
+                                    }</div>
                                 </CardBody>
                             </Card>
                         </Col>
@@ -168,7 +150,6 @@ const Student = () => {
                         onSubmit={
                             (e) => {
                                 e.preventDefault();
-                                handleOk(e)
                                 setIsModalOpen(false);
                             }
                         }>

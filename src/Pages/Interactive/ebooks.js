@@ -36,7 +36,8 @@ import { useEffect } from "react";
 import EbooksTableList from "../Lessons/LessonsTabel/EbooksTableList";
 import { Icon } from "@iconify/react";
 import { Loader } from "rsuite";
-const Ebooks = ({ CourseId, unitId }) => {
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+const Ebooks = ({ CourseId, unitId ,allunitdata}) => {
   const [type, setType] = useState(false);
   const [videoLink, setVideoLink] = useState(false);
 
@@ -121,6 +122,7 @@ const Ebooks = ({ CourseId, unitId }) => {
     if (edit.status == "success") {
       toast.success(edit.message);
       await getEbooks();
+      setEdit(false);
     } else {
       toast.error(edit.message);
     }
@@ -130,6 +132,16 @@ const Ebooks = ({ CourseId, unitId }) => {
   useEffect(() => { getEbooks() }, [])
   const columns =
     [
+      {
+        Header: "No",
+        Cell: (cell) => {
+          return (
+            <b>
+              {cell.cell.row.index + 1}
+            </b>
+          )
+        }
+      },
       {
         Header: 'Ebook ID',
         accessor: 'book_id',
@@ -147,24 +159,36 @@ const Ebooks = ({ CourseId, unitId }) => {
       {
         Header: 'Pdf',
         Cell: (cell) => {
-          <a href={cell.cell.row.original.book_url}>Show Book</a>
+         return <a target="_blank" href={cell.cell.row.original.book_url}>Show Book</a>
         }
       },
       {
-        Header: 'Status',
+        Header: 'Hidden',
         Cell: (cell) => {
           switch (cell.cell.row.original.hidden) {
             case 'no':
-              return <span className="badge badge-pill badge-soft-success font-size-12">
-                {
-                  cell.cell.row.original.hidden
-                }</span>;
+              return <div style={{ cursor:'pointer' }} onClick={() => {
+                const item = cell.cell.row.original;
+                const send_data = {
+                  hidden_value: item.hidden == "no" ? "yes" : "no",
+                  book_id: item.book_id
+                }
+                showHideEbooks(send_data)
+              }}>
+                <Visibility className="shown"/>
+              </div>;
 
             case 'yes':
-              return <span className="badge badge-pill badge-soft-warning font-size-12">
-                {
-                  cell.cell.row.original.hidden
-                }</span>;
+              return  <div style={{ cursor:'pointer' }}  onClick={() => {
+                const item = cell.cell.row.original;
+                const send_data = {
+                  hidden_value: item.hidden == "no" ? "yes" : "no",
+                  book_id: item.book_id
+                }
+                showHideEbooks(send_data)
+              }}>
+              <VisibilityOff className="hidden"/>
+            </div>;
 
             default:
               return <span className="badge badge-pill badge-soft-success font-size-12">
@@ -185,14 +209,14 @@ const Ebooks = ({ CourseId, unitId }) => {
                 </DropdownToggle>
                 <DropdownMenu className="dropdown-menu-end">
                   <DropdownItem onClick={() => { setEdit(true); setItem(cell.cell.row.original); }}>Edit</DropdownItem>
-                  <DropdownItem onClick={() => {
+                  {/* <DropdownItem onClick={() => {
                     const item = cell.cell.row.original;
                     const send_data = {
                       hidden_value: item.hidden == "no" ? "yes" : "no",
                       book_id: item.book_id
                     }
                     showHideEbooks(send_data)
-                  }}>Hide/Show</DropdownItem>
+                  }}>Hide/Show</DropdownItem> */}
                   <DropdownItem onClick={() => handlecopyitem(cell.cell.row.original)}>Copy</DropdownItem>
                 </DropdownMenu>
               </UncontrolledDropdown>
@@ -277,11 +301,12 @@ const Ebooks = ({ CourseId, unitId }) => {
     const add = await axios.post("https://camp-coding.tech/dr_elmatary/admin/ebooks/insert_ebooks.php", data_send);
     console.log(add);
     if (add.status == "success") {
-      toast.success(add.message);
+      toast.success("Added");
       setBook(false);
       setBookUrl(false);
       setNumberOfPages(false);
-      getEbooks()
+      getEbooks();
+      setmodal(false)
     } else {
       toast.error(add.message)
     }
@@ -290,8 +315,7 @@ const Ebooks = ({ CourseId, unitId }) => {
   return (
     <React.Fragment>
       <Container fluid={true}>
-        <Breadcrumbs title="ebooks" breadcrumbItem="Ebooks List" />
-
+      <Breadcrumbs title="Ebooks" breadcrumbItem={allunitdata.unit_name + " - Ebooks List"} />
         <Row>
           <Col lg={12}>
             <Card>
@@ -388,7 +412,7 @@ const Ebooks = ({ CourseId, unitId }) => {
                 <div className="mb-3">
                   <Label className="form-label">ebook file</Label>
                   <div style={{ "display": "flex", width: "100%", justifyContent: "space-between", alignItems: "center" }}>  <input type="file" id="pdfInput" accept=".pdf" onChange={handleFileSelect} /> <span className="btn btn-primary" onClick={() => uploadPdf()}>
-                    {!loading ? <Icon icon="solar:upload-bold-duotone" /> : <Loader size="lg" />}
+                    {!loading ? <Icon icon="solar:upload-bold-duotone" /> : <Loader size="sm" />}
                   </span></div>
                   <h4>{numberOfPages ? <span>numberOfPages : {numberOfPages}</span> : null}</h4>
                 </div>
@@ -427,7 +451,7 @@ const Ebooks = ({ CourseId, unitId }) => {
                 <div className="mb-3">
                   <Label className="form-label">ebook file</Label>
                   <div style={{ "display": "flex", width: "100%", justifyContent: "space-between", alignItems: "center" }}>  <input type="file" id="pdfInput" accept=".pdf" onChange={handleFileSelect} /> <span className="btn btn-primary" onClick={() => uploadPdf()}>
-                    {!loading ? <Icon icon="solar:upload-bold-duotone" /> : <Loader size="lg" />}
+                    {!loading ? <Icon icon="solar:upload-bold-duotone" /> : <Loader size="sm" />}
                   </span></div>
                   <h4>{numberOfPages ? <span>numberOfPages : {numberOfPages}</span> : null}</h4>
                 </div>

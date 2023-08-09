@@ -17,10 +17,15 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 import {useRef} from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
+import { useEffect } from "react";
 
 const AddCourse = () => {
     document.title = "Add Course | Matary - React Admin & Dashboard Template";
 
+    const [universities,setuniversities]=useState([]);
+    const [grades,setgrades]=useState([]);
+    const [selecteduni,setselecteduni]=useState("");
+    const [selectedgrade,setselectedgrade]=useState("");
     const [col1, setcol1] = useState(true);
     const [col2, setcol2] = useState(false);
     const [col3, setcol3] = useState(false);
@@ -52,9 +57,9 @@ const AddCourse = () => {
    * Formats the size
    */
     function formatBytes(bytes, decimals = 2) {
-        if (bytes === 0) 
+        if (bytes === 0)
             return "0 Bytes";
-        
+
 
 
         const k = 1024;
@@ -81,6 +86,34 @@ const AddCourse = () => {
         setmodal(!modal);
     }
 
+    const getuniversits=()=>{
+      axios.get("https://camp-coding.tech/dr_elmatary/admin/universities/select_university.php")
+      .then((res)=>{
+        console.log(res);
+        setuniversities(res.message);
+        setselecteduni(res.message[0].university_id);
+      }).catch((err)=>console.log(err))
+    }
+
+    const getgrades=()=>{
+      axios.get("https://camp-coding.tech/dr_elmatary/admin/universities/select_universities_grade.php")
+      .then((res)=>{
+        let filteresedarr=[...res?.message];
+        filteresedarr.filter((item)=>item.university_id==selecteduni);
+        setgrades(filteresedarr[0]?.grades);
+        setselectedgrade(filteresedarr[0]?.grades[0].grade_id)
+      })
+    }
+
+    useEffect(()=>{
+      getgrades();
+    },[selecteduni])
+
+    useEffect(()=>{
+      getuniversits();
+      // getgrades()
+    },[])
+
     const image = useRef();
     // https://camp-coding.tech/dr_elmatary/admin/image_uplouder.php
     const [course_photo_url, set_course_photo_url] = useState(false)
@@ -101,9 +134,13 @@ const AddCourse = () => {
             "course_price": courseDate.current.course_price.value,
             "course_photo_url": course_photo_url,
             "course_content": courseDate.current.course_content.value,
-            "category_id": 1
+            "category_id": 1,
+            "university_id":selecteduni,
+            "grade_id":selectedgrade
         }
+        console.log(data_send);
         const url = await axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/add_course.php", JSON.stringify(data_send));
+        console.log(url)
         if(url.status == "success"){
             toast.success(url.message)
             navigate("/courses-list")
@@ -116,7 +153,7 @@ const AddCourse = () => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Ecommerce" breadcrumbItem="Add Course"/>
+                    <Breadcrumbs title="Courses" breadcrumbItem="Add Course"/>
                     <Row>
                         <Col lg={12}>
                             <div className="custom-accordion" id="addcourse-accordion">
@@ -192,6 +229,47 @@ const AddCourse = () => {
                                                     </div>
                                                 </Row>
 
+                                                <Row>
+                                                    <div className="col-md-6">
+                                                        <div className="mb-3">
+                                                            <label htmlFor="category_id" className="form-label">
+                                                                Universities
+                                                            </label>
+                                                            <select onChange={(e)=>{
+                                                              setselecteduni(e.target.value);
+                                                            }} value={selecteduni} className="form-control" data-trigger name="choices-single-category" id="choices-single-category">
+                                                              {
+                                                                universities.map((item,index)=>{
+                                                                  return(
+                                                                    <option value={item.university_id}>{item.university_name}</option>
+
+                                                                  )
+                                                                })
+                                                              }
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-md-6">
+                                                    <div className="mb-3">
+                                                            <label htmlFor="category_id" className="form-label">
+                                                                Grade
+                                                            </label>
+                                                            <select value={selectedgrade} onChange={(e)=>{
+                                                              setselectedgrade(e.target.value)
+                                                            }} className="form-control" data-trigger name="choices-single-category" id="choices-single-category">
+                                                              {
+                                                                grades.map((item,index)=>{
+                                                                  return(
+                                                                    <option value={item.grade_id}>{item.grade_name}</option>
+
+                                                                  )
+                                                                })
+                                                              }
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </Row>
+
                                                 <div className="mb-0">
                                                     <label className="form-label" htmlFor="coursedesc">
                                                         Course Description
@@ -238,13 +316,13 @@ const AddCourse = () => {
                                     <Collapse isOpen={col2}
                                         id="addcourse-img-collapse">
                                         <div className="p-4 border-top">
-                                            <form 
+                                            <form
                                                 onSubmit={
                                                     (e) => {
                                                         uploadImage(e)
                                                     }
                                                 }
-                                           
+
 
                                                 action="#"
                                                 style={

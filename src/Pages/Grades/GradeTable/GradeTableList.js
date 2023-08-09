@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown} from 'reactstrap';
+import {CloseButton, DropdownItem, DropdownMenu, DropdownToggle, Input, Modal, UncontrolledDropdown} from 'reactstrap';
 // import TableContainer from "./../../../../components/Common/TableContainer";
 // import { CourseData } from "../../../../CommonData/Data/Course";
 import {Navigate, useLocation, useNavigate} from 'react-router-dom';
@@ -9,53 +9,101 @@ import {Loader} from 'rsuite';
 import {toastPlacements} from 'rsuite/esm/toaster/ToastContainer';
 import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 import { toast } from 'react-toastify';
-const UnitListTable = ({Units, universitydata, showHideUnit}) => {
+import '../unit.css'
+const UnitListTable = ({grades, universitydata, showHideUnit,updatedata}) => {
     const navigate = useNavigate();
-
-    const handleupdateshow=(rowdata)=>{
+    const [iseditmodel,setiseditmodel]=useState(false);
+    const [rowdata,setrowdata]=useState({});
+    
+    const handledeltegrade=(data)=>{
       const data_send={
-        university_id:rowdata.university_id,
-        show:rowdata.show==false?true:false
+        university_id:universitydata.university_id,
+        grade_id:data.grade_id
       }
-      axios.post("",JSON.stringify(data_send))
+      axios.post("")
+    }
+
+    const handleupdateshowhid=(data)=>{
+      // console.log(data)
+      const data_send={
+        // university_id:universitydata.university_id,
+        grade_id:data.grade_id,
+        hidden_value:data.hidden=='no'?'yes':'no'
+      }
+      // console.log(data_send);
+      axios.post("https://camp-coding.tech/dr_elmatary/admin/universities/update_grade_hidden.php",JSON.stringify(data_send))
       .then((res)=>{
-        if(res.status=='success'){
-          window.location.reload();
-          // setshowcourseedit(false);
+        if(res.status=="success"){
           toast.success(res.message);
+          updatedata()
         }
-        else if(res.status=='error'){
-          toast.error(res.message);
+        else if(res.status=="error"){
+          toast.err(res.message);
         }
         else {
           toast.error("Something Went Error");
         }
-      }).catch(err=>console.log(err))
+      }).catch(err=>console.log(err));
     }
 
 
+    const handleOk = async (e) => {
+      const send_data = {
+        // university_id:universitydata.university_id,
+        grade_name:rowdata.grade_name,
+        grade_id:rowdata.grade_id,
+      };
+      const units = await axios.post("https://camp-coding.tech/dr_elmatary/admin/universities/update_grade.php", send_data);
+      // console.log(units);
+      if (units.status=="success") {
+          toast.success(units.message);
+          updatedata();
+      } else if(units.status=="error"){
+          toast.error(units.message);
+      }
+      else {
+        toast.error("Something Went Error");
+      }
+      setiseditmodel(false);
+  };
+
 
     const columns = [
-        {
+      {
+        Header: "No",
+        Cell: (cell) => {
+          return (
+            <b>
+              {cell.cell.row.index + 1}
+            </b>
+          )
+        }
+      }, 
+      {
             Header: 'Grade ID',
             accessor: 'grade_id',
             Filter: false
         }, {
-            Header: 'grade_name',
+            Header: 'grade name',
             accessor: 'grade_name',
             Filter: false
-        }, {
-            Header: 'Show',
+        },
+        {
+            Header: 'Hidden',
             Cell: (cell) => {
                 switch (cell.cell.row.original.hidden) {
-                    case 'no':
-                        return <AiFillEyeInvisible onClick={()=>{
-                          handleupdateshow(cell.cell.original);
-                        }} style={{cursor:'pointer',fontSize:'22px'}}/>;
                     case 'yes':
-                        return <AiFillEye onClick={()=>{
-                          handleupdateshow(cell.cell.original);
-                        }}  style={{cursor:'pointer',fontSize:'22px'}}/>;
+                        return <AiFillEyeInvisible  onClick={
+                          () => {
+                            handleupdateshowhid(cell.cell.row.original);
+                          }
+                      } style={{cursor:'pointer',fontSize:'22px'}}/>;
+                    case 'no':
+                        return <AiFillEye   onClick={
+                          () => {
+                            handleupdateshowhid(cell.cell.row.original);
+                          }
+                      } style={{cursor:'pointer',fontSize:'22px'}}/>;
 
                     default:
                         return <span className="badge badge-pill badge-soft-success font-size-12">
@@ -65,56 +113,86 @@ const UnitListTable = ({Units, universitydata, showHideUnit}) => {
                 }
             }
         },
-        // {
-        //     Header: 'Action',
-        //     Cell: (cell) => {
-        //         return (
-        //             <>
-        //                 <UncontrolledDropdown>
-        //                     <DropdownToggle className="btn btn-light btn-sm" tag="button" data-bs-toggle="dropdown" direction="start">
-        //                         <i className="bx bx-dots-horizontal-rounded"></i>
-        //                     </DropdownToggle>
-        //                     <DropdownMenu className="dropdown-menu-end">
-        //                         <DropdownItem>Edit</DropdownItem>
-        //                         <DropdownItem onClick={
-        //                             () => {
-        //                                 console.log(cell.cell.row.original);
-        //                                 navigate("/lessons", {
-        //                                     state: {
-        //                                       universitydata: universitydata,
-        //                                         unitData: cell.cell.row.original
-        //                                     }
-        //                                 })
-        //                             }
-        //                         }>View</DropdownItem>
-        //                         <DropdownItem onClick={
-        //                             () => {
-        //                                 const item = cell.cell.row.original;
-        //                                 const send_data = {
-        //                                     status: item.hidden == "no" ? "yes" : "no",
-        //                                     unit_id: item.unit_id
-        //                                 }
-        //                                 showHideUnit(send_data);
-        //                             }
-        //                         }>Show/Hide</DropdownItem>
-        //                         <DropdownItem>Delete</DropdownItem>
-        //                     </DropdownMenu>
-        //                 </UncontrolledDropdown>
-        //             </>
-        //         )
-        //     }
-        // },
+        {
+            Header: 'Action',
+            Cell: (cell) => {
+                return (
+                    <>
+                        
+                                <button className='btn btn-primary'
+                                  onClick={()=>{
+                                    setiseditmodel(true);
+                                    setrowdata(cell.cell.row.original);
+                                  }}
+                                >Edit</button>
+                                
+                   
+
+                    </>
+                )
+            }
+        },
     ]
-    console.log(Units)
 
     return (
         <React.Fragment> {
-            Units && Units.length ? <TableContainer columns={columns}
-                data={Units}
-                isGlobalFilter={true}
-                customPageSize={10}
-                className="Invoice table"/> : !Units.length ? <h2>No Units</h2> : <Loader/>
-        } </React.Fragment>
+          grades && grades.length ? <TableContainer columns={columns}
+          data={grades}
+          isGlobalFilter={true}
+          customPageSize={10}
+          className="Invoice table"/> : !grades.length ? <h2>No grades</h2> : <Loader/>
+        }
+          <Modal title="edit grade"
+            isOpen={iseditmodel}>
+            <form action="#"
+                style={
+                    {
+                        padding: "15px",
+                        display: "flex",
+                        flexDirection: "column"
+                    }
+                }
+                onSubmit={
+                    (e) => {
+                        e.preventDefault();
+                        handleOk(e)
+                        setiseditmodel(false);
+                    }
+                }>
+                <CloseButton onClick={
+                    () => setiseditmodel(false)
+                }
+                    style={
+                        { marginLeft: "auto" }
+                    } />
+                <div className="input_Field">
+                    <label forHtml="unit_name">grade Name</label>
+                    <Input style={
+                        {
+                            width: "100%",
+                            padding: "10px",
+                            borderRadius: "4px"
+                        }
+                    }
+                    value={rowdata?.grade_name}
+                        type="text"
+                        name="unit_name"
+                        id="unit_name"
+                        onChange={(e)=>{
+                          setrowdata({...rowdata,grade_name:e.target.value})
+                        }}
+                        placeholder="grade name"
+                        required />
+                </div>
+                <button className="btn btn-success"
+                    style={
+                        { margin: "10px 0 0 auto" }
+                    }>
+                    {" "}
+                    update{" "} </button>
+            </form>
+          </Modal>
+        </React.Fragment>
     )
 }
 
