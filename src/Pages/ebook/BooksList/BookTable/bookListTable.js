@@ -13,11 +13,6 @@ const BookListTable = () => {
   const navigate = useNavigate();
   const columns = [
     {
-      Header: "Book ID",
-      accessor: "id",
-      Filter: false,
-    },
-    {
       Header: "Date",
       accessor: "date",
       Filter: false,

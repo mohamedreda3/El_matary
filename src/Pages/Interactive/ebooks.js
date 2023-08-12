@@ -37,9 +37,13 @@ import EbooksTableList from "../Lessons/LessonsTabel/EbooksTableList";
 import { Icon } from "@iconify/react";
 import { Loader } from "rsuite";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-const Ebooks = ({ CourseId, unitId ,allunitdata}) => {
+import Confirm from "../../components/ConfComp/Confirm";
+const Ebooks = ({ CourseId, unitId, allunitdata, cd }) => {
   const [type, setType] = useState(false);
   const [videoLink, setVideoLink] = useState(false);
+
+  const [rowdata, setrowdata] = useState({});
+  const [showconf, setshowconf] = useState(false);
 
   // console.log(data)
   const [modal, setmodal] = useState(false);
@@ -87,13 +91,17 @@ const Ebooks = ({ CourseId, unitId ,allunitdata}) => {
   const [edit, setEdit] = useState(false);
   const [ebooks, setEbooks] = useState(false);
   const [item, setItem] = useState(false);
+
+  const [itemLoader, setItemLoader] = useState(false);
   const getEbooks = async () => {
+    setItemLoader(true)
     const data_send = {
       "course_id": CourseId,
       "unit_id": unitId
     }
     const get = await axios.post("https://camp-coding.tech/dr_elmatary/admin/ebooks/select_ebook.php", data_send)
     setEbooks(get.message);
+    setItemLoader(false);
   }
 
   const showHideEbooks = async (send_data) => {
@@ -143,12 +151,6 @@ const Ebooks = ({ CourseId, unitId ,allunitdata}) => {
         }
       },
       {
-        Header: 'Ebook ID',
-        accessor: 'book_id',
-        Filter: false,
-      },
-
-      {
         Header: 'Ebook title',
         accessor: 'book_title',
       },
@@ -159,36 +161,40 @@ const Ebooks = ({ CourseId, unitId ,allunitdata}) => {
       {
         Header: 'Pdf',
         Cell: (cell) => {
-         return <a target="_blank" href={cell.cell.row.original.book_url}>Show Book</a>
+          return <a target="_blank" href={cell.cell.row.original.book_url}>Show Book</a>
         }
       },
       {
-        Header: 'Hidden',
+        Header: 'Status',
         Cell: (cell) => {
           switch (cell.cell.row.original.hidden) {
             case 'no':
-              return <div style={{ cursor:'pointer' }} onClick={() => {
-                const item = cell.cell.row.original;
-                const send_data = {
-                  hidden_value: item.hidden == "no" ? "yes" : "no",
-                  book_id: item.book_id
-                }
-                showHideEbooks(send_data)
+              return <div style={{ cursor: 'pointer' }} onClick={() => {
+                setshowconf(true);
+                setrowdata({ ...cell.cell.row.original, number: cell.cell.row.index + 1 })
+                // const item = cell.cell.row.original;
+                // const send_data = {
+                //   hidden_value: item.hidden == "no" ? "yes" : "no",
+                //   book_id: item.book_id
+                // }
+                // showHideEbooks(send_data)
               }}>
-                <Visibility className="shown"/>
+                <Visibility className="shown" />
               </div>;
 
             case 'yes':
-              return  <div style={{ cursor:'pointer' }}  onClick={() => {
-                const item = cell.cell.row.original;
-                const send_data = {
-                  hidden_value: item.hidden == "no" ? "yes" : "no",
-                  book_id: item.book_id
-                }
-                showHideEbooks(send_data)
+              return <div style={{ cursor: 'pointer' }} onClick={() => {
+                setshowconf(true);
+                setrowdata({ ...cell.cell.row.original, number: cell.cell.row.index + 1 })
+                // const item = cell.cell.row.original;
+                // const send_data = {
+                //   hidden_value: item.hidden == "no" ? "yes" : "no",
+                //   book_id: item.book_id
+                // }
+                // showHideEbooks(send_data)
               }}>
-              <VisibilityOff className="hidden"/>
-            </div>;
+                <VisibilityOff className="hidden" />
+              </div>;
 
             default:
               return <span className="badge badge-pill badge-soft-success font-size-12">
@@ -315,7 +321,8 @@ const Ebooks = ({ CourseId, unitId ,allunitdata}) => {
   return (
     <React.Fragment>
       <Container fluid={true}>
-      <Breadcrumbs title="Ebooks" breadcrumbItem={allunitdata.unit_name + " - Ebooks List"} />
+        <Breadcrumbs title={cd.course_name} breadcrumbItem={allunitdata.unit_name + " > Ebooks List"} />
+
         <Row>
           <Col lg={12}>
             <Card>
@@ -345,47 +352,17 @@ const Ebooks = ({ CourseId, unitId ,allunitdata}) => {
                           </button>
                         </div>
                       </Col>
-                      <Col className="col-sm-auto">
-                        <div className="d-flex gap-1">
-                          <div className="input-group">
-                            <Flatpickr
-                              className="form-control"
-                              placeholder="dd M, yyyy"
-                              options={{
-                                mode: "range",
-                                dateFormat: "Y-m-d",
-                              }}
-                              id="datepicker-range"
-                            />
-                            <span className="input-group-text">
-                              <i className="bx bx-calendar-event"></i>
-                            </span>
-                          </div>
-
-                          <UncontrolledDropdown
-                            className="dropdown"
-                            direction="start"
-                          >
-                            <DropdownToggle
-                              tag="a"
-                              className="btn btn-link text-body shadow-none"
-                            >
-                              <i className="bx bx-dots-horizontal-rounded"></i>
-                            </DropdownToggle>
-                            <DropdownMenu className="dropdown-menu-end">
-                              <DropdownItem>Action</DropdownItem>
-                              <DropdownItem>Another action</DropdownItem>
-                              <DropdownItem>Something else here</DropdownItem>
-                            </DropdownMenu>
-                          </UncontrolledDropdown>
-                        </div>
-                      </Col>
+                   
                     </Row>
                   </div>
                 </div>
-                <div id="table-invoices-list">
-                  {ebooks && ebooks.length ? <EbooksTableList showHideEbook={showHideEbooks} data={ebooks} columns={columns} /> : <h4>No Ebooks</h4>}
-                </div>
+                <div id="table-invoices-list">{
+                  itemLoader ? <Loader /> :
+                    <>
+                      {ebooks && ebooks.length ? <EbooksTableList showHideEbook={showHideEbooks} data={ebooks} columns={columns} /> : <h4>No Ebooks</h4>}
+                    </>
+
+                }</div>
               </CardBody>
             </Card>
           </Col>
@@ -469,6 +446,25 @@ const Ebooks = ({ CourseId, unitId ,allunitdata}) => {
           </Form>
         </ModalBody>
       </Modal>
+      {
+        showconf ? (
+          <Confirm
+            id={rowdata.number}
+            cancleoper={() => {
+              setshowconf(false)
+            }}
+            confirmoper={() => {
+              const send_data = {
+                hidden_value: rowdata.hidden == "no" ? "yes" : "no",
+                book_id: rowdata.book_id
+              }
+              showHideEbooks(send_data)
+              setshowconf(false);
+            }}
+            status={rowdata.hidden == 'no' ? 'hide' : 'show'}
+            comp={'unit'} />
+        ) : (null)
+      }
     </React.Fragment>
   );
 };

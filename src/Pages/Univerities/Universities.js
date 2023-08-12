@@ -33,6 +33,7 @@ import axios from "axios";
 import CourseListTable from "../Courses/CoursesList/CourseTable/courseListTable";
 import Breadcrumbs from "../../components/Common/Breadcrumb";
 import UniversityListTable from "./UniversityTable/UniversityListTable";
+import { Loader } from "rsuite";
 // import { CloseButton } from "react-toastify/dist/components";
 
 
@@ -42,12 +43,14 @@ const Universities = () => {
 
     const [Univerisities, setUniverisities] = useState(false)
 
-    const [showadduni,setshowadduni]=useState(false);
-
+    const [showadduni, setshowadduni] = useState(false);
+    const [itemLoader, setItemLoader] = useState(false)
     const getUniversities = async () => {
+        setItemLoader(true);
         const University = await axios.get("https://camp-coding.tech/dr_elmatary/admin/universities/select_university.php");
         // console.log(University);
-        setUniverisities([...University.message])
+        setUniverisities([...University.message]);
+        setItemLoader(false)
     }
 
     const showHideCourse = async (send_data) => {
@@ -61,30 +64,30 @@ const Universities = () => {
         }
     }
 
-    const [university_name,setuniversity_name]=useState("");
+    const [university_name, setuniversity_name] = useState("");
 
-    const handleaddnewuni=()=>{
-      if(university_name==""||university_name==null){
-        toast.warn("Enter University Name");
-        return;
-      }
-      const data_send={
-        university_name
-      }
-      // console.log(data_send);
-      axios.post("https://camp-coding.tech/dr_elmatary/admin/universities/insert_university.php",JSON.stringify(data_send))
-      .then((res)=>{
-        if(res.status=='success'){
-          window.location.reload();
-          toast.success(res.message);
+    const handleaddnewuni = () => {
+        if (university_name == "" || university_name == null) {
+            toast.warn("Enter University Name");
+            return;
         }
-        else if(res.status=='error'){
-          toast.error(res.message);
+        const data_send = {
+            university_name
         }
-        else{
-          toast.error("Something Went Error");
-        }
-      }).catch(err=>console.log(err))
+        // console.log(data_send);
+        axios.post("https://camp-coding.tech/dr_elmatary/admin/universities/insert_university.php", JSON.stringify(data_send))
+            .then((res) => {
+                if (res.status == 'success') {
+                    window.location.reload();
+                    toast.success(res.message);
+                }
+                else if (res.status == 'error') {
+                    toast.error(res.message);
+                }
+                else {
+                    toast.error("Something Went Error");
+                }
+            }).catch(err => console.log(err))
     }
 
     useEffect(() => {
@@ -116,86 +119,92 @@ const Universities = () => {
                                                         </button>
                                                     </div>
                                                 </Col>
-                                               
+
                                             </Row>
                                         </div>
                                     </div>
                                     <div id="table-invoices-list">
-                                        <UniversityListTable handleupdateparent={()=>{
-                                          getUniversities();
-                                        }} Univerisities={Univerisities}
-                                            showHideCourse={showHideCourse} />
+                                        {itemLoader ? <Loader /> :
+                                            <>
+                                                <UniversityListTable handleupdateparent={() => {
+                                                    getUniversities();
+                                                }} Univerisities={Univerisities}
+                                                    showHideCourse={showHideCourse} /> : <div>
+                                                    <h2>No Videos</h2>
+                                                </div>
+                                            </>
+                                        }
                                     </div>
                                 </CardBody>
                             </Card>
                         </Col>
                     </Row>
                     <Modal isOpen={showadduni}>
-                <ModalHeader
-                    tag="h4">
-                    <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
-                        <h4>Add New University</h4>
-                        <CloseButton onClick={
-                            () => {
-                                setshowadduni(false);
-                            }
-                        }
-                            style={
-                                { marginLeft: "auto" }
-                            } />
-                    </div>
-                </ModalHeader>
-                <ModalBody>
-
-                <form
-                        style={
-                            {
-                                padding: "15px",
-                                display: "flex",
-                                flexDirection: "column"
-                            }
-                        }
-                        onSubmit={
-                            (e) => {
-                                e.preventDefault();
-                                // AssignVideo(e)
-                                handleaddnewuni()
-                            }
-                        }>
-
-
-
-                        <div className="input_Field">
-                            <label htmlFor="">University Name</label>
-                            <Input
-                              onChange={(e)=>{
-                                setuniversity_name(e.target.value)
-                              }}
-                            style={
-                                {
-                                    width: "100%",
-                                    borderRadius: "4px",
-                                    margin: "10px 0"
+                        <ModalHeader
+                            tag="h4">
+                            <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+                                <h4>Add New University</h4>
+                                <CloseButton onClick={
+                                    () => {
+                                        setshowadduni(false);
+                                    }
                                 }
-                            }
-                                type="text"
-                                name="new_title"
-                                id="new_title"
-                                placeholder="Enter University Name"
-                            />
+                                    style={
+                                        { marginLeft: "auto" }
+                                    } />
+                            </div>
+                        </ModalHeader>
+                        <ModalBody>
 
-                        </div>
-                          <button className="btn btn-success"
-                            style={
-                                { margin: "10px 0 0 auto" }
-                            }>
-                            {" "}
-                            Add {" "}
-                          </button>
-                    </form>
+                            <form
+                                style={
+                                    {
+                                        padding: "15px",
+                                        display: "flex",
+                                        flexDirection: "column"
+                                    }
+                                }
+                                onSubmit={
+                                    (e) => {
+                                        e.preventDefault();
+                                        // AssignVideo(e)
+                                        handleaddnewuni()
+                                    }
+                                }>
 
 
-                </ModalBody>
+
+                                <div className="input_Field">
+                                    <label htmlFor="">University Name</label>
+                                    <Input
+                                        onChange={(e) => {
+                                            setuniversity_name(e.target.value)
+                                        }}
+                                        style={
+                                            {
+                                                width: "100%",
+                                                borderRadius: "4px",
+                                                margin: "10px 0"
+                                            }
+                                        }
+                                        type="text"
+                                        name="new_title"
+                                        id="new_title"
+                                        placeholder="Enter University Name"
+                                    />
+
+                                </div>
+                                <button className="btn btn-success"
+                                    style={
+                                        { margin: "10px 0 0 auto" }
+                                    }>
+                                    {" "}
+                                    Add {" "}
+                                </button>
+                            </form>
+
+
+                        </ModalBody>
                     </Modal>
                 </Container>
                 <ToastContainer />

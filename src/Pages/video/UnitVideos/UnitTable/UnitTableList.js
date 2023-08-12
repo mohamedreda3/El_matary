@@ -12,11 +12,7 @@ const UnitListTable = ({ Units, courseData, showHideUnit }) => {
 
 
     const columns = [
-        {
-            Header: 'Unit ID',
-            accessor: 'unit_id',
-            Filter: false
-        }, {
+ {
             Header: 'unit_name',
             accessor: 'unit_name',
             Filter: false

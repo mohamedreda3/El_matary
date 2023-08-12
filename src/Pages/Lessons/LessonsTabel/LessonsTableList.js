@@ -10,11 +10,6 @@ const LessonsTableList = () => {
     const columns =
         [
             {
-                Header: 'Course ID',
-                accessor: 'id',
-                Filter: false,
-            },
-            {
                 Header: 'Type',
                 accessor: 'type',
                 Filter: false,

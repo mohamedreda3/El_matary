@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from 'reactstrap';
+import { CloseButton, DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown, Modal } from 'reactstrap';
 // import TableContainer from "./../../../../components/Common/TableContainer";
 // import { CourseData } from "../../../../CommonData/Data/Course";
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +8,8 @@ import axios from 'axios';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Loader } from 'rsuite';
 import { toast } from 'react-toastify';
-const UnitListTable = ({ Units, courseData, showHideUnit }) => {
+import { MenuItem, Select } from '@mui/material';
+const UnitListTable = ({ Units, courseData, setshowconf, setrowdata }) => {
     const navigate = useNavigate();
 
     // https://camp-coding.tech/dr_elmatary/admin/unit/make_copy_from_unit_and_alldata.php
@@ -17,16 +18,12 @@ const UnitListTable = ({ Units, courseData, showHideUnit }) => {
         {
             Header: "No",
             Cell: (cell) => {
-              return (
-                <b>
-                  {cell.cell.row.index + 1}
-                </b>
-              )
+                return (
+                    <b>
+                        {cell.cell.row.index + 1}
+                    </b>
+                )
             }
-          }, {
-            Header: 'Unit ID',
-            accessor: 'unit_id',
-            Filter: false
         }, {
             Header: 'Unit Title',
             accessor: 'unit_name',
@@ -37,10 +34,11 @@ const UnitListTable = ({ Units, courseData, showHideUnit }) => {
                     () => {
                         const item = cell.cell.row.original;
                         const send_data = {
-                            status: item.hidden == "no" ? "yes" : "no",
+                            status: item.hidden,
                             unit_id: item.unit_id
                         }
-                        showHideUnit(send_data);
+                        setshowconf(true);
+                        setrowdata(send_data)
                     }
                 }>
                     {
@@ -74,9 +72,7 @@ const UnitListTable = ({ Units, courseData, showHideUnit }) => {
             Cell: (cell) => {
                 return (
                     <>
-
-                        <button className="btn btn-primary" onClick={() => handlecopyitem(cell.cell.row.original)}>Copy</button>
-
+                        <button className="btn btn-primary" onClick={() =>{ setsetShowCopy(true); setSelectedUnit(cell.cell.row.original.unit_id)}}>Copy</button>
                     </>
                 )
             }
@@ -84,14 +80,14 @@ const UnitListTable = ({ Units, courseData, showHideUnit }) => {
     ]
     const handlecopyitem = (data) => {
         const data_send = {
-            unit_id: data.unit_id
+            unit_id: selectedUnit,
+            course_id: selectedCourse
         }
         console.log(data_send)
         axios.post("https://camp-coding.tech/dr_elmatary/admin/unit/make_copy_from_unit_and_alldata.php", JSON.stringify(data_send))
             .then((res) => {
                 if (res.status == 'success') {
                     toast.success("Success");
-                    window.location.reload()
                 }
                 else if (res.status == 'error') {
                     toast.error(res.message);
@@ -101,7 +97,34 @@ const UnitListTable = ({ Units, courseData, showHideUnit }) => {
                 }
             })
     }
-
+    const [Courses, setCourses] = useState(false);
+    const [showCopy, setsetShowCopy] = useState(false);
+    const [selectedCourse, setSelectedCourse] = useState(false);
+    const [selectedUnit, setSelectedUnit] = useState(false);
+    const getCourses = async () => {
+        const courses = await axios.get("https://camp-coding.tech/dr_elmatary/admin/courses/select_courses.php");
+        setCourses([...courses])
+    }
+    useEffect(() => {
+        getCourses()
+    }, []); 
+    // const [Units, setUnits] = useState(false);
+    // const getUnits = async () => {
+    //   const send_data = {
+    //     course_id: selectedCourse
+    //   };
+    //   try {
+    //     const units = await axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/select_course_units.php", send_data);
+    //     console.log(units);
+    //     console.log(selectedCourse);
+    //     setUnits([...units]);
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
+    // }
+    // useEffect(() => {
+    //   getUnits();
+    // }, [selectedCourse])
     return (
         <React.Fragment> {
             Units && Units.length ? <TableContainer columns={columns}
@@ -109,7 +132,64 @@ const UnitListTable = ({ Units, courseData, showHideUnit }) => {
                 isGlobalFilter={true}
                 customPageSize={10}
                 className="Invoice table" /> : !Units.length ? <h2>No Units</h2> : <Loader />
-        } </React.Fragment>
+        }
+
+            <Modal title="Copy Unit To Course"
+                isOpen={showCopy}>
+                <form action="#"
+                    style={
+                        {
+                            padding: "15px",
+                            display: "flex",
+                            flexDirection: "column"
+                        }
+                    }
+                    onSubmit={
+                        (e) => {
+                            e.preventDefault();
+                            handlecopyitem(e)
+                            setsetShowCopy(false);
+                        }
+                    }>
+                    <CloseButton onClick={
+                        () => setsetShowCopy(false)
+                    }
+                        style={
+                            { marginLeft: "auto" }
+                        } />
+
+                    <div className="input_Field">
+                        <label forHtml="course_id">Course Name</label>
+                        <div className="input_Field">
+                            <Select style={
+                                {
+                                    width: "100%",
+                                    borderRadius: "4px",
+                                    margin: "10px 0"
+                                }
+                            }
+                                type="text"
+                                name="course_id"
+                                id="course_id"
+                                placeholder="Choose Course"
+                                onChange={(e) => setSelectedCourse(e.target.value)}
+                                required>
+                                {
+                                    Courses && Courses.length ? Courses.map((item, index) => {
+                                        return <MenuItem value={item.course_id} key={index}>{item.course_name}</MenuItem>
+                                    }) : <h3>No Courses</h3>
+                                }
+                            </Select>
+                        </div></div>
+                    <button className="btn btn-success"
+                        style={
+                            { margin: "10px 0 0 auto" }
+                        }>
+                        {" "}
+                        Copy Unit{" "} </button>
+                </form>
+            </Modal>
+        </React.Fragment>
     )
 }
 

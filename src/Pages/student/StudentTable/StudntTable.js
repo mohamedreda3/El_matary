@@ -11,9 +11,14 @@ import 'rsuite/dist/rsuite.min.css';
 import { toastPlacements } from 'rsuite/esm/toaster/ToastContainer';
 import { Icon } from '@mui/material';
 import { toast } from 'react-toastify';
+import Confirm3 from '../../../components/ConfComp/Confirm3';
 const StudntListTable = ({ getStudents, Units, courseData, showHideUnit }) => {
     const navigate = useNavigate();
     const [item, setItem] = useState(false)
+    const [rowdata,setrowdata]=useState({});
+    const [showconf,setshowconf]=useState(false);
+    const [showconf2,setshowconf2]=useState(false);
+    const [showconf3,setshowconf3]=useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const changeSerial = async () => {
@@ -66,12 +71,7 @@ const StudntListTable = ({ getStudents, Units, courseData, showHideUnit }) => {
                 </b>
               )
             }
-          },
-        {
-            Header: 'Student ID',
-            accessor: 'student_id',
-            Filter: false
-        }, {
+          },{
             Header: 'student_name',
             accessor: 'student_name',
             Filter: false
@@ -114,8 +114,13 @@ const StudntListTable = ({ getStudents, Units, courseData, showHideUnit }) => {
             Cell: (cell) => {
                 const itemN = cell.cell.row.original;
                 return <span>
+                    <Toggle size="md" checked={itemN.skip_headphone == "no" ? false : true} onChange={() => {
+                      // changeHeadPhone(itemN.student_id, itemN.skip_headphone == "no" ? "yes" : "no")
+                      setrowdata(cell.cell.row.original);
+                      setshowconf(true);
+                    }} />
 
-                    <Toggle size="md" checked={itemN.skip_headphone == "no" ? false : true} onChange={() => changeHeadPhone(itemN.student_id, itemN.skip_headphone == "no" ? "yes" : "no")} />
+                    {/* <Toggle size="md" checked={itemN.skip_headphone == "no" ? false : true} onChange={() => changeHeadPhone(itemN.student_id, itemN.skip_headphone == "no" ? "yes" : "no")} /> */}
 
                 </span>;
 
@@ -127,7 +132,12 @@ const StudntListTable = ({ getStudents, Units, courseData, showHideUnit }) => {
                 const itemN = cell.cell.row.original;
                 return <span>
 
-                    <Toggle size="md" checked={itemN.skip_sim == "no" ? false : true} onChange={() => changeSimCard(itemN.student_id, itemN.skip_sim == "no" ? "yes" : "no")} />
+                    <Toggle size="md" checked={itemN.skip_sim == "no" ? false : true} onChange={() => {
+                      setrowdata(cell.cell.row.original);
+                      setshowconf2(true);
+                      // changeSimCard(itemN.student_id, itemN.skip_sim == "no" ? "yes" : "no")
+                    }} />
+                    {/* <Toggle size="md" checked={itemN.skip_sim == "no" ? false : true} onChange={() => changeSimCard(itemN.student_id, itemN.skip_sim == "no" ? "yes" : "no")} /> */}
 
                 </span>;
 
@@ -139,7 +149,11 @@ const StudntListTable = ({ getStudents, Units, courseData, showHideUnit }) => {
                 const itemN = cell.cell.row.original;
                 return <span>
 
-                    <Toggle size="md" checked={itemN.blocked == "no" ? false : true} onChange={() => changeBlock(itemN.student_id, itemN.blocked == "no" ? "yes" : "no")} />
+                    <Toggle size="modal" checked={itemN.blocked == "no" ? false : true} onChange={() => {
+                      // changeBlock(itemN.student_id, itemN.blocked == "no" ? "yes" : "no")
+                      setshowconf3(true);
+                      setrowdata(cell.cell.row.original);
+                    }} />
 
                 </span>;
 
@@ -150,7 +164,7 @@ const StudntListTable = ({ getStudents, Units, courseData, showHideUnit }) => {
             Cell: (cell) => {
                 return (
                     <>
-                        
+
                                 <button className='btn btn-primary' onClick={
                                     () => {
                                         console.log(cell.cell.row.original);
@@ -162,7 +176,7 @@ const StudntListTable = ({ getStudents, Units, courseData, showHideUnit }) => {
                                         })
                                     }
                                 }>View</button>
-                          
+
                     </>
                 )
             }
@@ -179,7 +193,7 @@ const StudntListTable = ({ getStudents, Units, courseData, showHideUnit }) => {
                     className="Invoice table" /> : !Units.length ? <h2>No Units</h2> : <Loader />
             } </div>
 
-            <Modal title="add unit"
+            <Modal title="Reset Serial"
                 isOpen={isModalOpen}>
                 <form action="#"
                     style={
@@ -215,6 +229,76 @@ const StudntListTable = ({ getStudents, Units, courseData, showHideUnit }) => {
                         Reset Serial{" "} </button>
                 </form>
             </Modal>
+            {
+        showconf?(
+          <Confirm3
+          id={rowdata.number}
+          cancleoperpaid={()=>{
+            setshowconf(false)
+            // console.log("eew")
+          }}
+          confirmoperpaid={()=>{
+            // console.log("eew")
+            // const send_data = {
+            //   student_id:rowdata.student_id,
+            //   status:rowdata.skip_headphone == "no" ? "yes" : "no"
+            // }
+            let value=rowdata.skip_headphone == "no" ? "yes" : "no"
+            changeHeadPhone(rowdata.student_id,value)
+            setshowconf(false);
+          }}
+          status={rowdata.skip_headphone=='no'?'active':'non active'}
+          comp={'HeadePhone'}/>
+        ):(null)
+      }
+            {
+        showconf2?(
+          <Confirm3
+          id={rowdata.number}
+          cancleoperpaid={()=>{
+            setshowconf2(false)
+            // console.log("eew")
+          }}
+          confirmoperpaid={()=>{
+            // console.log("eew")
+            // const send_data = {
+            //   student_id:rowdata.student_id,
+            //   status:rowdata.skip_headphone == "no" ? "yes" : "no"
+            // }
+
+            let value=rowdata.skip_sim == "no" ? "yes" : "no"
+            changeSimCard(rowdata.student_id,value)
+            setshowconf2(false);
+
+          }}
+          status={rowdata.skip_sim=='no'?'active':'non active'}
+          comp={'Sim Card'}/>
+        ):(null)
+      }
+            {
+        showconf3?(
+          <Confirm3
+          id={rowdata.number}
+          cancleoperpaid={()=>{
+            setshowconf3(false)
+            // console.log("eew")
+          }}
+          confirmoperpaid={()=>{
+            // console.log("eew")
+            // const send_data = {
+            //   student_id:rowdata.student_id,
+            //   status:rowdata.skip_headphone == "no" ? "yes" : "no"
+            // }
+
+            let value=rowdata.blocked == "no" ? "yes" : "no"
+            changeBlock(rowdata.student_id,value)
+            setshowconf3(false);
+
+          }}
+          status={rowdata.blocked=='no'?'block':'yes'}
+          comp={'Sim Card'}/>
+        ):(null)
+      }
         </React.Fragment>
     )
 }

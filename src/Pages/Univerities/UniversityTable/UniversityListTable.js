@@ -8,12 +8,16 @@ import { toast } from 'react-toastify';
 import Select from "react-select";
 import TableContainer from '../../../components/Common/TableContainer';
 import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
+import Confirm from '../../../components/ConfComp/Confirm';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 const UniversityListTable = ({ Univerisities, showHideCourse, handleupdateparent }) => {
   const navigate = useNavigate();
   const [showuniedit, setshowuniedit] = useState(false);
   const [rowdata, setrowdata] = useState({});
   const [image, setimage] = useState(null);
+
+  const[showconf,setshowconf]=useState(false);
 
   const handleupdateuniversity = () => {
     const data_send = {
@@ -72,27 +76,26 @@ const UniversityListTable = ({ Univerisities, showHideCourse, handleupdateparent
       }
     },
     {
-      Header: 'University ID',
-      accessor: 'university_id',
-      Filter: false
-    },
-    {
       Header: 'University Name',
       accessor: 'university_name'
     },
     {
-      Header: 'Show',
+      Header: 'Status',
       Cell: (cell) => {
         switch (cell.cell.row.original.hidden) {
           case 'no':
-            return <AiFillEyeInvisible onClick={() => {
-              handleupdateshow(cell.cell.row.original);
+            return <Visibility className='shown' onClick={() => {
+              // handleupdateshow(cell.cell.row.original);
+              setshowconf(true);
+              setrowdata({...cell.cell.row.original,number:cell.cell.row.index + 1})
               // console.log(cell.cell.original,"ddd")
             }} style={{ cursor: 'pointer', fontSize: '22px' }} />;
 
           case 'yes':
-            return <AiFillEye onClick={() => {
-              handleupdateshow(cell.cell.row.original);
+            return <VisibilityOff className='hidden' onClick={() => {
+              setshowconf(true);
+              setrowdata({...cell.cell.row.original,number:cell.cell.row.index + 1})
+              // handleupdateshow(cell.cell.row.original);
             }} style={{ cursor: 'pointer', fontSize: '22px' }} />;
           default:
             return <span className="badge badge-pill badge-soft-success font-size-12">
@@ -208,6 +211,25 @@ const UniversityListTable = ({ Univerisities, showHideCourse, handleupdateparent
 
         </ModalBody>
       </Modal>
+      {
+        showconf?(
+          <Confirm
+          id={rowdata.number}
+          cancleoper={()=>{
+            setshowconf(false)
+          }}
+          confirmoper={()=>{
+            const send_data = {
+              hidden_value: rowdata.hidden == "no" ? "yes" : "no",
+              book_id: rowdata.book_id
+            }
+            handleupdateshow(rowdata)
+            setshowconf(false);
+          }}
+          status={rowdata.hidden=='no'?'hide':'show'}
+          comp={'unit'}/>
+        ):(null)
+      }
     </React.Fragment>
   )
 }

@@ -10,11 +10,12 @@ import {toastPlacements} from 'rsuite/esm/toaster/ToastContainer';
 import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 import { toast } from 'react-toastify';
 import '../unit.css'
+import Confirm from '../../../components/ConfComp/Confirm';
 const UnitListTable = ({grades, universitydata, showHideUnit,updatedata}) => {
     const navigate = useNavigate();
     const [iseditmodel,setiseditmodel]=useState(false);
     const [rowdata,setrowdata]=useState({});
-    
+    const [showconf,setshowconf]=useState(false);
     const handledeltegrade=(data)=>{
       const data_send={
         university_id:universitydata.university_id,
@@ -78,30 +79,29 @@ const UnitListTable = ({grades, universitydata, showHideUnit,updatedata}) => {
             </b>
           )
         }
-      }, 
-      {
-            Header: 'Grade ID',
-            accessor: 'grade_id',
-            Filter: false
-        }, {
+      }, {
             Header: 'grade name',
             accessor: 'grade_name',
             Filter: false
         },
         {
-            Header: 'Hidden',
+            Header: 'Status',
             Cell: (cell) => {
                 switch (cell.cell.row.original.hidden) {
                     case 'yes':
                         return <AiFillEyeInvisible  onClick={
                           () => {
-                            handleupdateshowhid(cell.cell.row.original);
+                            setshowconf(true);
+                            setrowdata({...cell.cell.row.original,number:cell.cell.row.index + 1})
+                            // handleupdateshowhid(cell.cell.row.original);
                           }
                       } style={{cursor:'pointer',fontSize:'22px'}}/>;
                     case 'no':
                         return <AiFillEye   onClick={
                           () => {
-                            handleupdateshowhid(cell.cell.row.original);
+                            setshowconf(true);
+                            setrowdata({...cell.cell.row.original,number:cell.cell.row.index + 1})
+                            // handleupdateshowhid(cell.cell.row.original);
                           }
                       } style={{cursor:'pointer',fontSize:'22px'}}/>;
 
@@ -118,15 +118,15 @@ const UnitListTable = ({grades, universitydata, showHideUnit,updatedata}) => {
             Cell: (cell) => {
                 return (
                     <>
-                        
+
                                 <button className='btn btn-primary'
                                   onClick={()=>{
                                     setiseditmodel(true);
                                     setrowdata(cell.cell.row.original);
                                   }}
                                 >Edit</button>
-                                
-                   
+
+
 
                     </>
                 )
@@ -192,6 +192,26 @@ const UnitListTable = ({grades, universitydata, showHideUnit,updatedata}) => {
                     update{" "} </button>
             </form>
           </Modal>
+          {
+        showconf?(
+          <Confirm
+          id={rowdata.number}
+          cancleoper={()=>{
+            setshowconf(false)
+          }}
+          confirmoper={()=>{
+            const send_data = {
+              hidden_value: rowdata.hidden == "no" ? "yes" : "no",
+              book_id: rowdata.book_id
+            }
+            // handleupdateshow(rowdata)
+            handleupdateshowhid(rowdata)
+            setshowconf(false);
+          }}
+          status={rowdata.hidden=='no'?'hide':'show'}
+          comp={'grade'}/>
+        ):(null)
+      }
         </React.Fragment>
     )
 }

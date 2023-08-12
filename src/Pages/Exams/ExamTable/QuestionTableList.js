@@ -15,11 +15,6 @@ const QuestionTableList = () => {
   const navigate = useNavigate();
   const columns = [
     {
-      Header: "Question ID",
-      accessor: "id",
-      Filter: false,
-    },
-    {
       Header: "question_name",
       accessor: "question_name",
     //   Filter: false,

@@ -20,6 +20,7 @@ import {
   Label,
   Input,
   FormFeedback,
+  CloseButton,
 } from "reactstrap";
 import Breadcrumbs from "../../components/Common/Breadcrumb";
 import "flatpickr/dist/themes/material_blue.css";
@@ -31,11 +32,17 @@ import { toast } from "react-toastify";
 import FlashCardsTableList from "../Lessons/LessonsTabel/FlashCardsTableList";
 import "./interactive.css";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import Confirm from "../../components/ConfComp/Confirm";
+import { MenuItem, Select } from "@mui/material";
+import { Loader } from "rsuite";
 
-const Flash_Cards = ({ CourseId, unitId,allunitdata }) => {
+const Flash_Cards = ({ CourseId, unitId, allunitdata, cd }) => {
   console.log(unitId)
   const [type, setType] = useState(false);
   const [videoLink, setVideoLink] = useState(false);
+
+
+
 
   // console.log(data)
   const [modal, setModal] = useState(false);
@@ -49,16 +56,20 @@ const Flash_Cards = ({ CourseId, unitId,allunitdata }) => {
 
   const [flashCard_data, setFlashCardData] = useState(false);
   const [edit, setEdit] = useState(false);
+  const [showconf, setshowconf] = useState(false);
+  const [rowdata, setrowdata] = useState({});
   const [flashCards, setFlashCards] = useState(false);
   const [item, setItem] = useState(false);
+  const [itemLoader, setItemLoader] = useState(false)
   const getFlashCards = async () => {
+    setItemLoader(true)
     const data_send = {
       "course_id": CourseId,
       "unit_id": unitId
     }
     const get = await axios.post("https://camp-coding.tech/dr_elmatary/admin/flash_cards/select_unit_flash_cards.php", data_send)
     setFlashCards(get.message.flash_card);
-    console.log(get);
+    setItemLoader(false)
   }
   const addFlashCard = async (e) => {
     const data_send = {
@@ -93,7 +104,6 @@ const Flash_Cards = ({ CourseId, unitId,allunitdata }) => {
       toast.error(flashCards_1.message);
     }
   }
-
   const editFlashCard = async (e) => {
     const data_send = {
       "course_id": CourseId,
@@ -116,15 +126,48 @@ const Flash_Cards = ({ CourseId, unitId,allunitdata }) => {
     }
   }
 
+  const [Courses, setCourses] = useState(false);
+  const [showCopy, setsetShowCopy] = useState(false);
+  const [selectedCourse, setSelectedCourse] = useState(false);
+  const [selectedUnit, setSelectedUnit] = useState(false);
+  const [selectedFlashCard, setFlashCard] = useState(false);
+  const [Units, setUnits] = useState(false);
+
+  const getCourses = async () => {
+    const courses = await axios.get("https://camp-coding.tech/dr_elmatary/admin/courses/select_courses.php");
+    setCourses([...courses])
+  }
+  useEffect(() => {
+    getCourses()
+  }, []);
+  const getUnits = async () => {
+    const send_data = {
+      course_id: selectedCourse
+    };
+    try {
+      const units = await axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/select_course_units.php", send_data);
+      console.log(units);
+      console.log(selectedCourse);
+      setUnits([...units]);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  useEffect(() => {
+    getUnits();
+  }, [selectedCourse])
+
   const handlecopyitem = (data) => {
     const data_send = {
-      flash_card_id: data.flash_card_id
+      flash_card_id: selectedFlashCard,
+      course_id: selectedCourse,
+      unit_id: selectedUnit,
     }
     console.log(data_send)
     axios.post("https://camp-coding.tech/dr_elmatary/admin/flash_cards/make_copy_from_flash_cards.php", JSON.stringify(data_send))
       .then((res) => {
         if (res.status == 'success') {
-          toast.success(res.message);
+          toast.success("Copied");
           getFlashCards()
         }
         else if (res.status == 'error') {
@@ -157,6 +200,7 @@ const Flash_Cards = ({ CourseId, unitId,allunitdata }) => {
   useEffect(() => {
     setIsEditBack(false)
   }, [side3]);
+  const [view, setView] = useState(false);
   const columns =
     [
       {
@@ -170,79 +214,51 @@ const Flash_Cards = ({ CourseId, unitId,allunitdata }) => {
         }
       },
       {
-        Header: 'FlashCard ID',
-        accessor: 'flash_card_id',
-        Filter: false,
-      },
-
-      {
         Header: 'Flash Card Side 1',
         accessor: 'flash_card_side_1',
       },
       {
         Header: 'Flash Card Side 2',
         accessor: 'flash_card_side_2',
+
       },
-      // {
-      //   Header: 'Hidden',
-      //   Cell: (cell) => {
-      //     switch (cell.cell.row.original.hidden) {
-      //       case 'no':
-      //         return <span className="badge badge-pill badge-soft-success font-size-12">
-      //           {
-      //             cell.cell.row.original.hidden
-      //           }</span>;
-
-      //       case 'yes':
-      //         return <span className="badge badge-pill badge-soft-warning font-size-12">
-      //           {
-      //             cell.cell.row.original.hidden
-      //           }</span>;
-
-      //       default:
-      //         return <span className="badge badge-pill badge-soft-success font-size-12">
-      //           {
-      //             cell.cell.row.original.hidden
-      //           }</span>
-      //     }
-      //   }
-      // },
-
       {
-    Header: 'Show',
-    Cell: (cell) => {
-      switch (cell.cell.row.original.hidden) {
-        case 'no':
-          return <div style={{ cursor:'pointer' }} onClick={()=>{
-            const item = cell.cell.row.original;
-                    const send_data = {
-                      hidden_value: item.hidden == "no" ? "yes" : "no",
-                      flash_card_id: item.flash_card_id
-                    }
-                    showHideFlashCards(send_data)
-          }}>
-            <Visibility className="shown"/>
-          </div>;
+        Header: 'Status',
+        Cell: (cell) => {
+          switch (cell.cell.row.original.hidden) {
+            case 'no':
+              return <div style={{ cursor: 'pointer' }} onClick={() => {
+                setrowdata(cell.cell.row.original)
+                setshowconf(true);
+              }}>
+                <Visibility className="shown" />
+              </div>;
 
-        case 'yes':
-          return <div style={{ cursor:'pointer' }} onClick={()=>{const item = cell.cell.row.original;
-                    const send_data = {
-                      hidden_value: item.hidden == "no" ? "yes" : "no",
-                      flash_card_id: item.flash_card_id
-                    }
-                    showHideFlashCards(send_data)}}>
-            <VisibilityOff className="hidden"/>
-          </div>;
+            case 'yes':
+              return <div style={{ cursor: 'pointer' }} onClick={() => {
+                const item = cell.cell.row.original;
+                setshowconf(true);
+                setrowdata({ ...cell.cell.row.original, number: cell.cell.row.index + 1 })
+              }}>
+                <VisibilityOff className="hidden" />
+              </div>;
 
-        default:
-          return <span className="badge badge-pill badge-soft-success font-size-12">
-            {
-              cell.cell.row.original.hidden
-            }</span>
-      }
-    }
-  },
-
+            default:
+              return <span className="badge badge-pill badge-soft-success font-size-12">
+                {
+                  cell.cell.row.original.hidden
+                }</span>
+          }
+        }
+      },
+      {
+        Header: 'view',
+        Cell: (cell) => {
+          return <button className="btn btn-primary" onClick={() => { setView(true); setItem(cell.cell.row.original) }}>
+            View
+          </button>
+        }
+      },
       {
         Header: 'Action',
         Cell: (cell) => {
@@ -254,19 +270,11 @@ const Flash_Cards = ({ CourseId, unitId,allunitdata }) => {
                 </DropdownToggle>
                 <DropdownMenu className="dropdown-menu-end">
                   <DropdownItem onClick={() => { setEdit(true); setItem(cell.cell.row.original); }}>Edit</DropdownItem>
-                  {/* <DropdownItem onClick={() => {
-                    const item = cell.cell.row.original;
-                    const send_data = {
-                      hidden_value: item.hidden == "no" ? "yes" : "no",
-                      flash_card_id: item.flash_card_id
-                    }
-                    showHideFlashCards(send_data)
-                  }}>Hide/Show</DropdownItem> */}
                   <DropdownItem
                     onClick={() => {
-                      handlecopyitem(cell.cell.row.original)
+                      setsetShowCopy(true);
+                      setFlashCard(cell.cell.row.original.flash_card_id);
                     }}
-
                   >Copy</DropdownItem>
                 </DropdownMenu>
               </UncontrolledDropdown>
@@ -278,7 +286,7 @@ const Flash_Cards = ({ CourseId, unitId,allunitdata }) => {
   return (
     <React.Fragment>
       <Container fluid={true}>
-      <Breadcrumbs title="Flash Cards" breadcrumbItem={allunitdata?.unit_name + " - Flash List"} />
+        <Breadcrumbs title={cd.course_name} breadcrumbItem={allunitdata.unit_name + " > Flash Cards List"} />
 
         <Row>
           <Col lg={12}>
@@ -309,47 +317,12 @@ const Flash_Cards = ({ CourseId, unitId,allunitdata }) => {
                           </button>
                         </div>
                       </Col>
-                      <Col className="col-sm-auto">
-                        <div className="d-flex gap-1">
-                          <div className="input-group">
-                            <Flatpickr
-                              className="form-control"
-                              placeholder="dd M, yyyy"
-                              options={{
-                                mode: "range",
-                                dateFormat: "Y-m-d",
-                              }}
-                              id="datepicker-range"
-                            />
-                            <span className="input-group-text">
-                              <i className="bx bx-calendar-event"></i>
-                            </span>
-                          </div>
-
-                          <UncontrolledDropdown
-                            className="dropdown"
-                            direction="start"
-                          >
-                            <DropdownToggle
-                              tag="a"
-                              className="btn btn-link text-body shadow-none"
-                            >
-                              <i className="bx bx-dots-horizontal-rounded"></i>
-                            </DropdownToggle>
-                            <DropdownMenu className="dropdown-menu-end">
-                              <DropdownItem>Action</DropdownItem>
-                              <DropdownItem>Another action</DropdownItem>
-                              <DropdownItem>Something else here</DropdownItem>
-                            </DropdownMenu>
-                          </UncontrolledDropdown>
-                        </div>
-                      </Col>
                     </Row>
                   </div>
                 </div>
-                <div id="table-invoices-list">
+                <div id="table-invoices-list">{itemLoader ? <Loader /> : <>
                   {flashCards && flashCards.length ? <FlashCardsTableList showHideFlashCard={showHideFlashCards} data={flashCards} columns={columns} /> : <h4>No FlashCards</h4>}
-                </div>
+                </>}</div>
               </CardBody>
             </Card>
           </Col>
@@ -382,11 +355,11 @@ const Flash_Cards = ({ CourseId, unitId,allunitdata }) => {
                 </div>
                 <div className="mb-3">
                   <Label className="form-label">Side 1</Label>
-                  <Input name="flashCard_title" type="text" onChange={(e) => setSide1(e.currentTarget.value)} />
+                  <Input name="flashCard_title" type="text" onChange={(e) => setSide1(e.currentTarget.value)} onFocus={() => { setIsBack(false); }} />
                 </div>
                 <div className="mb-3">
                   <Label className="form-label">Side 2</Label>
-                  <Input name="flashCard_value" type="text" onChange={(e) => setSide2(e.currentTarget.value)} />
+                  <Input name="flashCard_value" type="text" onChange={(e) => setSide2(e.currentTarget.value)} onFocus={() => { setIsBack(true); }} />
                 </div>
               </Col>
             </Row>
@@ -430,11 +403,11 @@ const Flash_Cards = ({ CourseId, unitId,allunitdata }) => {
                 </div>
                 <div className="mb-3">
                   <Label className="form-label">flash card side 1</Label>
-                  <Input type="text" name="flashCard_title" defaultValue={item?.flash_card_side_1} onChange={(e) => setSide3(e.currentTarget.value)} />
+                  <Input type="text" name="flashCard_title" defaultValue={item?.flash_card_side_1} onChange={(e) => setSide3(e.currentTarget.value)} onFocus={() => { setIsEditBack(false); }} />
                 </div>
                 <div className="mb-3">
                   <Label className="form-label">flash card side 2</Label>
-                  <Input type="text" name="flashCard_answar" defaultValue={item?.flash_card_side_2} onChange={(e) => setSide4(e.currentTarget.value)} />
+                  <Input type="text" name="flashCard_answar" defaultValue={item?.flash_card_side_2} onChange={(e) => setSide4(e.currentTarget.value)} onFocus={() => { setIsEditBack(true); }} />
                 </div>
               </Col>
             </Row>
@@ -448,6 +421,142 @@ const Flash_Cards = ({ CourseId, unitId,allunitdata }) => {
               </Col>
             </Row>
           </Form>
+        </ModalBody>
+      </Modal>
+
+      <Modal isOpen={view} toggle={() => setView(false)}>
+        <ModalHeader toggle={() => setView(false)} tag="h4">
+          Flash Card
+        </ModalHeader>
+        <ModalBody>
+          <Form
+            onSubmit={(e) => {
+              e.preventDefault();
+            }}
+          >
+            <Row>
+
+              <Col md={12}>
+                <div class={isEditBack ? "card-flid back" : "card-flid"}>
+                  <div class="card-inner">
+                    <div class="card-front">
+                      {item?.flash_card_side_1}
+                    </div>
+                    <div class="card-back">
+                      {item?.flash_card_side_2}
+                    </div>
+                  </div>
+                </div>
+
+              </Col>
+            </Row>
+          </Form>
+        </ModalBody>
+      </Modal>
+      {
+        showconf ? (
+          <Confirm
+            id={rowdata.number}
+            cancleoper={() => {
+              setshowconf(false)
+            }}
+            confirmoper={() => {
+              const send_data = {
+                hidden_value: rowdata.hidden == "no" ? "yes" : "no",
+                flash_card_id: rowdata.flash_card_id
+              }
+              showHideFlashCards(send_data);
+              setshowconf(false);
+            }}
+            status={rowdata.hidden == 'no' ? 'hide' : 'show'}
+            comp={'unit'} />
+        ) : (null)
+      }
+      <Modal isOpen={showCopy}>
+        <ModalHeader
+          tag="h4">
+          <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+            <h4>  Copy Flash Card To Unit </h4>
+            <CloseButton onClick={
+              () => {
+                setsetShowCopy(false);
+                setSelectedCourse(false)
+                setUnits(false);
+              }
+            }
+              style={
+                { marginLeft: "auto" }
+              } />
+          </div>
+        </ModalHeader>
+        <ModalBody>
+
+          <form action="#"
+            style={
+              {
+                padding: "15px",
+                display: "flex",
+                flexDirection: "column"
+              }
+            }
+            onSubmit={
+              (e) => {
+                e.preventDefault();
+                handlecopyitem(e);
+              }
+            }>
+
+            <div className="input_Field">
+              <Select style={
+                {
+                  width: "100%",
+                  borderRadius: "4px",
+                  margin: "10px 0"
+                }
+              }
+                type="text"
+                name="course_id"
+                id="course_id"
+                placeholder="Choose Course"
+                onChange={(e) => setSelectedCourse(e.target.value)}
+                required>
+                {
+                  Courses && Courses.length ? Courses.map((item, index) => {
+                    return <MenuItem value={item?.course_id} key={index}>{item?.course_name}</MenuItem>
+                  }) : <h3>No Courses</h3>
+                }
+              </Select>
+            </div>
+            {
+              selectedCourse && Units && Units.length ? <div className="input_Field">
+                <Select style={
+                  {
+                    width: "100%",
+                    borderRadius: "4px",
+                    margin: "10px 0"
+                  }
+                }
+                  type="text"
+                  name="unit_id"
+                  id="unit_id"
+                  placeholder="Choose Unit"
+                  onChange={(e) => setSelectedUnit(e.target.value)}
+                  required>
+                  {
+                    Units.map((item, index) => {
+                      return <MenuItem value={item?.unit_id} key={index}>{item?.unit_name}</MenuItem>
+                    })
+                  }
+                </Select>
+              </div> : <h3>No Units In Course</h3>}
+            <button className="btn btn-success"
+              style={
+                { margin: "10px 0 0 auto" }
+              }>
+              {" "}
+              Assign To Unit{" "} </button>
+          </form>
+
         </ModalBody>
       </Modal>
     </React.Fragment>

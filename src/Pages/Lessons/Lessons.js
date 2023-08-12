@@ -87,7 +87,7 @@ const Lessons = () => {
     { type: "FlashCards", title: "Flash Cards" },
     { type: "Tweets", title: "Tweets" },
     { type: "writtenquestion", title: "Written Questions" },
-    // { type: "mcqquestion", title: "MCQ Questions" },
+    { type: "mcqquestion", title: "MCQ Questions" },
     { type: "ebooks", title: "Ebooks" },
     // ebooks
   ];
@@ -97,9 +97,12 @@ const Lessons = () => {
   const [showEdit, setShowEdit] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(false)
   const [videoData, setVideoData] = useState(false);
+  const [itemLoader, setItemLoader] = useState(false);
   const getVideos = async () => {
+    setItemLoader(true);
     const videos = await axios.get("https://camp-coding.tech/dr_elmatary/admin/videos/select_videos.php");
     setVideos([...videos])
+    setItemLoader(false);
   }
   useEffect(() => { getVideos() }, []);
 
@@ -111,6 +114,7 @@ const Lessons = () => {
 
   const [selectedCourse, setSelectedCourse] = useState(false);
   const [Units, setUnits] = useState(false);
+
   const getUnits = async () => {
     const send_data = {
       course_id: selectedCourse
@@ -208,11 +212,11 @@ const Lessons = () => {
       Header: "Video Title",
       accessor: "new_title",
     },
-    {
-      Header: "Course Name",
-      accessor: "course_name",
-      Filter: false,
-    },
+    // {
+    //   Header: "Course Name",
+    //   accessor: "course_name",
+    //   Filter: false,
+    // },
     {
       Header: 'Free',
       Cell: (cell) => {
@@ -220,7 +224,7 @@ const Lessons = () => {
           () => {
             handleupdatefree(cell.cell.row.original)
           }
-        }>{cell.cell.row.original.free == "no" ? <VisibilityOff className="hidden" /> : <Visibility className="shown" />}</DropdownItem>
+        }>{cell.cell.row.original.free == "no" ? <TbFreeRights className="hidden" /> : <MdOutlinePaid className="shown" />}</DropdownItem>
       }
     }, {
       Header: 'Hidden',
@@ -229,7 +233,7 @@ const Lessons = () => {
           () => {
             handleupdatestatus(cell.cell.row.original)
           }
-        }>{cell.cell.row.original.hidden == "no" ? <TbFreeRights className="hidden" /> : <MdOutlinePaid className="shown" />}
+        }>{cell.cell.row.original.hidden == "no" ? <VisibilityOff className="hidden" /> : <Visibility className="shown" />}
         </DropdownItem>
       }
     },
@@ -256,24 +260,10 @@ const Lessons = () => {
   const [videoData_r, setVideoDataR] = useState(false);
   const [pubLink, setPubLink] = useState(false);
   const [Vim_link, setVimLink] = useState(false);
-  useEffect(() => { getUnitsVideos() }, [Videos])
-
-  useEffect(() => {
-    if (selectedCourse) {
-      setVideoDataR(Videos.filter((item) => item?.video_id == selectedCourse));
-    } else {
-      setVideoDataR(false)
-    }
-  }, [selectedCourse])
 
 
-
-  if (!location.state) {
-    return navigate(-1);
-  }
-
-  const unitData = location.state.unitData.unit_id;
-  const courseData = location.state.coursedata.course_id;
+  const unitData = location?.state?.unitData?.unit_id;
+  const courseData = location?.state?.coursedata?.course_id;
 
 
   const getUnitsVideos = () => {
@@ -289,6 +279,26 @@ const Lessons = () => {
       setUnitVideos([...arr])
     }
   };
+  
+  useEffect(() => { getUnitsVideos() }, [Videos])
+
+  useEffect(() => {
+    if (selectedCourse) {
+      setVideoDataR(Videos.filter((item) => item?.video_id == selectedCourse));
+    } else {
+      setVideoDataR(false)
+    }
+  }, [selectedCourse])
+
+  const [searchValue, setSearchValue] = useState(false);
+
+
+  if (!location?.state) {
+    return navigate(-1);
+  }
+
+ 
+
 
   const AssignVideo = async (e) => {
     const data_send = {
@@ -329,7 +339,7 @@ const Lessons = () => {
           <div id="table-invoices-list">
             {type == "Lessons" ? (
               <Fragment>
-                <Breadcrumbs title="Lessons" breadcrumbItem={location?.state?.unitData?.unit_name + " - Lesson List"} />
+                <Breadcrumbs title={location.state.coursedata.course_name} breadcrumbItem={location?.state?.unitData?.unit_name + "  >  Lesson List"} />
 
                 <Row>
                   <Col lg={12}>
@@ -362,11 +372,14 @@ const Lessons = () => {
                           </div>
                         </div>
                         <div id="table-invoices-list">
-                          {unitVideos && unitVideos.length ?
-                            <VideoListTable videos={unitVideos} columns={columns} /> : <div>
-                              <h2>No Videos</h2>
-                            </div>
-                          }
+
+                          {itemLoader ? <Loader /> : <>
+                            {unitVideos && unitVideos.length ?
+                              <VideoListTable videos={unitVideos} columns={columns} /> : <div>
+                                <h2>No Videos</h2>
+                              </div>
+                            }
+                          </>}
                         </div>
                       </CardBody>
                     </Card>
@@ -433,13 +446,27 @@ const Lessons = () => {
                         {
                           videoType == "vsid" ?
                             Videos && Videos.length ? <>
-                              <SelectPicker label="Search By Video Source" data={Videos.map(item => { return { label: `${item?.video_id + "- " + item?.video_title}`, value: item?.video_id } })} style={{ width: 224 }} required
-                                onChange={(e) => setSelectedCourse(e)}
-                              /> </>
+                              <input type="search" className="search_type" onChange={(e) => setSearchValue(e.currentTarget.value)} placeholder="Video Source ID" />
+                              {
+                                searchValue && searchValue.length != "" ?
+                                  <ul className="options" style={{ listStyle: "none" }}>
+                                    {
+                                      Videos && Videos.length ?
+                                        Videos.map((item) => {
+                                          return item.video_id.toString().includes(searchValue) ? <li onClick={() => {
+                                            setSelectedCourse(item.video_id);
+                                            setSearchValue(false)
+                                          }}>{item.video_title}</li> : null
+                                        }) : <h3>No Videos</h3>
+                                    }
+                                  </ul> : null
+                              }
+                            </>
                               : <h3>No Videos</h3> : videoType == "vlist" ? Videos && Videos.length ? <>
                                 <SelectPicker label="Select Video" data={Videos.map(item => { return { label: item?.video_title, value: item?.video_id } })} style={{ width: 224 }} required
                                   onChange={(e) => setSelectedCourse(e)}
-                                /> </>
+                                />
+                              </>
                                 : <h3>No Videos</h3> : null
                         }
 
@@ -504,13 +531,14 @@ const Lessons = () => {
                 </Modal>
               </Fragment>
             ) : type == "FlashCards" ? (
-              <Flash_Cards CourseId={courseData} unitId={unitData} allunitdata={location?.state?.unitData} />
+              <Flash_Cards CourseId={courseData} unitId={unitData} allunitdata={location?.state?.unitData} cd={location.state.coursedata} />
             ) : type == "Tweets" ? (
-              <Tweets CourseId={courseData} unitId={unitData} allunitdata={location?.state?.unitData} />
+              <Tweets CourseId={courseData} unitId={unitData} allunitdata={location?.state?.unitData} cd={location.state.coursedata} />
             ) : type == "writtenquestion" ? (
-              <WrittenQuestions CourseId={courseData} unitId={unitData} allunitdata={location?.state?.unitData} />
+              <WrittenQuestions CourseId={courseData} unitId={unitData} allunitdata={location?.state?.unitData} cd={location.state.coursedata} />
             ) : type == "ebooks" ? (
-              <Ebooks CourseId={courseData} unitId={unitData} allunitdata={location?.state?.unitData} />) : null}
+              <Ebooks CourseId={courseData} unitId={unitData} allunitdata={location?.state?.unitData} cd={location.state.coursedata} />) : type == "mcqquestion" ? (
+                <MCQQuestions CourseId={courseData} unitId={unitData} allunitdata={location?.state?.unitData} cd={location.state.coursedata} />) : null}
           </div>
         </Container>
         <Modal isOpen={modal} toggle={toggle}>

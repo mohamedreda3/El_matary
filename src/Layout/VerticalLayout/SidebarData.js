@@ -96,7 +96,7 @@ const SidebarData = [
     icon: "bx bx-store icon nav-icon",
     subItem: [
       { sublabel: "Subscription", link: "/subscription" },
-      { sublabel: "Ended Subscription", link: "/endedsubscription" },
+      // { sublabel: "Ended Subscription", link: "/endedsubscription" },
       { sublabel: "Canceled Subscription", link: "/canceledsubscription" },
       // { sublabel: "Daily Income", link: "/dailyIncome" },
       // { sublabel: "Product Detail", link: "/ecommerce-product-detail/1" },
@@ -133,6 +133,22 @@ const SidebarData = [
     subItem: [
       { sublabel: "Exams", link: "/exam" },
       { sublabel: "Add Question", link: "/addques" },
+      // { sublabel: "Product Detail", link: "/ecommerce-product-detail/1" },
+      // { sublabel: "Orders", link: "/ecommerce-orders" },
+      // { sublabel: "Customers", link: "/ecommerce-customers" },
+      // { sublabel: "Cart", link: "/ecommerce-cart" },
+      // { sublabel: "Checkout", link: "/ecommerce-checkout" },
+      // { sublabel: "Shops", link: "/ecommerce-shops" },
+      // { sublabel: "Add Product", link: "/ecommerce-add-product" },
+    ],
+  },
+
+
+  {
+    label: "Reports",
+    icon: "bx bx-store icon nav-icon",
+    subItem: [
+      { sublabel: "Reports", link: "/reports-list" },
       // { sublabel: "Product Detail", link: "/ecommerce-product-detail/1" },
       // { sublabel: "Orders", link: "/ecommerce-orders" },
       // { sublabel: "Customers", link: "/ecommerce-customers" },

@@ -10,11 +10,6 @@ const CopounListTable = ({Copouns, showHideCopoun}) => {
   
     const columns = [
         {
-            Header: 'Copoun ID',
-            accessor: 'copoun_id',
-            Filter: false
-        },
-        {
             Header: 'Copoun Name',
             accessor: 'copoun_name'
         },

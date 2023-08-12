@@ -113,6 +113,7 @@ import Logout from "../Pages/Authentication/Logout";
 import Register from "../Pages/Authentication/Register";
 import UserProfile from "../Pages/Authentication/user-profile";
 import Courses from "../Pages/Courses/CoursesList/CoursesList";
+import Reports from "../Pages/Reports/CoursesList/CoursesList";
 import AddCourse from "../Pages/Courses/AddCourse";
 import AddMaterial from "../Pages/Courses/AddMaterial";
 import Universities from "../Pages/Univerities/Universities";
@@ -132,6 +133,8 @@ import CourseDetail from "../Pages/Courses/CourseDetail";
 import Unit from "../Pages/Units/Units";
 import Units from "../Pages/Units/Units";
 import Lessons from "../Pages/Lessons/Lessons";
+import ReportsLessons from "../Pages/ReportsLessons/Lessons";
+// ReportsLessons
 import AddBook from "../Pages/ebook/Addbook";
 import BookListTable from "../Pages/ebook/BooksList/BooksList";
 import Books from "../Pages/ebook/BooksList/BooksList";
@@ -150,6 +153,7 @@ import Videos from "../Pages/video/VideosList/VideosList";
 import AddVideo from "../Pages/video/Addvideo";
 import UnitVideo from "../Pages/video/UnitVideos/Units";
 import StudentCourses from "../Pages/StudentCourses/StudentCourses";
+import VideoMCQQuestions from "../Pages/video/mcqquestion"
 // import DailyIncome from "../Pages/subscription/dailyIncome";
 
 const authProtectedRoutes = [
@@ -181,12 +185,17 @@ const authProtectedRoutes = [
   // Courses
 
   { path: "/courses-list", component: <Courses /> },
+  { path: "/reports-list", component: <Reports /> },
+  { path: "/ReportsLessons", component: <ReportsLessons /> },
+  // ReportsLessons
   { path: "/copouns-list", component: <Copouns /> },
   { path: "/courses-list/add-course", component: <AddCourse /> },
   { path: "/copouns-list/add-copoun", component: <AddCopoun /> },
+
+  // reports-list
   { path: "add-material", component: <AddMaterial /> },
   { path: "/coursedetail", component: <CourseDetail /> },
-  { path: "/units", component: <Units /> },
+  { path: "/units", component:  <Units /> },
   { path: "/lessons", component: <Lessons /> },
   { path: "/e-book/add-book", component: <AddBook /> },
   { path: "/e-book", component: <Books /> },
@@ -204,6 +213,8 @@ const authProtectedRoutes = [
   { path: "/grade", component: <Grade /> },
   { path: "/universities", component: <Universities />},
   { path: "/StudentCourses", component: <StudentCourses/> },
+  { path: "/video/VideoMCQQuestions", component: <VideoMCQQuestions /> },
+
 
   // {path:'/dailyIncome',component:<DailyIncome />},
   // questions

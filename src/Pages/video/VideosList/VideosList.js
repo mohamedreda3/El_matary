@@ -45,10 +45,12 @@ const Videos = () => {
   const [showAssign, setShowAssign] = useState(false);
   const [item, setItem] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
-
+  const [itemLoader, setItemLoader] = useState(false)
   const getVideos = async () => {
+    setItemLoader(true)
     const videos = await axios.get("https://camp-coding.tech/dr_elmatary/admin/videos/select_videos.php");
     setVideos([...videos])
+    setItemLoader(false)
   }
   useEffect(() => { getVideos() }, []);
 
@@ -58,12 +60,6 @@ const Videos = () => {
     setCourses([...courses])
   }
 
-  /* {
-    "new_title" : "new title", // not req
-    "source_video_id" : "2",
-    "unit_id" : "1",
-    "course_id" :"2"
-    } */
 
   const [selectedUnit, setSelectedUnit] = useState(false);
   const AssignVideo = async (e) => {
@@ -102,9 +98,42 @@ const Videos = () => {
   useEffect(() => {
     getUnits();
   }, [selectedCourse])
+  const [unitName, setUnitName] = useState(false)
 
+  const handleOk = async (e) => {
+    const send_data = {
+      course_id: selectedCourse,
+      unit_name: unitName
+    };
+    const units = await axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/add_unit.php", send_data);
+    if (units.status) {
+      toast.success("Added");
+      await getUnits();
+    } else {
+      toast.error(units.message);
+    }
+  };
+  const [showEditV, setShowEditV] = useState(false)
+  const editVideo = async (e) => {
+    console.log(e)
+    const data_send = {
+      "source_video_id": item.video_id,
+      "video_title": e.currentTarget.new_title.value ? e.currentTarget.new_title.value : item.video_title,
+      "video_duration": e.currentTarget.video_duration.value ? e.currentTarget.video_duration.value : item.video_duration,
+      "vimeo_data": e.currentTarget.vimeo_data.value ? e.currentTarget.vimeo_data.value : item.vimeo_data,
+      "publitio_data": e.currentTarget.publitio_data.value ? e.currentTarget.publitio_data.value : item.publitio_data
+    }
 
-
+    const assign = await axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/edit_source_video.php", data_send);
+    console.log(assign)
+    if (assign.status == "success") {
+      toast.success("Editted");
+      getVideos();
+      setShowEditV(false)
+    } else {
+      toast.error(assign.message);
+    }
+  }
   const columns = [
     {
       Header: "No",
@@ -115,15 +144,23 @@ const Videos = () => {
           </b>
         )
       }
+    }, , {
+      Header: "Video Title",
+      accessor: "video_title",
     }, {
+      Header: "Video Duration",
+      accessor: "video_duration",
+      Filter: false,
+    },
+    {
       Header: "Video Source ID",
       accessor: "video_id",
       Cell: (cell) => {
         return (
           <>
-            <CopyToClipboard style={{ padding: "0 14px", cursor: "pointer", width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center" }} text={cell.cell.row.original?.video_id} onCopy={() => toast.success("Copied")}>
+            <CopyToClipboard style={{ padding: "0 14px", cursor: "pointer", width: "100%", display: "flex", gap: "10px", alignItems: "center" }} text={cell.cell.row.original?.video_id} onCopy={() => toast.success("Copied")}>
               <span style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <b>{cell.cell.row.original?.video_id}</b>
+                <b style={{ fontSize: "22px", fontWeight: "700", color: "green" }}>{cell.cell.row.original?.video_id}</b>
                 <em><ContentCopyOutlined /></em>
               </span>
             </CopyToClipboard>
@@ -131,13 +168,6 @@ const Videos = () => {
           </>
         )
       }
-    }, {
-      Header: "Video Title",
-      accessor: "video_title",
-    }, {
-      Header: "Video Duration",
-      accessor: "video_duration",
-      Filter: false,
     },
     {
       Header: "View Video",
@@ -150,6 +180,23 @@ const Videos = () => {
             }
           }>View</button>
 
+        )
+      }
+    },
+    {
+      Header: 'Edit',
+      Cell: (cell) => {
+        return (
+          <>
+            <button className="btn btn-primary" onClick={
+              () => {
+                setItem(cell.cell.row.original);
+                setShowEditV(true)
+                getCourses();
+              }
+            }>Edit</button>
+
+          </>
         )
       }
     },
@@ -208,8 +255,10 @@ const Videos = () => {
                   </div>
                   <div id="table-invoices-list">
 
-                    {Videos && Videos.length ?
-                      <VideoListTable videos={Videos} columns={columns} /> : <Loader />
+                    {
+                      itemLoader ? <Loader /> :
+                        Videos && Videos.length ?
+                          <VideoListTable videos={Videos} columns={columns} /> : <h4>No videos</h4>
                     }
                   </div>
                 </CardBody>
@@ -288,7 +337,7 @@ const Videos = () => {
               </Select>
             </div>
             {
-              selectedCourse && Units && Units.length ? <div className="input_Field">
+              selectedCourse && Units && Units.length ? <><div className="input_Field">
                 <Select style={
                   {
                     width: "100%",
@@ -308,13 +357,154 @@ const Videos = () => {
                     })
                   }
                 </Select>
-              </div> : <h3>No Units In Course</h3>}
+
+              </div> </> : <h3>No Units In Course</h3>}
+            <form action="#"
+              style={
+                {
+                  padding: "15px",
+                  display: "flex",
+                  flexDirection: "column"
+                }
+              }
+            >
+
+              <div className="input_Field">
+                <label forHtml="unit_name">Add New Unit</label>
+                <Input style={
+                  {
+                    width: "100%",
+                    padding: "10px",
+                    borderRadius: "4px"
+                  }
+                }
+                  type="text"
+                  name="unit_name"
+                  id="unit_name"
+                  placeholder="unit_name"
+                  onChange={(e) => setUnitName(e.currentTarget.value)}
+                  required />
+              </div>
+              <button className="btn btn-success"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleOk(e)
+                }}
+                style={
+                  { margin: "10px 0 0 auto" }
+                }>
+                {" "}
+                Add Unit{" "} </button>
+            </form>
             <button className="btn btn-success"
               style={
                 { margin: "10px 0 0 auto" }
               }>
               {" "}
               Assign To Unit{" "} </button>
+          </form>
+
+        </ModalBody>
+      </Modal>
+      <Modal isOpen={showEditV}>
+        <ModalHeader
+          tag="h4">
+          <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+            <h4>  Edit Video </h4>
+            <CloseButton onClick={
+              () => {
+                setShowEditV(false)
+                setSelectedCourse(false)
+                setUnits(false);
+              }
+            }
+              style={
+                { marginLeft: "auto" }
+              } />
+          </div>
+        </ModalHeader>
+        <ModalBody>
+
+          <form action="#"
+            style={
+              {
+                padding: "15px",
+                display: "flex",
+                flexDirection: "column"
+              }
+            }
+            onSubmit={
+              (e) => {
+                e.preventDefault();
+                editVideo(e);
+              }
+            }>
+            <div className="input_Field">
+              <Input style={
+                {
+                  width: "100%",
+                  borderRadius: "4px",
+                  margin: "10px 0"
+                }
+              }
+                type="text"
+                name="new_title"
+                id="new_title"
+                placeholder="Enter new_title"
+              />
+            </div>
+            <div className="input_Field">
+              <Input style={
+                {
+                  width: "100%",
+                  borderRadius: "4px",
+                  margin: "10px 0"
+                }
+              }
+                type="text"
+                name="video_duration"
+                id="video_duration"
+                placeholder="Enter video duration"
+              />
+            </div>
+
+            <div className="input_Field">
+              <Input style={
+                {
+                  width: "100%",
+                  borderRadius: "4px",
+                  margin: "10px 0"
+                }
+              }
+                type="text"
+                name="vimeo_data"
+                id="vimeo_data"
+                placeholder="Enter vimeo Link"
+              />
+            </div>
+
+
+            <div className="input_Field">
+              <Input style={
+                {
+                  width: "100%",
+                  borderRadius: "4px",
+                  margin: "10px 0"
+                }
+              }
+                type="text"
+                name="publitio_data"
+                id="publitio_data"
+                placeholder="Enter publitio Link"
+              />
+            </div>
+
+            <button className="btn btn-success"
+              style={
+                { margin: "10px 0 0 auto" }
+              }>
+              {" "}
+              Edit{" "} </button>
           </form>
 
         </ModalBody>

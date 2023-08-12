@@ -26,6 +26,7 @@ import CourseListTable from "./CourseTable/courseListTable";
 import { useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import axios from "axios";
+import { Loader } from "rsuite";
 
 
 const Courses = () => {
@@ -33,11 +34,14 @@ const Courses = () => {
     const navigate = useNavigate();
 
     const [Courses, setCourses] = useState(false)
+    const [loading, setLoading] = useState(false);
 
     const getCourses = async () => {
+        setLoading(true);
         const courses = await axios.get("https://camp-coding.tech/dr_elmatary/admin/courses/select_courses.php");
         console.log(courses);
-        setCourses([...courses])
+        setCourses([...courses]);
+        setLoading(false);
     }
 
     const showHideCourse = async (send_data) => {
@@ -55,19 +59,14 @@ const Courses = () => {
         else {
             toast.error("Something Went Error");
         }
-        // if (courses.status) {
-        //     toast.success(courses.message);
-        //     await getCourses();
-        // } else {
-        //     toast.error(courses.message);
-        // }
+
     }
 
 
     useEffect(() => {
         getCourses();
     }, [])
- 
+
     return (
         <React.Fragment>
             <div className="page-content">
@@ -98,11 +97,13 @@ const Courses = () => {
                                         </div>
                                     </div>
                                     <div id="table-invoices-list">
-                                        <CourseListTable Courses={Courses}
-                                            showHideCourse={showHideCourse}
-                                            getCourses={getCourses}
-                                        />
-                                    </div>
+                                        {loading ? <Loader /> :
+                                            <CourseListTable Courses={Courses}
+                                                showHideCourse={showHideCourse}
+                                                getCourses={getCourses}
+                                            />
+                                        }</div>
+
                                 </CardBody>
                             </Card>
                         </Col>

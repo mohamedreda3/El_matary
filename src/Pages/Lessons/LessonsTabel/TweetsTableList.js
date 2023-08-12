@@ -5,12 +5,12 @@ import TableContainer from '../../../components/Common/TableContainer';
 import { CourseData } from '../../../CommonData/Data/Course';
 import { LessonsData } from '../../../CommonData/Data/Lesson';
 
-const TweetsTableList = ({columns,data }) => {
+const TweetsTableList = ({columns, data }) => {
   const navigate=useNavigate();
    
     return (
         <React.Fragment>
-            {console.log(columns, data)}
+            {console.log(columns, " , " , data)}
             <TableContainer
                 columns={columns}
                 data={data}

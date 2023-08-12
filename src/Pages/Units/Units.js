@@ -28,6 +28,9 @@ import UnitListTable from "./UnitTable/UnitTableList";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { useEffect } from "react";
+import Confirm from "../../components/ConfComp/Confirm";
+import { MenuItem, Select } from "@mui/material";
+import { Loader } from "rsuite";
 
 const Unit = () => {
     document.title = "Courses | Matary - React Admin & Dashboard Template";
@@ -35,7 +38,9 @@ const Unit = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [Units, setUnits] = useState(false)
     const location = useLocation();
+    const [itemLoader, setItemLoader] = useState(false)
     const getUnits = async () => {
+        setItemLoader(true)
         const send_data = {
             course_id: location?.state?.coursedata?.course_id
         };
@@ -43,12 +48,13 @@ const Unit = () => {
             const units = await axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/select_course_units.php", send_data);
             console.log(units);
             setUnits([...units]);
+            setItemLoader(false);
         } catch (err) {
             console.log(err);
+            setItemLoader(false);
         }
+
     }
-
-
     const showModal = () => {
         setIsModalOpen(true);
     };
@@ -71,6 +77,8 @@ const Unit = () => {
         getUnits();
     }, []);
 
+    const [showconf, setshowconf] = useState(false);
+    const [rowdata, setrowdata] = useState({});
     const showHideUnit = async (send_data) => {
         const units = await axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/show_hide_unit.php", JSON.stringify(send_data));
         if (units.status) {
@@ -81,6 +89,7 @@ const Unit = () => {
         }
     }
 
+
     if (!location.state) {
         return navigate("/courses-list");
     }
@@ -90,7 +99,7 @@ const Unit = () => {
             <div className="page-content">
                 <Container fluid={true}>
                     {/* breadcrumbItem={loation?.state?.coursedata?.course_name + " Unit List"} */}
-                    <Breadcrumbs title="Units" breadcrumbItem={location?.state?.coursedata?.course_name + " - Unit List"} />
+                    <Breadcrumbs title={location?.state?.coursedata?.course_name} breadcrumbItem={"Unit List"} />
 
                     <Row>
                         <Col lg={12}>
@@ -112,16 +121,21 @@ const Unit = () => {
                                                         </button>
                                                     </div>
                                                 </Col>
-                                              
                                             </Row>
                                         </div>
                                     </div>
                                     <div id="table-invoices-list">
-                                        <UnitListTable Units={Units}
-                                            showHideUnit={showHideUnit}
-                                            courseData={
-                                                location.state.coursedata
-                                            } />
+
+                                        {itemLoader ? <Loader /> :
+                                            <>
+                                                <UnitListTable Units={Units}
+                                                    setshowconf={setshowconf}
+                                                    setrowdata={setrowdata}
+                                                    courseData={
+                                                        location.state.coursedata
+                                                    } />
+                                            </>
+                                        }
                                     </div>
                                 </CardBody>
                             </Card>
@@ -177,6 +191,25 @@ const Unit = () => {
                     </form>
                 </Modal>
                 <ToastContainer />
+                {
+                    showconf ? (
+                        <Confirm
+                            id={rowdata.number}
+                            cancleoper={() => {
+                                setshowconf(false)
+                            }}
+                            confirmoper={() => {
+                                const send_data = {
+                                    status: rowdata.status == "no" ? "yes" : "no",
+                                    unit_id: rowdata.unit_id
+                                }
+                                showHideUnit(send_data);
+                                setshowconf(false);
+                            }}
+                            status={rowdata.status == 'no' ? 'hide' : 'show'}
+                            comp={'unit'} />
+                    ) : (null)
+                }
 
             </div>
         </React.Fragment>

@@ -173,7 +173,7 @@ const UnitVideo = () => {
         setVideo(video_data?.assign_data)
     }, [video_data])
 
-    if (!location.state) {
+    if (!location?.state) {
         return navigate("/videos");
     }
 
@@ -194,6 +194,14 @@ const UnitVideo = () => {
                 return <p>
                     <span> Course Name :  </span>
                     <em>{cell.cell.row.original.course_name}</em>
+                </p>
+            }
+        }, {
+            Header: "Unit Name",
+            Cell: (cell) => {
+                return <p>
+                    <span> Unit Name :  </span>
+                    <em>{cell?.cell?.row?.original?.unit_name}</em>
                 </p>
             }
         },
@@ -243,9 +251,78 @@ const UnitVideo = () => {
         },
     ]
 
+    const qColumns = [
+        {
+            Header: "Video Title",
+            Cell: (cell) => {
+                return <p>
+                    <span> Video Title :  </span>
+                    <em>{cell.cell.row.original.new_title}</em>
+                </p>
+            }
+        },
+        {
+            Header: "Course Name",
+            Cell: (cell) => {
+                return <p>
+                    <span> Course Name :  </span>
+                    <em>{cell.cell.row.original.course_name}</em>
+                </p>
+            }
+        }, {
+            Header: "Unit Name",
+            Cell: (cell) => {
+                return <p>
+                    <span> Unit Name :  </span>
+                    <em>{cell?.cell?.row?.original?.unit_name}</em>
+                </p>
+            }
+        },
+        {
+            Header: 'Action',
+            Cell: (cell) => {
+                return (
+                    <>
+                        <UncontrolledDropdown className="DropVidUn">
+                            <DropdownToggle className="btn btn-light btn-sm" tag="button" data-bs-toggle="dropdown" direction="start">
+                                <i className="bx bx-dots-horizontal-rounded"></i>
+                            </DropdownToggle>
+                            <DropdownMenu className="dropdown-menu-end">
+                                <DropdownItem
+                                    onClick={() => {
+                                        setshowupdate(true);
+                                        setrowdata(cell.cell.row.original);
+                                        console.log(cell.cell.row.original)
+                                    }}
+                                ><BiEdit /></DropdownItem>
 
+                                <DropdownItem onClick={
+                                    () => {
+                                        handleupdatestatus(cell.cell.row.original)
+                                    }
+                                }>
+                                    {
+                                        cell.cell.row.original.hidden == "yes" ? <VisibilityOff className="hidden" /> : <Visibility className="shown" />
+                                    }
+                                </DropdownItem>
 
-    // const Video = video_data.assign_data;
+                                <DropdownItem onClick={
+                                    () => {
+                                        handleupdatefree(cell.cell.row.original)
+                                    }
+                                }>
+                                    {
+                                        cell.cell.row.original.free == "yes" ? <TbFreeRights className="hidden" /> : <MdOutlinePaid className="shown" />
+                                    }
+
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </UncontrolledDropdown>
+                    </>
+                )
+            }
+        },
+    ]
 
     const AssignVideo = async (e) => {
         const data_send = {
@@ -263,6 +340,11 @@ const UnitVideo = () => {
             toast.error(assign.message);
         }
     }
+    const AddQuestionVideo = () => {
+
+    }
+
+
     return (
         <React.Fragment>
             <div className="page-content">
@@ -306,6 +388,23 @@ const UnitVideo = () => {
                                             <Row className="align-items-start">
                                                 <Col className="col-sm">
                                                     <div>
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-success mb-4"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#addVideoModal"
+                                                            style={{ margin: "0 10px" }}
+                                                            onClick={
+                                                                () => {
+                                                                    console.log(Video);
+                                                                    setItem(Video);
+                                                                    navigate("/video/VideoMCQQuestions", { state: { videoData: location?.state } });
+                                                                }
+                                                            }
+
+                                                        >
+                                                            Video MCQ Question
+                                                        </button>
                                                         <button
                                                             type="button"
                                                             className="btn btn-success mb-4"
