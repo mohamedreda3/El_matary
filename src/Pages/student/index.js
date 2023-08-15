@@ -83,7 +83,7 @@ const Student = () => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Units" breadcrumbItem="Unit List" />
+                    <Breadcrumbs title="Students" breadcrumbItem="Students List" />
                     <Row>
                         <Col lg={12}>
                             <Card>
