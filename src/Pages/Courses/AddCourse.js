@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import classnames from "classnames";
 import {
     Container,
@@ -9,12 +9,12 @@ import {
     Form,
     Modal
 } from "reactstrap";
-import {Link, useNavigate} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Dropzone from "react-dropzone";
 
 // Breadcrumb
 import Breadcrumbs from "../../components/Common/Breadcrumb";
-import {useRef} from "react";
+import { useRef } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { useEffect } from "react";
@@ -22,10 +22,10 @@ import { useEffect } from "react";
 const AddCourse = () => {
     document.title = "Add Course | Matary - React Admin & Dashboard Template";
 
-    const [universities,setuniversities]=useState([]);
-    const [grades,setgrades]=useState([]);
-    const [selecteduni,setselecteduni]=useState("");
-    const [selectedgrade,setselectedgrade]=useState("");
+    const [universities, setuniversities] = useState([]);
+    const [grades, setgrades] = useState([]);
+    const [selecteduni, setselecteduni] = useState("");
+    const [selectedgrade, setselectedgrade] = useState("");
     const [col1, setcol1] = useState(true);
     const [col2, setcol2] = useState(false);
     const [col3, setcol3] = useState(false);
@@ -86,33 +86,33 @@ const AddCourse = () => {
         setmodal(!modal);
     }
 
-    const getuniversits=()=>{
-      axios.get("https://camp-coding.tech/dr_elmatary/admin/universities/select_university.php")
-      .then((res)=>{
-        console.log(res);
-        setuniversities(res.message);
-        setselecteduni(res.message[0].university_id);
-      }).catch((err)=>console.log(err))
+    const getuniversits = () => {
+        axios.get("https://camp-coding.tech/dr_elmatary/admin/universities/select_university.php")
+            .then((res) => {
+                console.log(res);
+                setuniversities(res.message);
+                setselecteduni(res.message[0].university_id);
+            }).catch((err) => console.log(err))
     }
 
-    const getgrades=()=>{
-      axios.get("https://camp-coding.tech/dr_elmatary/admin/universities/select_universities_grade.php")
-      .then((res)=>{
-        let filteresedarr=[...res?.message];
-        filteresedarr.filter((item)=>item.university_id==selecteduni);
-        setgrades(filteresedarr[0]?.grades);
-        setselectedgrade(filteresedarr[0]?.grades[0].grade_id)
-      })
+    const getgrades = () => {
+        axios.get("https://camp-coding.tech/dr_elmatary/admin/universities/select_universities_grade.php")
+            .then((res) => {
+                let filteresedarr = [...res?.message];
+                filteresedarr.filter((item) => item.university_id == selecteduni);
+                setgrades(filteresedarr[0]?.grades);
+                setselectedgrade(filteresedarr[0]?.grades[0].grade_id)
+            })
     }
 
-    useEffect(()=>{
-      getgrades();
-    },[selecteduni])
+    useEffect(() => {
+        getgrades();
+    }, [selecteduni])
 
-    useEffect(()=>{
-      getuniversits();
-      // getgrades()
-    },[])
+    useEffect(() => {
+        getuniversits();
+        // getgrades()
+    }, [])
 
     const image = useRef();
     // https://camp-coding.tech/dr_elmatary/admin/image_uplouder.php
@@ -135,17 +135,22 @@ const AddCourse = () => {
             "course_photo_url": course_photo_url,
             "course_content": courseDate.current.course_content.value,
             "category_id": 1,
-            "university_id":selecteduni,
-            "grade_id":selectedgrade
+            "university_id": selecteduni,
+            "grade_id": selectedgrade
         }
         console.log(data_send);
-        const url = await axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/add_course.php", JSON.stringify(data_send));
-        console.log(url)
-        if(url.status == "success"){
-            toast.success(url.message)
-            navigate("/courses-list")
-        }else{
-            toast.error(url.message);
+        if (Object.values(data_send).every(value => value !== undefined && value !== null && value !== "")) {
+            const url = await axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/add_course.php", JSON.stringify(data_send));
+            console.log(url)
+            if (url.status == "success") {
+                toast.success(url.message)
+                navigate("/courses-list")
+            } else {
+                toast.error(url.message);
+            }
+        } else {
+            toast.error("Enter All data");
+
         }
     }
 
@@ -153,7 +158,7 @@ const AddCourse = () => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Courses" breadcrumbItem="Add Course"/>
+                    <Breadcrumbs title="Courses" breadcrumbItem="Add Course" />
                     <Row>
                         <Col lg={12}>
                             <div className="custom-accordion" id="addcourse-accordion">
@@ -167,8 +172,8 @@ const AddCourse = () => {
                                         type="button"
                                         onClick={t_col1}
                                         style={
-                                            {cursor: "pointer"}
-                                    }>
+                                            { cursor: "pointer" }
+                                        }>
                                         <div className="p-4">
                                             <div className="d-flex align-items-center">
                                                 <div className="flex-shrink-0 me-3">
@@ -200,7 +205,7 @@ const AddCourse = () => {
                                                     <label className="form-label" htmlFor="coursename">
                                                         Course Name
                                                     </label>
-                                                    <input id="coursename" name="course_name" placeholder="Enter Course Name" type="text" className="form-control"/>
+                                                    <input id="coursename" name="course_name" placeholder="Enter Course Name" type="text" className="form-control" />
                                                 </div>
                                                 <Row>
                                                     <Col lg={4}>
@@ -208,7 +213,7 @@ const AddCourse = () => {
                                                             <label className="form-label" htmlFor="price">
                                                                 Price
                                                             </label>
-                                                            <input id="price" name="course_price" placeholder="Enter Price" type="number" className="form-control"/>
+                                                            <input id="price" name="course_price" placeholder="Enter Price" type="number" className="form-control" />
                                                         </div>
                                                     </Col>
 
@@ -235,36 +240,36 @@ const AddCourse = () => {
                                                             <label htmlFor="category_id" className="form-label">
                                                                 Universities
                                                             </label>
-                                                            <select onChange={(e)=>{
-                                                              setselecteduni(e.target.value);
+                                                            <select onChange={(e) => {
+                                                                setselecteduni(e.target.value);
                                                             }} value={selecteduni} className="form-control" data-trigger name="choices-single-category" id="choices-single-category">
-                                                              {
-                                                                universities.map((item,index)=>{
-                                                                  return(
-                                                                    <option value={item.university_id}>{item.university_name}</option>
+                                                                {
+                                                                    universities.map((item, index) => {
+                                                                        return (
+                                                                            <option value={item.university_id}>{item.university_name}</option>
 
-                                                                  )
-                                                                })
-                                                              }
+                                                                        )
+                                                                    })
+                                                                }
                                                             </select>
                                                         </div>
                                                     </div>
                                                     <div className="col-md-6">
-                                                    <div className="mb-3">
+                                                        <div className="mb-3">
                                                             <label htmlFor="category_id" className="form-label">
                                                                 Grade
                                                             </label>
-                                                            <select value={selectedgrade} onChange={(e)=>{
-                                                              setselectedgrade(e.target.value)
+                                                            <select value={selectedgrade} onChange={(e) => {
+                                                                setselectedgrade(e.target.value)
                                                             }} className="form-control" data-trigger name="choices-single-category" id="choices-single-category">
-                                                              {
-                                                                grades.map((item,index)=>{
-                                                                  return(
-                                                                    <option value={item.grade_id}>{item.grade_name}</option>
+                                                                {
+                                                                    grades.map((item, index) => {
+                                                                        return (
+                                                                            <option value={item.grade_id}>{item.grade_name}</option>
 
-                                                                  )
-                                                                })
-                                                              }
+                                                                        )
+                                                                    })
+                                                                }
                                                             </select>
                                                         </div>
                                                     </div>
@@ -290,8 +295,8 @@ const AddCourse = () => {
                                         type="button"
                                         onClick={t_col2}
                                         style={
-                                            {cursor: "pointer"}
-                                    }>
+                                            { cursor: "pointer" }
+                                        }>
                                         <div className="p-4">
                                             <div className="d-flex align-items-center">
                                                 <div className="flex-shrink-0 me-3">
@@ -332,8 +337,8 @@ const AddCourse = () => {
                                                         alignItems: "flex-start",
                                                         gap: "10px"
                                                     }
-                                            }>
-                                                <input type="file" name="image" id="image "/>
+                                                }>
+                                                <input type="file" name="image" id="image " />
                                                 <button className="btn btn-success">Upload</button>
                                             </form>
                                         </div>
@@ -354,7 +359,7 @@ const AddCourse = () => {
                                     () => {
                                         addCourse();
                                     }
-                            }>
+                                }>
                                 {" "}
                                 <i className=" bx bx-file me-1"></i>
                                 Save{" "} </Link>
@@ -379,7 +384,7 @@ const AddCourse = () => {
                     </div>
                 </div>
             </Modal>
-            <ToastContainer/>
+            <ToastContainer />
         </React.Fragment>
     );
 };

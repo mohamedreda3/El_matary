@@ -68,6 +68,8 @@
   background-position: top;
   font-size: 20px;
   font-weight: 700;
+  line-break: anywhere;
+  padding: 10px;
 }
 
 .card-front p {
