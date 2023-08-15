@@ -73,9 +73,10 @@ const Student = () => {
 
 
     const getStudents = async (e) => {
+        data_send.grade_id = data_send.university_id != "all" ?  data_send.grade_id ? data_send.grade_id : "all" : "all"
         const student = await axios.post("https://camp-coding.tech/dr_elmatary/admin/students/select_students.php", data_send);
         setStudent(student?.message)
-        console.log(student);
+        console.log(data_send);
     }
 
     return (
