@@ -60,34 +60,7 @@ const Copouns = () => {
                                                         </button>
                                                     </div>
                                                 </Col>
-                                                <Col className="col-sm-auto">
-                                                    <div className="d-flex gap-1">
-                                                        <div className="input-group">
-                                                            <Flatpickr className="form-control" placeholder="dd M, yyyy"
-                                                                options={
-                                                                    {
-                                                                        mode: "range",
-                                                                        dateFormat: "Y-m-d"
-                                                                    }
-                                                                }
-                                                                id="datepicker-range"/>
-                                                            <span className="input-group-text">
-                                                                <i className="bx bx-calendar-event"></i>
-                                                            </span>
-                                                        </div>
-
-                                                        <UncontrolledDropdown className="dropdown" direction="start">
-                                                            <DropdownToggle tag="a" className="btn btn-link text-body shadow-none">
-                                                                <i className="bx bx-dots-horizontal-rounded"></i>
-                                                            </DropdownToggle>
-                                                            <DropdownMenu className="dropdown-menu-end">
-                                                                <DropdownItem>Action</DropdownItem>
-                                                                <DropdownItem>Another action</DropdownItem>
-                                                                <DropdownItem>Something else here</DropdownItem>
-                                                            </DropdownMenu>
-                                                        </UncontrolledDropdown>
-                                                    </div>
-                                                </Col>
+                                            
                                             </Row>
                                         </div>
                                     </div>

@@ -131,8 +131,7 @@ const SidebarData = [
     label: "Exam",
     icon: "bx bx-store icon nav-icon",
     subItem: [
-      { sublabel: "Exams", link: "/exam" },
-      { sublabel: "Add Question", link: "/addques" },
+      { sublabel: "Exams", link: "/publicexam" },
       // { sublabel: "Product Detail", link: "/ecommerce-product-detail/1" },
       // { sublabel: "Orders", link: "/ecommerce-orders" },
       // { sublabel: "Customers", link: "/ecommerce-customers" },
@@ -149,6 +148,22 @@ const SidebarData = [
     icon: "bx bx-store icon nav-icon",
     subItem: [
       { sublabel: "Reports", link: "/reports-list" },
+      // { sublabel: "Product Detail", link: "/ecommerce-product-detail/1" },
+      // { sublabel: "Orders", link: "/ecommerce-orders" },
+      // { sublabel: "Customers", link: "/ecommerce-customers" },
+      // { sublabel: "Cart", link: "/ecommerce-cart" },
+      // { sublabel: "Checkout", link: "/ecommerce-checkout" },
+      // { sublabel: "Shops", link: "/ecommerce-shops" },
+      // { sublabel: "Add Product", link: "/ecommerce-add-product" },
+    ],
+  },
+
+  {
+    label: "Information",
+    icon: "bx bx-store icon nav-icon",
+    subItem: [
+      { sublabel: "Policy", link: "/policy" },
+      { sublabel: "CallCenter", link: "/callcenter" },
       // { sublabel: "Product Detail", link: "/ecommerce-product-detail/1" },
       // { sublabel: "Orders", link: "/ecommerce-orders" },
       // { sublabel: "Customers", link: "/ecommerce-customers" },

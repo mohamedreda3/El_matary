@@ -56,8 +56,11 @@ const StudentCourses = () => {
         {
           subs && subs.length ? subs.map((item, index) => {
             return <div
+            onClick={()=>{
+              navigate("/studentcouunits",{state:{data:location?.state?.unitData}})
+            }}
               style={{
-                textAlign: "start"
+                textAlign: "start",cursor:'pointer'
               }}
               key={index}
             >

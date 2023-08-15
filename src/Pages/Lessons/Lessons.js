@@ -49,6 +49,7 @@ import Ebooks from "../Interactive/ebooks";
 import { TbFreeRights } from "react-icons/tb";
 import { MdOutlinePaid } from "react-icons/md";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import UniqQuestion from "../UnitQuestion/UniqQuestion";
 
 // import CourseListTable from "../CourseTable/courseListTable";
 
@@ -89,6 +90,7 @@ const Lessons = () => {
     { type: "writtenquestion", title: "Written Questions" },
     { type: "mcqquestion", title: "MCQ Questions" },
     { type: "ebooks", title: "Ebooks" },
+    // {type:"mcqquestion",title:"MCQ Question"}
     // ebooks
   ];
   const [Videos, setVideos] = useState([]);
@@ -264,7 +266,8 @@ const Lessons = () => {
 
   const unitData = location?.state?.unitData?.unit_id;
   const courseData = location?.state?.coursedata?.course_id;
-
+  const unitdata=location?.state;
+  console.log(unitdata,"sds")
 
   const getUnitsVideos = () => {
     const arr = [];
@@ -279,7 +282,7 @@ const Lessons = () => {
       setUnitVideos([...arr])
     }
   };
-  
+
   useEffect(() => { getUnitsVideos() }, [Videos])
 
   useEffect(() => {
@@ -297,7 +300,7 @@ const Lessons = () => {
     return navigate(-1);
   }
 
- 
+
 
 
   const AssignVideo = async (e) => {
@@ -339,7 +342,7 @@ const Lessons = () => {
           <div id="table-invoices-list">
             {type == "Lessons" ? (
               <Fragment>
-                <Breadcrumbs title={location.state.coursedata.course_name} breadcrumbItem={location?.state?.unitData?.unit_name + "  >  Lesson List"} />
+                <Breadcrumbs title={location?.state?.coursedata?.course_name} breadcrumbItem={location?.state?.unitData?.unit_name + "  >  Lesson List"} />
 
                 <Row>
                   <Col lg={12}>
@@ -538,7 +541,9 @@ const Lessons = () => {
               <WrittenQuestions CourseId={courseData} unitId={unitData} allunitdata={location?.state?.unitData} cd={location.state.coursedata} />
             ) : type == "ebooks" ? (
               <Ebooks CourseId={courseData} unitId={unitData} allunitdata={location?.state?.unitData} cd={location.state.coursedata} />) : type == "mcqquestion" ? (
-                <MCQQuestions CourseId={courseData} unitId={unitData} allunitdata={location?.state?.unitData} cd={location.state.coursedata} />) : null}
+                <MCQQuestions CourseId={courseData} unitId={unitdata.unitData} allunitdata={location?.state?.unitData} cd={location.state.coursedata} />) : (
+                  <UniqQuestion unitdata={courseData}/>
+                )}
           </div>
         </Container>
         <Modal isOpen={modal} toggle={toggle}>

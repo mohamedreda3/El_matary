@@ -120,13 +120,12 @@ const Flash_Cards = ({ CourseId, unitId, cd }) => {
       setSide3(false);
       setSide4(false);
       setIsEditBack(false);
-      setEdit(false)
+      setEdit(false);
+      getReports();
     } else {
       toast.error(edit.message);
     }
   }
-
-
 
   const [Courses, setCourses] = useState(false);
   const [showCopy, setsetShowCopy] = useState(false);
@@ -140,7 +139,7 @@ const Flash_Cards = ({ CourseId, unitId, cd }) => {
     const reports = await axios.post("https://camp-coding.tech/dr_elmatary/admin/reports/select_reports.php", {
       "report_for": "flash_cards"
     });
-    setItemReport(reports?.message?.filter(item => item.course_id == CourseId));
+    setItemReport(reports?.message?.filter(item => item?.course_id == CourseId)?.filter(item => item?.status == "pending"));
     setItemLoader(false);
   }
   useEffect(() => {
@@ -206,7 +205,6 @@ const Flash_Cards = ({ CourseId, unitId, cd }) => {
   useEffect(() => {
     setIsBack(false)
   }, [side1]);
-
   useEffect(() => {
     setIsEditBack(true)
   }, [side4]);
@@ -216,13 +214,15 @@ const Flash_Cards = ({ CourseId, unitId, cd }) => {
   const [view, setView] = useState(false);
   const [showSolve, setShowSolve] = useState(false);
   const handleSolveReport = () => {
-    axios.post("", { report_id: item.report_id }).then((res) => {
+    axios.post("https://camp-coding.tech/dr_elmatary/admin/reports/update_report_status.php", { report_id: item.report_id }).then((res) => {
       if (res.status == "success") {
         toast.success("Solved");
+        getReports();
+        setShowSolve(false);
       } else {
         toast.error(res.message);
       }
-    }).catch((err)=>{
+    }).catch((err) => {
       toast.error(err.message)
     })
   }
@@ -243,9 +243,9 @@ const Flash_Cards = ({ CourseId, unitId, cd }) => {
         accessor: 'report_type',
       },
       {
-        Header: 'view',
+        Header: 'View Student',
         Cell: (cell) => {
-          return <button className="btn btn-primary" onClick={() => { setView(true); setItem(cell.cell.row.original) }}>
+          return <button className="btn btn-primary" onClick={() => { setView(true); setItem(cell.cell.row.original?.student_data) }}>
             View
           </button>
         }
@@ -291,7 +291,8 @@ const Flash_Cards = ({ CourseId, unitId, cd }) => {
                   <DropdownItem onClick={() => {
                     setShowSolve(true);
                     setItem(cell.cell.row.original)
-                  }}>Set As Solved</DropdownItem>
+                  }}>Set As Solved</DropdownItem> 
+                  <DropdownItem onClick={() => { setEdit(true); setItem(cell.cell.row.original?.report_item_data); }}>Edit</DropdownItem>
                 </DropdownMenu>
               </UncontrolledDropdown>
             </>

@@ -12,7 +12,6 @@ import { MenuItem, Select } from '@mui/material';
 const UnitListTable = ({ Units, courseData, setshowconf, setrowdata }) => {
     const navigate = useNavigate();
 
-    // https://camp-coding.tech/dr_elmatary/admin/unit/make_copy_from_unit_and_alldata.php
 
     const columns = [
         {
@@ -27,15 +26,16 @@ const UnitListTable = ({ Units, courseData, setshowconf, setrowdata }) => {
         }, {
             Header: 'Unit Title',
             accessor: 'unit_name',
-        }, {
+        },
+        {
             Header: 'Hidden',
             Cell: (cell) => {
                 return <button className="btn" onClick={
                     () => {
                         const item = cell.cell.row.original;
                         const send_data = {
-                            status: item.hidden,
-                            unit_id: item.unit_id
+                          status: item.hidden,
+                          unit_id: item.unit_id
                         }
                         setshowconf(true);
                         setrowdata(send_data)
@@ -47,6 +47,27 @@ const UnitListTable = ({ Units, courseData, setshowconf, setrowdata }) => {
                 </button>
             }
         },
+
+        // {
+        //     Header: 'Questions',
+        //     Cell: (cell) => {
+        //         return <button className="btn btn-success" onClick={
+        //             () => {
+        //                 const item = cell.cell.row.original;
+        //                 const send_data = {
+        //                   status: item.hidden,
+        //                   unit_id: item.unit_id
+        //                 }
+        //                 setshowconf(true);
+        //                 setrowdata(send_data)
+        //                 navigate("/unitquestion",{state:{unitdata:item}})
+        //             }
+        //         }>
+        //             Questions
+        //         </button>
+        //     }
+        // },
+
         {
             Header: "View Unit",
             Cell: (cell) => {
@@ -107,7 +128,7 @@ const UnitListTable = ({ Units, courseData, setshowconf, setrowdata }) => {
     }
     useEffect(() => {
         getCourses()
-    }, []); 
+    }, []);
     // const [Units, setUnits] = useState(false);
     // const getUnits = async () => {
     //   const send_data = {

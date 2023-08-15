@@ -126,7 +126,7 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
       }
     }
     const en = (tweetstxt.split("</p>").join("").replace(/<p>/g, '//camp//').replace(/<\/p><p>/g, '').replace(/<br>/g, '')
-      .replace(/<p>/g, '').replace(/<\/p>/g, '//camp//').replace(/<strong>/g, '<B>').replace(/<\/strong>/g, '</B>'));
+    .replace(/<p>/g, '').replace(/<\/p>/g, '//camp//').replace(/<strong>/g, '<B>').replace(/<\/strong>/g, '</B>'));
     const data_send = {
       "tweet_value": en,
       "tweet_title": e.currentTarget.tweet_title.value,
@@ -187,7 +187,10 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
     if (edit.status == "success") {
       toast.success(edit.message);
       await getTweets();
-      setEdit(false)
+      setEdit(false);
+      getReports();
+      setShowSolve(true);
+
     } else {
       toast.error(edit.message);
     }
@@ -205,7 +208,7 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
       "report_for": "tweets"
     });
     console.log(CourseId)
-    setItemReport(reports?.message?.filter(item => item.course_id == CourseId));
+    setItemReport(reports?.message?.filter(item => item?.course_id == CourseId)?.filter(item => item?.status == "pending"));
     setItemLoader(false);
   }
   useEffect(() => {
@@ -217,7 +220,7 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
   }
   useEffect(() => {
     getCourses()
-  }, []); 
+  }, []);
   const getUnits = async () => {
     const send_data = {
       course_id: selectedCourse
@@ -229,99 +232,132 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
       console.log(err);
     }
   }
-  const getTweet = (selectedCourseId) => {
 
-  }
   useEffect(() => {
     getUnits();
-    getTweet();
   }, [selectedCourse])
   const [view, setView] = useState(false)
   const [showSolve, setShowSolve] = useState(false);
+
   const handleSolveReport = () => {
-    axios.post("", { report_id: item.report_id }).then((res) => {
+    axios.post("https://camp-coding.tech/dr_elmatary/admin/reports/update_report_status.php", { report_id: item.report_id }).then((res) => {
       if (res.status == "success") {
         toast.success("Solved");
+        getReports();
+        setShowSolve(false);
+
       } else {
         toast.error(res.message);
       }
-    }).catch((err)=>{
+    }).catch((err) => {
       toast.error(err.message)
     })
   }
-  const columns =
-    [
-      {
-        Header: "No",
-        Cell: (cell) => {
-          return (
-            <b>
-              {cell.cell.row.index + 1}
-            </b>
-          )
-        }
-      },
-      {
-        Header: 'Report Type',
-        accessor: 'report_type',
-      },
-      {
-        Header: 'view',
-        Cell: (cell) => {
-          return <button className="btn btn-primary" onClick={() => { setView(true); setItem(cell.cell.row.original) }}>
-            View
-          </button>
-        }
-      },
-      {
-        Header: 'Status',
-        Cell: (cell) => {
-          switch (cell.cell.row.original.hidden) {
-            case 'pending':
-              return <div style={{ cursor: 'pointer' }}>
-                Pending
-              </div>;
-            case 'solved':
-              return <div style={{ cursor: 'pointer' }}>
-                Solved
-              </div>;
+  const columns = [
+    {
+      Header: "No",
+      Cell: (cell) => {
+        return (
+          <b>
+            {cell.cell.row.index + 1}
+          </b>
+        )
+      }
+    },
+    {
+      Header: 'Report Type',
+      accessor: 'report_type',
+    },
+    {
+      Header: 'View Student', 
+      Cell: (cell) => {
+        return <button className="btn btn-primary" onClick={() => { setView(true); setItem(cell.cell.row.original) }}>
+          View
+        </button>
+      }
+    },
+    {
+      Header: 'Status',
+      Cell: (cell) => {
+        switch (cell.cell.row.original.hidden) {
+          case 'pending':
+            return <div style={{ cursor: 'pointer' }}>
+              Pending
+            </div>;
+          case 'solved':
+            return <div style={{ cursor: 'pointer' }}>
+              Solved
+            </div>;
 
-            default:
-              return <span className="badge badge-pill badge-soft-success font-size-12">
-                {
-                  cell.cell.row.original.status
-                }</span>
-          }
+          default:
+            return <span className="badge badge-pill badge-soft-success font-size-12">
+              {
+                cell.cell.row.original.status
+              }</span>
         }
-      },
-      {
-        Header: 'Concat With Student',
-        Cell: (cell) => {
-          return <a href={"https://wa.me/+2" + cell?.cell?.row?.original?.student_data?.phone} target="_blanck" style={{ color: "green", display: "block", width: "100%", textAlign: "center", fontSize: "22px", height: "100%" }}><WhatsApp /></a>
-        }
+      }
+    },
+    {
+      Header: 'Concat With Student',
+      Cell: (cell) => {
+        return <a href={"https://wa.me/+2" + cell?.cell?.row?.original?.student_data?.phone} target="_blanck" style={{ color: "green", display: "block", width: "100%", textAlign: "center", fontSize: "22px", height: "100%" }}><WhatsApp /></a>
+      }
 
-      },
-      {
-        Header: 'Action',
-        Cell: (cell) => {
-          return (
-            <>
-              <UncontrolledDropdown>
-                <DropdownToggle className="btn btn-light btn-sm" tag="button" data-bs-toggle="dropdown" direction="start">
-                  <i className="bx bx-dots-horizontal-rounded"></i>
-                </DropdownToggle>
-                <DropdownMenu className="dropdown-menu-end">
-                  <DropdownItem onClick={() => {
-                    setShowSolve(true);
-                    setItem(cell.cell.row.original)
-                  }}>Set As Solved</DropdownItem>
-                </DropdownMenu>
-              </UncontrolledDropdown>
-            </>
-          )
-        }
-      },
-    ];
+    },
+    {
+      Header: 'Action',
+      Cell: (cell) => {
+        return (
+          <>
+            <UncontrolledDropdown>
+              <DropdownToggle className="btn btn-light btn-sm" tag="button" data-bs-toggle="dropdown" direction="start">
+                <i className="bx bx-dots-horizontal-rounded"></i>
+              </DropdownToggle>
+              <DropdownMenu className="dropdown-menu-end">
+                <DropdownItem onClick={() => {
+                  setShowSolve(true);
+                  setItem(cell.cell.row.original)
+                }}>Set As Solved</DropdownItem>
+                <DropdownItem
+                  onClick={() => {
+                    setEdit(true);
+                    setItem(cell.cell.row.original?.report_item_data);
+                    // console.log(cell.cell.row.original)
+                    // let tweet_value=cell.cell.row.original.tweet_value;
+                    let push1 = [];
+                    let pusharr = [];
+                    let tweetslist = cell.cell.row.original?.report_item_data?.tweet_value.split('//camp//');
+                    for (let k = 0; k < tweetslist.length; k++) {
+                      if (tweetslist[k] !== "") {
+                        push1.push(tweetslist[k])
+                      }
+                    }
+                    for (let i = 0; i < push1.length; i++) {
+                      let obj = {
+                        id: i,
+                        tweet_value: push1[i]
+                      }
+                      console.log(obj)
+                      pusharr = [...pusharr, obj]
+                      if (obj.id !== "") {
+                        setedittweets([...edittweets, obj]);
+                      }
+                    }
+                    setedittweets(pusharr);
+                    // console.log(pusharr);
+                    // settwetslistedit()
+                    // settwetslistedit([...pushedlist])
+                  }}
+                >
+                  Edit
+                </DropdownItem>
+              </DropdownMenu>
+            </UncontrolledDropdown>
+          </>
+        )
+      }
+    },
+  ];
   const handlecopyitem = (data) => {
     const data_send = {
       tweet_id: selectedFlashCard,
@@ -367,17 +403,11 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
           <Col lg={12}>
             <Card>
               <CardBody>
-                <div className="position-relative">
-                  <div className="modal-button mt-2">
-                    <Row className="align-items-start">
-
-                    </Row>
-                  </div>
-                </div>
+                
                 <div id="table-invoices-list">
 
                   {itemLoader ? <Loader /> : <>
-                    {itemReport && itemReport.length ? <TweetsTableList showHideTweet={showHideTweets} data={itemReport} columns={columns} /> : <h4>No Reports</h4>}
+                    {itemReport && itemReport.length ? <TweetsTableList showHideTweet={showHideTweets} data={itemReport} columns={columns} /> : <h4>No Report</h4>}
                   </>}
 
                 </div>
@@ -386,10 +416,264 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
           </Col>
         </Row>
       </Container>
+      <Modal isOpen={modal} toggle={toggle}>
+        <ModalHeader toggle={toggle} tag="h4">
+          Add New Tweet
+        </ModalHeader>
+        <ModalBody>
+          <Form
+            onSubmit={(e) => {
+              e.preventDefault();
+              addTweet(e)
+              return false;
+            }}
+          >
+            <Row>
+              <Col md={12}>
+                <div className="mb-3">
+                  <Label className="form-label">Tweet Title</Label>
+                  <Input name="tweet_title" type="text" />
+                </div>
+                <div className="mb-3">
+                  <div className="add_newanstwee">
+                    <Label className="form-label">Answer</Label>
+                    <AiOutlinePlus
+                      onClick={() => {
+                        settweetanswerlist([...tweetanswerlist, { id: tweetanswerlist.length, tweet_value: "" }])
+                      }}
+                    />
+                  </div>
+                  {
+                    tweetanswerlist.map((item, index) => {
+                      return (
+                        <div className="tweet_ans">
+                          <ReactQuill
+                            theme='snow'
+                            value={item.tweet_value}
+                            onChange={(e) => {
+                              // console.log(item.id);
+                              handlesavetxt(e, index, 'tweet_value');
+                            }}
+                            style={{ minHeight: '300px' }}
+                          />
+                          {index !== 0 ?
+                            (<Button onClick={() => {
+                              // console.log(item.id)
+                              settweetanswerlist(tweetanswerlist.filter((it) => item.id !== it.id))
+                            }} color="red" appearance="primary">
+                              Delete
+                            </Button>)
+                            :
+                            (null)
+                          }
+                        </div>
+                      )
+                    })
+                  }
+                </div>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <div className="text-end">
+                  <button type="submit" className="btn btn-success save-user">
+                    Save
+                  </button>
+                </div>
+              </Col>
+            </Row>
+          </Form>
+        </ModalBody>
+      </Modal>
+      <Modal isOpen={edit} toggle={() => setEdit(false)}>
+        <ModalHeader toggle={() => setEdit(false)} tag="h4">
+          Edit Written Tweet
+        </ModalHeader>
+        <ModalBody>
+          <Form
+            onSubmit={(e) => {
+              e.preventDefault();
+              editTweet(e)
+              return false;
+            }}
+          >
+            <Row>
+              <Col md={12}>
+                <div className="mb-3">
+                  <Label className="form-label">Tweet Title</Label>
+                  <Input type="text" name="tweet_title" defaultValue={item?.tweet_title} />
+                </div>
+                <div className="mb-3">
+                  <div className="add_newanstwee">
+                    <Label className="form-label">Answer</Label>
+                    <AiOutlinePlus
+                      onClick={() => {
+                        setedittweets([...edittweets, { id: edittweets.length, tweet_value: "" }])
+                      }}
+                    />
+                  </div>
+                  {/* <textarea
+                    style={{ height: "100px" }}
+                    id="hours"
+                    name="tweet_answar"
+                    placeholder="Enter Explanation"
+                    type="number"
+                    className="form-control"
+                    defaultValue={item?.tweet_value}
+                  ></textarea> */}
+                  {/* {console.log(tweetsedis,"dfdf")} */}
+                  {
+                    edittweets.map((item, index) => {
+                      return (
+                        <div className="tweet_ans">
+                          {console.log(item, "Ererer")}
+                          <ReactQuill
+                            theme='snow'
+                            value={item.tweet_value}
+                            onChange={(e) => {
+                              // console.log(item.id);
+                              handlesavetxtedit(e, index, 'tweet_value');
+                            }}
+                            style={{ minHeight: '300px' }}
+                          />
+                          {index !== 0 ?
+                            (<Button onClick={() => {
+                              // console.log(item.id)
+                              setedittweets(edittweets.filter((it) => item.id !== it.id))
+                            }} color="red" appearance="primary">
+                              Delete
+                            </Button>)
+                            :
+                            (null)
+                          }
+                        </div>
+                      )
+                    })
+                  }
+                </div>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <div className="text-end">
+                  <button type="submit" className="btn btn-success save-user">
+                    Save
+                  </button>
+                </div>
+              </Col>
+            </Row>
+          </Form>
+        </ModalBody>
+      </Modal>
+      {
+        showconf ? (
+          <Confirm
+            id={rowdata.number}
+            cancleoper={() => {
+              setshowconf(false)
+            }}
+            confirmoper={() => {
+              const send_data = {
+                hidden_value: rowdata.hidden == "no" ? "yes" : "no",
+                tweet_id: rowdata.tweet_id
+              }
+              showHideTweets(send_data)
+              setshowconf(false);
+            }}
+            status={rowdata.hidden == 'no' ? 'hide' : 'show'}
+            comp={'unit'} />
+        ) : (null)
+      }
+      <Modal isOpen={showCopy}>
+        <ModalHeader
+          tag="h4">
+          <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center" }}>
+            <h4>  Copy Tweet To Unit </h4>
+            <CloseButton onClick={
+              () => {
+                setsetShowCopy(false);
+                setSelectedCourse(false)
+                setUnits(false);
+              }
+            }
+              style={
+                { marginLeft: "auto" }
+              } />
+          </div>
+        </ModalHeader>
+        <ModalBody>
 
+          <form action="#"
+            style={
+              {
+                padding: "15px",
+                display: "flex",
+                flexDirection: "column"
+              }
+            }
+            onSubmit={
+              (e) => {
+                e.preventDefault();
+                handlecopyitem(e);
+              }
+            }>
+
+            <div className="input_Field">
+              <Select style={
+                {
+                  width: "100%",
+                  borderRadius: "4px",
+                  margin: "10px 0"
+                }
+              }
+                type="text"
+                name="course_id"
+                id="course_id"
+                placeholder="Choose Course"
+                onChange={(e) => setSelectedCourse(e.target.value)}
+                required>
+                {
+                  Courses && Courses.length ? Courses.map((item, index) => {
+                    return <MenuItem value={item.course_id} key={index}>{item.course_name}</MenuItem>
+                  }) : <h3>No Courses</h3>
+                }
+              </Select>
+            </div>
+            {
+              selectedCourse && Units && Units.length ? <div className="input_Field">
+                <Select style={
+                  {
+                    width: "100%",
+                    borderRadius: "4px",
+                    margin: "10px 0"
+                  }
+                }
+                  type="text"
+                  name="unit_id"
+                  id="unit_id"
+                  placeholder="Choose Unit"
+                  onChange={(e) => setSelectedUnit(e.target.value)}
+                  required>
+                  {
+                    Units.map((item, index) => {
+                      return <MenuItem value={item.unit_id} key={index}>{item?.unit_name}</MenuItem>
+                    })
+                  }
+                </Select>
+              </div> : <h3>No Units In Course</h3>}
+            <button className="btn btn-success"
+              style={
+                { margin: "10px 0 0 auto" }
+              }>
+              {" "}
+              Assign To Unit{" "} </button>
+          </form>
+
+        </ModalBody>
+      </Modal>
       <Modal isOpen={view} toggle={() => setView(false)}>
         <ModalHeader toggle={() => setView(false)} tag="h4">
-          Tweet Report
+          Tweet
         </ModalHeader>
         <ModalBody>
           <Form
@@ -402,10 +686,6 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
               <Col md={12}>
                 <div>
                   <div>
-                  <h3 style={{ width: "fit-content", padding: "10px 18px 10px 0", borderBottom: ".4px solid #80808054" }}>Report Type : {item?.report_type}</h3>
-                  </div>
-                  <div>
-                    <h5 style={{ width: "fit-content", padding: "10px 18px 10px 0", borderBottom: ".4px solid #80808054" }}>Tweet Details </h5>
                     <h3> {item?.tweet_title} </h3>
                     <p>
                       {item?.tweet_value?.split("//camp//")?.map((item, index) => {

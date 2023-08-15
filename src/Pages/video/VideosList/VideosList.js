@@ -173,7 +173,6 @@ const Videos = () => {
       Header: "View Video",
       Cell: (cell) => {
         return (
-
           <button class="btn btn-success" onClick={
             () => {
               navigate("/videos/unit-videos", { state: cell.cell.row.original });

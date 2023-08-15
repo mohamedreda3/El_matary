@@ -158,6 +158,8 @@ const WrittenQuestions = ({ CourseId, allunitdata, unitId, cd }) => {
       toast.success(edit.message);
       await getQuestions();
       setEdit(false);
+      getReports();
+
     } else {
       toast.error(edit.message);
     }
@@ -175,7 +177,7 @@ const WrittenQuestions = ({ CourseId, allunitdata, unitId, cd }) => {
     const reports = await axios.post("https://camp-coding.tech/dr_elmatary/admin/reports/select_reports.php", {
       "report_for": "wqs"
     });
-    setItemReport(reports?.message?.filter(item => item.course_id == CourseId));
+    setItemReport(reports?.message?.filter(item => item?.course_id == CourseId)?.filter(item => item?.status == "pending"));
     setItemLoader(false);
   }
   useEffect(() => {
@@ -207,13 +209,15 @@ const WrittenQuestions = ({ CourseId, allunitdata, unitId, cd }) => {
   useEffect(() => { getQuestions() }, [])
   const [showSolve, setShowSolve] = useState(false);
   const handleSolveReport = () => {
-    axios.post("", { report_id: item.report_id }).then((res) => {
+    axios.post("https://camp-coding.tech/dr_elmatary/admin/reports/update_report_status.php", { report_id: item.report_id }).then((res) => {
       if (res.status == "success") {
         toast.success("Solved");
+        getReports();
+        setShowSolve(false);
       } else {
         toast.error(res.message);
       }
-    }).catch((err)=>{
+    }).catch((err) => {
       toast.error(err.message)
     })
   }
@@ -278,11 +282,38 @@ const WrittenQuestions = ({ CourseId, allunitdata, unitId, cd }) => {
                 <DropdownToggle className="btn btn-light btn-sm" tag="button" data-bs-toggle="dropdown" direction="start">
                   <i className="bx bx-dots-horizontal-rounded"></i>
                 </DropdownToggle>
+
                 <DropdownMenu className="dropdown-menu-end">
                   <DropdownItem onClick={() => {
                     setShowSolve(true);
                     setItem(cell.cell.row.original)
                   }}>Set As Solved</DropdownItem>
+                  <DropdownItem onClick={() => {
+                    setEdit(true);
+                    setItem(cell.cell.row.original?.report_item_data);
+                    let push1 = [];
+                    let pusharr = [];
+
+                    let tweetslist = cell.cell.row.original?.report_item_data.wq_value.split('//camp//');
+                    for (let k = 0; k < tweetslist.length; k++) {
+                      if (tweetslist[k] !== "") {
+                        push1.push(tweetslist[k])
+                      }
+                    }
+
+                    for (let i = 0; i < push1.length; i++) {
+                      let obj = {
+                        id: i,
+                        wq_value: push1[i]
+                      }
+                      pusharr = [...pusharr, obj]
+                      if (obj.id !== "") {
+                        seteditedwritten([...editedwritten, obj]);
+                      }
+                    }
+                    seteditedwritten(pusharr);
+
+                  }}>Edit</DropdownItem>
                 </DropdownMenu>
               </UncontrolledDropdown>
             </>
@@ -290,6 +321,29 @@ const WrittenQuestions = ({ CourseId, allunitdata, unitId, cd }) => {
         }
       },
     ];
+
+  const handlesavetxt = (e, i, txt) => {
+    console.log(i)
+    console.log(e)
+    // console.log(i)
+    // console.log(txt)
+    // console.log(e);
+    const list = [...questionslist];
+    list[i][txt] = e;
+    setquestionslist(list);
+    // console.log(list)
+  }
+  const handlesavetxtedit = (e, i, txt) => {
+    console.log(i)
+    console.log(e)
+    // console.log(i)
+    // console.log(txt)
+    // console.log(e);
+    const list = [...editedwritten];
+    list[i][txt] = e;
+    setquestionslist(list);
+    // console.log(list)
+  }
 
   return (
     <React.Fragment>
@@ -302,7 +356,7 @@ const WrittenQuestions = ({ CourseId, allunitdata, unitId, cd }) => {
                   <div className="modal-button mt-2">
                     <Row className="align-items-start">
                       <Col className="col-sm">
-                    
+
                       </Col>
 
                     </Row>
@@ -402,6 +456,77 @@ const WrittenQuestions = ({ CourseId, allunitdata, unitId, cd }) => {
               Set As Solved{" "} </button>
           </form>
 
+        </ModalBody>
+      </Modal>
+
+      <Modal isOpen={edit} toggle={() => setEdit(false)}>
+        <ModalHeader toggle={() => setEdit(false)} tag="h4">
+          Edit Written Question
+        </ModalHeader>
+        <ModalBody>
+          <Form
+            onSubmit={(e) => {
+              e.preventDefault();
+              editQuestion(e)
+              return false;
+            }}
+          >
+            <Row>
+              <Col md={12}>
+                <div className="mb-3">
+                  <Label className="form-label">Question Title</Label>
+                  <Input type="text" name="question_title" defaultValue={item?.wq_title} />
+                </div>
+                <div className="mb-3">
+                  <div className="add_newanstwee">
+                    <Label className="form-label">Answer</Label>
+                    <AiOutlinePlus
+                      onClick={() => {
+                        seteditedwritten([...editedwritten, { id: editedwritten.length, wq_value: "" }])
+                      }}
+                    />
+                  </div>
+                  {
+                    editedwritten.map((item, index) => {
+                      return (
+                        <div className="tweet_ans">
+                          {console.log(item, "Ererer")}
+                          <ReactQuill
+                            theme='snow'
+                            value={item.wq_value}
+                            onChange={(e) => {
+                              // console.log(item.id);
+                              handlesavetxtedit(e, index, 'wq_value');
+                            }}
+                            style={{ minHeight: '300px' }}
+                          />
+                          {index !== 0 ?
+                            (<Button onClick={() => {
+                              // console.log(item.id)
+                              seteditedwritten(editedwritten.filter((it) => item.id !== it.id))
+                            }} color="red" appearance="primary">
+                              Delete
+                            </Button>)
+                            :
+                            (null)
+                          }
+                        </div>
+                      )
+                    })
+                  }
+                </div>
+              </Col>
+            </Row>
+            <Row>
+              <Col>
+                <div className="text-end">
+                  <button type="submit" className="btn btn-success save-user">
+                    Save
+                  </button>
+                </div>
+              </Col>
+            </Row>
+          </Form>
         </ModalBody>
       </Modal>
     </React.Fragment>

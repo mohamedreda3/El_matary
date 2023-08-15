@@ -27,13 +27,18 @@ import Flatpickr from "react-flatpickr";
 import LessonsTableList from "../Lessons/LessonsTabel/LessonsTableList";
 import { useCallback } from "react";
 import { AiOutlinePlusCircle } from "react-icons/ai";
+import { Icon } from "@iconify/react";
+import { Loader } from "rsuite";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import MCQTableList from "../Lessons/LessonsTabel/mcqlisttable";
 const VideoMCQQuestions = ({ CourseId }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [type, setType] = useState(false);
   const [videoLink, setVideoLink] = useState(false);
 
-  // console.log(data)
+
   const [modal, setModal] = useState(false);
   const toggle = useCallback(() => {
     if (modal) {
@@ -56,17 +61,129 @@ const VideoMCQQuestions = ({ CourseId }) => {
     setinputList(list);
   };
 
+  const handleaddanans = (e, i) => {
+    const { name, value } = e.target;
+    const list = [...inputList];
+    list[i][name] = value;
+    setinputList(list);
+  };
 
-  const video = location.state.videoData;
-  console.log(location);
-  // useEffect(() => {
-  //   if (location?.state?.videoData) {
-  //     return navigate("/videos")
-  //   }
-  // }, [])
+  const video = location?.state?.videoData;
+  useEffect(() => {
+    if (!location?.state?.videoData) {
+      return navigate("/videos");
+    }
+  }, [])
 
+  const [send_data, setSendData] = useState(
+    {
+      "course_id": "1",
+      "unit_id": "video_" + video?.video_id,
+      "question_text": null,
+      "question_image_url": null,
+      "help_video": "0",
+      "answers": null,
+      "valid_answer": null,
+      // "ans***des1***matary***ans2***des2***matary***ans3***des3"
+    }
+  );
+  const [validAnswer, setValidAnswer] = useState(false);
+  const [uploadImage, setUploadImage] = useState(false);
+  const [numberOfPages, setNumberOfPages] = useState(false);
+  const handleFileSelect = async (event) => {
+    const file = event.target.files[0];
+    if (!file && !file?.length) {
+      setNumberOfPages(false);
+      return setBook(false);
+    }
+    setBook(file);
+    var reader = new FileReader();
+    reader.readAsBinaryString(event.target.files[0]);
+    reader.onloadend = function () {
+      var count = reader.result.match(/\/Type[\s]*\/Page[^s]/g)?.length;
+      if (count) {
+        setNumberOfPages(count);
+      } else {
+        setNumberOfPages(false);
+      }
+    }
 
+  };
+  const [book, setBook] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const uploadPdf = async () => {
+    setLoading(true)
+    const formData = new FormData();
+    if (book) {
+      formData.append("file_attachment", book)
+      const url = await axios.post("https://camp-coding.tech/dr_elmatary/admin/uploud_pdf.php", formData);
+      console.log(url);
+      if (url.status == "success") {
+        toast.success("File Uploaded Successfully");
+        setSendData({
+          ...send_data,
+          help_pdf: url?.message
+        })
+      } else {
+        toast.error(url.message)
+      }
+    } else { toast.error("Please Upload File") }
+    setLoading(false);
 
+  }
+
+  const [upLoading, setUpLoading] = useState(false);
+  const [image, setImage] = useState(false);
+
+  const uploadFile = async () => {
+    setUpLoading(true);
+
+    const formData = new FormData();
+    if (image) {
+      formData.append("image", image)
+      const url = await axios.post("https://camp-coding.tech/dr_elmatary/admin/image_uplouder.php", formData);
+      console.log(url);
+      if (url && url?.length) {
+        toast.success("Image Uploaded Successfully");
+        setSendData({
+          ...send_data,
+          question_image_url: url
+        })
+      } else {
+        toast.error(url.message)
+      }
+    } else { toast.error("Please Upload File") }
+    setUpLoading(false);
+
+  }
+
+  const [self, setSelf] = useState(false)
+
+  const addMCQ = async () => {
+    const answers = inputList?.map(
+      (item, index) =>
+        index != inputList?.length - 1 ? item?.answer?.trim() + "***" + "matary" + "***" : item?.answer?.trim())
+      ?.join("");
+
+    setSendData({
+      ...send_data,
+      "answers": answers,
+      "valid_answer": validAnswer?.answer?.trim()
+    });
+
+    await axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/insert_question.php", send_data).then((res) => {
+      console.log(res);
+      if (res.status == "success") {
+        toast.success("Added");
+        setSelf(!self);
+      } else {
+        toast.error(res.message);
+      }
+    })
+
+    console.log(send_data);
+
+  }
 
 
   return (
@@ -74,7 +191,7 @@ const VideoMCQQuestions = ({ CourseId }) => {
       <Container fluid={true}>
         <Breadcrumbs title="MCQ Questions" breadcrumbItem="MCQ Questions List" />
 
-        <Row style={{margin:"19px 0"}}>
+        <Row style={{ margin: "19px 0" }}>
           <Col lg={12}>
             <Card>
               <CardBody>
@@ -89,7 +206,6 @@ const VideoMCQQuestions = ({ CourseId }) => {
                             data-bs-toggle="modal"
                             data-bs-target="#addCourseModal"
                             onClick={() => {
-                              // showModal()
                               setModal(true);
                             }}
                           >
@@ -99,50 +215,18 @@ const VideoMCQQuestions = ({ CourseId }) => {
                               }}
                               className="mdi mdi-plus me-1"
                             ></i>{" "}
-                            Add MCQQuestion
+                            Add MCQ Question
                           </button>
                         </div>
                       </Col>
-                      <Col className="col-sm-auto">
-                        <div className="d-flex gap-1">
-                          <div className="input-group">
-                            <Flatpickr
-                              className="form-control"
-                              placeholder="dd M, yyyy"
-                              options={{
-                                mode: "range",
-                                dateFormat: "Y-m-d",
-                              }}
-                              id="datepicker-range"
-                            />
-                            <span className="input-group-text">
-                              <i className="bx bx-calendar-event"></i>
-                            </span>
-                          </div>
 
-                          <UncontrolledDropdown
-                            className="dropdown"
-                            direction="start"
-                          >
-                            <DropdownToggle
-                              tag="a"
-                              className="btn btn-link text-body shadow-none"
-                            >
-                              <i className="bx bx-dots-horizontal-rounded"></i>
-                            </DropdownToggle>
-                            <DropdownMenu className="dropdown-menu-end">
-                              <DropdownItem>Action</DropdownItem>
-                              <DropdownItem>Another action</DropdownItem>
-                              <DropdownItem>Something else here</DropdownItem>
-                            </DropdownMenu>
-                          </UncontrolledDropdown>
-                        </div>
-                      </Col>
                     </Row>
                   </div>
                 </div>
                 <div id="table-invoices-list">
-                  <LessonsTableList />
+                  <MCQTableList updatedata={()=>{
+                    
+                  }} video_id={video?.video_id} self={self}/>
                 </div>
               </CardBody>
             </Card>
@@ -156,20 +240,23 @@ const VideoMCQQuestions = ({ CourseId }) => {
           Add New MCQ Question
         </ModalHeader>
         <ModalBody>
-          <Form
-            onSubmit={(e) => {
-              e.preventDefault();
-              // validation.handleSubmit();
-              return false;
-            }}
-          >
+
           <Row>
-          <Col lg={12}>
-            <div className="custom-accordion" id="addcourse-accordion">
-              <Card>
-     
+            <Col lg={12}>
+              <div className="custom-accordion" id="addcourse-accordion">
+                <Card>
+
                   <div className="p-4 border-top">
                     <form>
+                      <Col md={12}>
+                        <div className="mb-3">
+                          <h3 className="form-label">question image</h3>
+                          <div style={{ "display": "flex", width: "100%", justifyContent: "space-between", alignItems: "center" }}>
+                            <input type="file" id="ImageInput" disabled={upLoading ? true : false} onChange={(e) => setImage(e.currentTarget.files[0])} />  {!upLoading ? <span className="btn btn-primary" onClick={() => uploadFile()}>
+                              <Icon icon="solar:upload-bold-duotone" />
+                            </span> : <Loader size="sm" />}</div>
+                        </div>
+                      </Col>
                       <div className="mb-3">
                         <label className="form-label" htmlFor="coursename">
                           question title
@@ -181,9 +268,12 @@ const VideoMCQQuestions = ({ CourseId }) => {
                           placeholder="Enter Question Title"
                           type="text"
                           className="form-control"
+                          onChange={(e) => {
+                            setSendData({ ...send_data, question_text: e?.currentTarget?.value })
+                          }}
                         ></textarea>
                       </div>
-                      
+
                       <div
                         onClick={() => {
                           setinputList([
@@ -225,22 +315,56 @@ const VideoMCQQuestions = ({ CourseId }) => {
                                     className="form-label"
                                     htmlFor="price"
                                   >
-                                    Answer_{i+1}
+                                    Answer_{i + 1}
                                   </label>
                                   <Input
                                     onChange={(e) => handleaddansex(e, i)}
-                                    id="price"
                                     name="answer"
                                     placeholder="Enter Answer"
                                     type="text"
                                     className="form-control"
-                                 />
+                                  />
+
+
+                                  {
+                                    /*
+                                    <Col lg={6}>
+                                <div className="mb-3">
+                                  <label className="form-label" htmlFor="hours">
+                                    Answer Explanation
+                                  </label
+                                     <textarea
+                                    style={{ height: "100px", width: "100%" }}
+                                    name="explanation"
+                                    placeholder="Enter Explanation"
+                                    type="number"
+                                    className="form-control"
+                                    onChange={(e) => handleaddanans(e, i)}
+                                  ></textarea>
+                                   </div>
+                              </Col>
+                                    */
+                                  }
+
                                 </div>
                               </Col>
                             </>
                           );
                         })}
-                       
+                        {/*
+                   <Col md={12}>
+                          <div className="mb-3">
+                            <h3 className="form-label">Help PDF</h3>
+                            <div style={{ "display": "flex", width: "100%", justifyContent: "space-between", alignItems: "center" }}>
+                              <input type="file" id="pdfInput" accept=".pdf" disabled={loading ? true : false} onChange={handleFileSelect} />  {!loading ? <span className="btn btn-primary" onClick={() => uploadPdf()}>
+                                <Icon icon="solar:upload-bold-duotone" />
+                              </span> : <Loader size="sm" />}</div>
+                            <h4>{numberOfPages ? <span>numberOfPages : {numberOfPages}</span> : null}</h4>
+                          </div>
+                        </Col>
+                   */}
+
+
                         <h5>select correct answer</h5>
                         <Col lg={12}>
                           <div
@@ -257,7 +381,7 @@ const VideoMCQQuestions = ({ CourseId }) => {
                                 <div
                                   onClick={() => {
                                     setselectanswer(item.id);
-                                    console.log(item);
+                                    setValidAnswer(item)
                                   }}
                                   className={
                                     selectanswer == item.id
@@ -270,42 +394,35 @@ const VideoMCQQuestions = ({ CourseId }) => {
                               );
                             })}
                           </div>
-                          <Col lg={6}>
-                          <div className="mb-3">
-                            <label className="form-label" htmlFor="hours">
-                             Correct Answer Explanation
-                            </label>
-                            <textarea
-                              style={{ height: "100px", width: "100%" }}
-                              id="hours"
-                              name="explanation"
-                              placeholder="Enter Explanation"
-                              type="number"
-                              className="form-control"
-                            ></textarea>
-                          </div>
-                        </Col>
+
                         </Col>
                       </Row>
-                      <button className="btn btn-success">Add Question</button>
                     </form>
                   </div>
-              </Card>
-            </div>
-          </Col>
-        </Row>
-            <Row>
-              <Col>
-                <div className="text-end">
-                  <button type="submit" className="btn btn-success save-user">
-                    Save
-                  </button>
-                </div>
-              </Col>
-            </Row>
-          </Form>
+                </Card>
+              </div>
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <div className="text-end">
+                <button type="submit" className="btn btn-success save-user"
+                  onClick={() => {
+                    console.log(inputList)
+                    addMCQ();
+                  }}
+                >
+                  Save
+                </button>
+              </div>
+            </Col>
+          </Row>
+
         </ModalBody>
       </Modal>
+
+
+      <ToastContainer />
     </React.Fragment>
   );
 };

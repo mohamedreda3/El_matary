@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Row,
@@ -16,8 +16,9 @@ import {
   DropdownToggle,
   Input,
   CloseButton,
+  Spinner,
 } from "reactstrap";
-
+import Select from 'react-select';
 //Import Flatepicker
 import "flatpickr/dist/themes/material_blue.css";
 import Flatpickr from "react-flatpickr";
@@ -27,18 +28,48 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 import CourseListTable from "../Courses/CoursesList/CourseTable/courseListTable";
 import ExamListTable from "./ExamTable/ExamTableList";
 import { Slider, Stack } from "@mui/material";
+import axios from "axios";
+import { SelectPicker } from "rsuite";
+import { ToastContainer, toast } from "react-toastify";
+import moment from "moment";
 // import CourseListTable from "../CourseTable/courseListTable";
 
 const Exam = () => {
   document.title = "Courses | Matary - React Admin & Dashboard Template";
+
+
+
 
   const location = useLocation();
   // const {state}=location;
   // const { data } = useLocation().state;
   // console.log(data)
 
+
+  const {course_data}=location.state;
+  // console.log(course_id)
+
   const navigate = useNavigate();
+
+
+  const [examdata,setexamdata]=useState({
+    exam_name:'',
+    timer:'',
+    end_date:'',
+    start_date:'',
+  })
+  const [courses,setcourses]=useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [assignexamshow, setassignexamshow] = useState(false);
+  const [addloading,setaddloading]=useState(false);
+  const [exams,setexams]=useState([]);
+
+  const [selectedexam,setselectedexam]=useState("");
+
+  const [coursesassined,setcoursesassined]=useState([]);
+
+  const [assignloading,setassignloading]=useState(false);
+
   const showModal = () => {
     setIsModalOpen(true);
   };
@@ -51,6 +82,102 @@ const Exam = () => {
   const [timerChecked, setChecked] = useState(false);
   const [deadLineChecked, setDeadLineChecked] = useState(false);
   // deadLineChecked
+
+
+  const getExams=()=>{
+    const data_send={
+      course_id:course_data.course_id
+    }
+    // console.log(data_send)
+
+    axios.post("https://camp-coding.tech/dr_elmatary/admin/Exams/select_exam.php",JSON.stringify(data_send))
+    .then((res)=>{
+      console.log(res)
+      setexams(res.message);
+      setselectedexam(res?.message[0]?.exam_id);
+    }).catch(err=>console.log(err))
+  }
+
+  const getcourses=()=>{
+    axios.get("https://camp-coding.tech/dr_elmatary/admin/courses/select_courses.php")
+    .then((res)=>{
+      // console.log(res);
+      setcourses(res);
+      setexamdata({...examdata,course_id:res[0].course_id})
+    })
+  }
+
+  const handleaddexam=()=>{
+    setaddloading(true);
+    const datasend={
+      ...examdata,
+      course_id:course_data.course_id
+    };
+    console.log(datasend)
+    axios.post("https://camp-coding.tech/dr_elmatary/admin/Exams/insert_exam.php",JSON.stringify(datasend))
+    .then((res)=>{
+      console.log(res)
+      if(res.status=='success'){
+        toast.success("exam has added successfully");
+      }
+      else if(res.status=='error'){
+        toast.error(res.message);
+      }
+      else{
+        toast.error("SomeThing Went Error");
+      }
+      getExams()
+    }).catch(err=>console.log(err))
+    .finally(()=>{
+      setaddloading(false);
+    });
+  }
+
+
+  const hanldeassign=()=>{
+    setassignexamshow(false)
+    setassignloading(true);
+
+    const coursesdata=[...coursesassined];
+    console.log(coursesdata)
+    let courses_data="";
+    for(let i=0;i<coursesdata.length;i++){
+      if(i==0){
+        courses_data+=coursesdata[i].value
+      }
+      else{
+        courses_data+="***matary***"+coursesdata[i].value;
+      }
+    }
+    console.log(courses_data);
+
+
+    const data_send={
+      exam_id:selectedexam,
+      courses_data
+    }
+    axios.post("https://camp-coding.tech/dr_elmatary/admin/Exams/assign_exam_to_course.php",JSON.stringify(data_send))
+    .then((res)=>{
+      console.log(res);
+      if(res.status=='success'){
+        toast.success(res.message);
+      }
+      else if(res.status=='error'){
+        toast.error(res.message);
+      }
+      else {
+        toast.error("Something Went Error");
+      }
+    }).catch(err=>console.log(err))
+    .finally(()=>{
+      setassignloading(false);
+    })
+  }
+
+  useEffect(()=>{
+    getcourses();
+    getExams();
+  },[])
   return (
     <React.Fragment>
       <div className="page-content">
@@ -79,46 +206,28 @@ const Exam = () => {
                             </button>
                           </div>
                         </Col>
-                        <Col className="col-sm-auto">
-                          <div className="d-flex gap-1">
-                            <div className="input-group">
-                              <Flatpickr
-                                className="form-control"
-                                placeholder="dd M, yyyy"
-                                options={{
-                                  mode: "range",
-                                  dateFormat: "Y-m-d",
-                                }}
-                                id="datepicker-range"
-                              />
-                              <span className="input-group-text">
-                                <i className="bx bx-calendar-event"></i>
-                              </span>
-                            </div>
-
-                            <UncontrolledDropdown
-                              className="dropdown"
-                              direction="start"
+                        <Col className="col-sm">
+                          <div>
+                            <button
+                              type="button"
+                              className="btn btn-success mb-4"
+                              data-bs-toggle="modal"
+                              data-bs-target="#addCourseModal"
+                              onClick={() => {
+                                // showModal();
+                                setassignexamshow(true);
+                              }}
                             >
-                              <DropdownToggle
-                                tag="a"
-                                className="btn btn-link text-body shadow-none"
-                              >
-                                <i className="bx bx-dots-horizontal-rounded"></i>
-                              </DropdownToggle>
-                              <DropdownMenu className="dropdown-menu-end">
-                                <DropdownItem>Action</DropdownItem>
-                                <DropdownItem>Another action</DropdownItem>
-                                <DropdownItem>Something else here</DropdownItem>
-                              </DropdownMenu>
-                            </UncontrolledDropdown>
+                              Assign Exam
+                            </button>
                           </div>
                         </Col>
+                      
                       </Row>
                     </div>
                   </div>
                   <div id="table-invoices-list">
-                    <ExamListTable />
+                    <ExamListTable exams={exams} />
                   </div>
                 </CardBody>
               </Card>
@@ -137,6 +246,7 @@ const Exam = () => {
             }}
             onSubmit={(e) => {
               e.preventDefault();
+              handleaddexam()
               setIsModalOpen(false);
             }}
           >
@@ -156,11 +266,28 @@ const Exam = () => {
                 type="text"
                 name="exam_name"
                 id="exam_name"
-                placeholder="exam_name"
+                placeholder="exam name"
                 required
+                onChange={(e)=>{
+                  setexamdata({...examdata,exam_name:e.target.value})
+                }}
               />
             </div>
-            <div className="inputField withtext">
+            {/* <div className="inputField withtext">
+              <label htmlFor="exam_details">courses</label>
+              <select value={examdata.course_id} onChange={(e)=>{
+                setexamdata({...examdata,course_id:e.target.value})
+              }} className="form-select" name="" id="">
+                {
+                  courses.map((item)=>{
+                    return (
+                      <option value={item.course_id}>{item.course_name}</option>
+                    )
+                  })
+                }
+              </select>
+            </div> */}
+            {/* <div className="inputField withtext">
               <label htmlFor="exam_details">Exam Details</label>
               <textarea
                 style={{ height: "100px" }}
@@ -170,8 +297,8 @@ const Exam = () => {
                 type="number"
                 className="form-control"
               ></textarea>
-            </div>
-            <div className="inputField withtext">
+            </div> */}
+            {/* <div className="inputField withtext">
               <label htmlFor="exam_degree">Exam Degree</label>
               <Input
                 style={{
@@ -185,7 +312,7 @@ const Exam = () => {
                 placeholder="exam_degree"
                 required
               />
-            </div>
+            </div> */}
             <div className="checkedBoxes">
               <div className="inputField">
                 <label
@@ -199,7 +326,6 @@ const Exam = () => {
                   style={{
                     padding: "10px",
                     borderRadius: "4px",
-
                     display: "none",
                   }}
                   type="checkbox"
@@ -227,7 +353,10 @@ const Exam = () => {
                         min={0}
                         max={200}
                         valueLabelDisplay="auto"
-                        onChange={(e) => console.log(e.target.value)}
+                        onChange={(e) => {
+                          // console.log(e.target.value)
+                          setexamdata({...examdata,timer:e.target.value})
+                        }}
                       />
                     </Stack>
                   </div>
@@ -240,7 +369,7 @@ const Exam = () => {
                   htmlFor="exam_isDeadLined"
                 >
                   {" "}
-                  With Deadline ?
+                  start date ?
                 </label>
                 <Input
                   style={{
@@ -259,22 +388,137 @@ const Exam = () => {
                 />
                 {deadLineChecked ? (
                   <div className="inputField withtext">
-                    <label htmlFor="time">Deadline Date</label>
-                    <Input type="date" />
+                    <label htmlFor="time">Start Date</label>
+                    <Input onChange={(e)=>{
+                      // console.log(moment(e.timeStamp).format('Y-M-D H:m:s'))
+                      setexamdata({...examdata,start_date:moment(Date.now()).format('Y-M-D H:m:s')})
+                    }} type="date" />
+                  </div>
+                ) : null}
+              </div>
+              <div className="inputField">
+                <label
+                  className={deadLineChecked ? "active" : null}
+                  htmlFor="exam_end"
+                >
+                  {" "}
+                  end date ?
+                </label>
+                <Input
+                  style={{
+                    padding: "10px",
+                    borderRadius: "4px",
+
+                    display: "none",
+                  }}
+                  type="checkbox"
+                  name="exam_end"
+                  id="exam_end"
+                  placeholder="end exam"
+                  required
+                  checked={deadLineChecked}
+                  // onChange={(e) => setDeadLineChecked(e.currentTarget.checked)}
+                />
+                {deadLineChecked ? (
+                  <div className="inputField withtext">
+                    <label htmlFor="time">end Date</label>
+                    <Input onChange={(e)=>{
+                      // console.log(e)
+                      // console.log(moment(Date.now()).format('Y-M-D H:m:s'));
+                      setexamdata({...examdata,end_date:moment(Date.now()).format('Y-M-D H:m:s')})
+                    }} type="date" />
                   </div>
                 ) : null}
               </div>
             </div>
-            <button
+            {
+              addloading?(
+                <div style={{
+                  textAlign:'end'
+                 }}>
+                  <Spinner style={{ color:'blue' }}/>
+                </div>
+              ):(
+                <button
               className="btn btn-success"
               style={{ margin: "10px 0 0 auto" }}
             >
               {" "}
               Add Exam{" "}
             </button>
+              )
+            }
           </form>
         </Modal>
+
+        <Modal title="assign exam" isOpen={assignexamshow}>
+          <form
+            action="#"
+            style={{
+              padding: "15px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "13px",
+            }}
+            onSubmit={(e) => {
+              e.preventDefault();
+              hanldeassign()
+              // setassignexamshow(false);
+            }}
+          >
+            <CloseButton
+              onClick={() => setassignexamshow(false)}
+              style={{ marginLeft: "auto" }}
+            />
+
+            <div className="inputField withtext">
+              <label htmlFor="exam_name">Exam Name</label>
+              <select onChange={(e)=>{
+                // set
+                setselectedexam(e.target.value);
+              }} value={selectedexam} className="form-control" name="" id="">
+                {
+                  exams.map((item)=>{
+                    return (
+                      <option value={item.exam_id}>{item.exam_name}</option>
+                    )
+                  })
+                }
+              </select>
+            </div>
+
+
+
+            <div className="inputField withtext">
+              <label htmlFor="exam_name">Course</label>
+              <Select
+                onChange={(e)=>{
+                console.log(e)
+                setcoursesassined(e);
+                }}
+                // defaultValue={[...courses]}
+                isMulti
+                name="colors"
+                options={courses.map(item=>{return {label: item.course_name,value: item.course_id}})}
+                className="basic-multi-select"
+                classNamePrefix="select"
+              />
+            </div>
+            <div style={{ marginTop:'30px',textAlign:'end' }}>
+              {
+                assignloading?(
+                  <Spinner style={{ color:'blue' }}/>
+                ):(
+                  <button className="btn btn-success">assign</button>
+                )
+              }
+            </div>
+          </form>
+        </Modal>
+
+
       </div>
+      <ToastContainer/>
     </React.Fragment>
   );
 };

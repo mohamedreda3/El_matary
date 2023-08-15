@@ -38,15 +38,16 @@ import { Icon, MenuItem, Select } from "@mui/material";
 import VideoListTable from "../VideosList/VideoTable/videoListTable";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { Copy } from "feather-icons-react/build/IconComponents";
+import Confirm from "../../../components/ConfComp/Confirm";
+import ConfirmPaid from "../../../components/ConfComp/ConfirmPaid";
 const UnitVideo = () => {
     document.title = "Courses | Matary - React Admin & Dashboard Template";
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [UnitVideos, setUnitVideos] = useState(false)
     const location = useLocation();
-
     const [showupdate, setshowupdate] = useState(false);
-
+    const [showconf2,setshowconf2]=useState(false);
     const [selectedCourse, setSelectedCourse] = useState(false);
     const [Units, setUnits] = useState(false);
 
@@ -159,7 +160,7 @@ const UnitVideo = () => {
 
     const [video_data, setVideoData] = useState(location.state);
     const [Video, setVideo] = useState(false);
-
+    const [showconf,setshowconf]=useState(false);
     const selectVideoData = async () => {
         const videos_data = await axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/select_video_data.php", { video_id: video_data?.video_id ? video_data?.video_id : video_data?.source_video_id ? video_data?.source_video_id : null });
         setVideoData(videos_data.message);
@@ -225,7 +226,9 @@ const UnitVideo = () => {
 
                                 <DropdownItem onClick={
                                     () => {
-                                        handleupdatestatus(cell.cell.row.original)
+                                      setrowdata(cell.cell.row.original);
+                                      setshowconf(true);
+                                      //handleupdatestatus(cell.cell.row.original)
                                     }
                                 }>
                                     {
@@ -235,80 +238,9 @@ const UnitVideo = () => {
 
                                 <DropdownItem onClick={
                                     () => {
-                                        handleupdatefree(cell.cell.row.original)
-                                    }
-                                }>
-                                    {
-                                        cell.cell.row.original.free == "yes" ? <TbFreeRights className="hidden" /> : <MdOutlinePaid className="shown" />
-                                    }
-
-                                </DropdownItem>
-                            </DropdownMenu>
-                        </UncontrolledDropdown>
-                    </>
-                )
-            }
-        },
-    ]
-
-    const qColumns = [
-        {
-            Header: "Video Title",
-            Cell: (cell) => {
-                return <p>
-                    <span> Video Title :  </span>
-                    <em>{cell.cell.row.original.new_title}</em>
-                </p>
-            }
-        },
-        {
-            Header: "Course Name",
-            Cell: (cell) => {
-                return <p>
-                    <span> Course Name :  </span>
-                    <em>{cell.cell.row.original.course_name}</em>
-                </p>
-            }
-        }, {
-            Header: "Unit Name",
-            Cell: (cell) => {
-                return <p>
-                    <span> Unit Name :  </span>
-                    <em>{cell?.cell?.row?.original?.unit_name}</em>
-                </p>
-            }
-        },
-        {
-            Header: 'Action',
-            Cell: (cell) => {
-                return (
-                    <>
-                        <UncontrolledDropdown className="DropVidUn">
-                            <DropdownToggle className="btn btn-light btn-sm" tag="button" data-bs-toggle="dropdown" direction="start">
-                                <i className="bx bx-dots-horizontal-rounded"></i>
-                            </DropdownToggle>
-                            <DropdownMenu className="dropdown-menu-end">
-                                <DropdownItem
-                                    onClick={() => {
-                                        setshowupdate(true);
-                                        setrowdata(cell.cell.row.original);
-                                        console.log(cell.cell.row.original)
-                                    }}
-                                ><BiEdit /></DropdownItem>
-
-                                <DropdownItem onClick={
-                                    () => {
-                                        handleupdatestatus(cell.cell.row.original)
-                                    }
-                                }>
-                                    {
-                                        cell.cell.row.original.hidden == "yes" ? <VisibilityOff className="hidden" /> : <Visibility className="shown" />
-                                    }
-                                </DropdownItem>
-
-                                <DropdownItem onClick={
-                                    () => {
-                                        handleupdatefree(cell.cell.row.original)
+                                      setrowdata(cell.cell.row.original);
+                                      setshowconf2(true);
+                                        // handleupdatefree(cell.cell.row.original)
                                     }
                                 }>
                                     {
@@ -340,9 +272,7 @@ const UnitVideo = () => {
             toast.error(assign.message);
         }
     }
-    const AddQuestionVideo = () => {
 
-    }
 
 
     return (
@@ -398,7 +328,7 @@ const UnitVideo = () => {
                                                                 () => {
                                                                     console.log(Video);
                                                                     setItem(Video);
-                                                                    navigate("/video/VideoMCQQuestions", { state: { videoData: location?.state } });
+                                                                    navigate("/video/VideoMCQQuestions", { state: { videoData: video_data } });
                                                                 }
                                                             }
 
@@ -630,7 +560,7 @@ const UnitVideo = () => {
                     <div className="fideos">
                         <div className="videoB_body">
                             <h3>Vimeo</h3>
-                            {console.log("Video", video_data)}
+                            {/* {console.log("Video", video_data)} */}
                             {video_data?.vimeo_data && video_data?.vimeo_data.length ? <iframe src={video_data?.vimeo_data} width="370"></iframe> : <h5>No Video</h5>}
                         </div>
                         <div className="videoB_body">
@@ -644,6 +574,45 @@ const UnitVideo = () => {
             {/* ====================================================================== */}
 
             <ToastContainer />
+            {
+              showconf ? (
+                <Confirm
+                  id={rowdata.unit_id}
+                  cancleoper={() => {
+                    setshowconf(false)
+                  }}
+                  confirmoper={() => {
+                    const send_data = {
+                      hidden_value: rowdata.hidden == "no" ? "yes" : "no",
+                      question_id: rowdata.question_id
+                    }
+                    handleupdatestatus(rowdata)
+                    setshowconf(false);
+                  }}
+                  status={rowdata.hidden == 'no' ? 'hide' : 'show'}
+                  comp={'unit video'} />
+              ) : (null)
+            }
+            {
+              showconf2 ? (
+                <ConfirmPaid
+                  id={rowdata.unit_id}
+                  cancleoperpaid={() => {
+                    setshowconf2(false)
+                  }}
+                  confirmoperpaid={() => {
+                    const send_data = {
+                      hidden_value: rowdata.hidden == "no" ? "yes" : "no",
+                      question_id: rowdata.question_id
+                    }
+                    handleupdatefree(rowdata)
+                    setshowconf2(false);
+                  }}
+                  status={rowdata.hidden == 'no' ? 'free' : 'paid'}
+                  comp={'unit video'} />
+              ) : (null)
+            }
+
         </React.Fragment >
     );
 };

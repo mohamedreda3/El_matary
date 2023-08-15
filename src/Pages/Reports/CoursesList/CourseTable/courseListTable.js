@@ -60,8 +60,8 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
   const [copyCourse, setCopyCourse] = useState(false);
 
   const columns = [
-    {
-      accessor: 'course_photo_url',
+    {  
+      accessor: 'course_name',
       Cell: (cell) => {
         return (<>
           <div>
@@ -137,15 +137,15 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
                   }
                 })
               }
-            } className='btn btn-primary'>View</button>
-            <button onClick={
+            } className='btn btn-primary'>View Reports</button>
+            
+            {/* <button onClick={
               () => {
                 console.log(cell.cell.row.original);
                 setrowdata(cell.cell.row.original);
                 setCopyCourse(true)
               }
             } className='btn btn-primary'>Duplicate Course</button>
-
             <UncontrolledDropdown className="DropVidUn">
               <DropdownToggle className="btn btn-light btn-sm" tag="button" data-bs-toggle="dropdown" direction="start">
                 <i className="bx bx-dots-horizontal-rounded"></i>
@@ -215,11 +215,11 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
                       console.log(cell.cell.row.original)
                     }
                   }>
-                    {/* <button className='btn btn-success' style={{ width: "100%" }}>Copy</button> */}
                   </span>
                 </DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown >
+            */}
 
           </div >
 

@@ -10,13 +10,14 @@ import {
 import { useNavigate } from "react-router-dom";
 import TableContainer from "../../../components/Common/TableContainer";
 import { ExamData } from "../../../CommonData/Data/Exams";
+import moment from "moment";
 
-const ExamListTable = () => {
+const ExamListTable = ({exams}) => {
   const navigate = useNavigate();
   const columns = [
     {
       Header: "Exam ID",
-      accessor: "id",
+      accessor: "exam_id",
       Filter: false,
     },
     {
@@ -24,14 +25,33 @@ const ExamListTable = () => {
       accessor: "exam_name",
     //   Filter: false,
     },
+    // {
+    //   Header: "exam_details",
+    //   accessor: "exam_details",
+    //   Filter: false,
+    // },
     {
-      Header: "exam_details",
-      accessor: "exam_details",
+      Header: "Timer",
+      accessor: "timer",
       Filter: false,
     },
     {
-      Header: "Date",
-      accessor: "date",
+      Header: "start date",
+      Cell:(cell)=>{
+        return(
+          <span>{moment(cell.cell.row.original.start_date).format('Y-M-D H:m:s')}</span>
+        )
+      },
+      Filter: false,
+    },
+    {
+      Header: "end date",
+      Cell:(cell)=>{
+        // {console.log(cell)}
+        return(
+          <span>{moment(cell.cell.row.original.end_date).format('Y-M-D H:m:s')}</span>
+        )
+      },
       Filter: false,
     },
     {
@@ -53,14 +73,14 @@ const ExamListTable = () => {
                 <DropdownItem
                   onClick={() => {
                     console.log(cell.cell.row.original);
-                    navigate("/questions", {
-                      state: { coursedata: cell.cell.row.original },
+                    const examdata={...cell.cell.row.original};
+                    navigate("/examquestion", {
+                      state: { examdata},
                     });
                   }}
                 >
                   Show
                 </DropdownItem>
-                <DropdownItem>Delete</DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
           </>
@@ -72,7 +92,7 @@ const ExamListTable = () => {
     <React.Fragment>
       <TableContainer
         columns={columns}
-        data={ExamData}
+        data={exams}
         isGlobalFilter={true}
         customPageSize={10}
         className="Invoice table"

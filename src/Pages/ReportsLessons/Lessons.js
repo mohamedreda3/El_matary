@@ -77,18 +77,18 @@ const Lessons = () => {
   function handelVideoLink(link) {
     setVideoLink(link);
   }
-  const [title, setTitle] = useState("Lessons");
-  const [type, setType] = useState("Lessons");
+  const [title, setTitle] = useState("FlashCards");
+  const [type, setType] = useState("FlashCards");
 
   document.title = title + " | Matary - React Admin & Dashboard Template";
 
   const buttons = [
-    { type: "Lessons", title: "Lessons" },
+    // { type: "Lessons", title: "Lessons" },
     { type: "FlashCards", title: "Flash Cards" },
     { type: "Tweets", title: "Tweets" },
     { type: "writtenquestion", title: "Written Questions" },
-    { type: "mcqquestion", title: "MCQ Questions" },
-    { type: "ebooks", title: "Ebooks" },
+    // { type: "mcqquestion", title: "MCQ Questions" },
+    // { type: "ebooks", title: "Ebooks" },
     // ebooks
   ];
   const [Videos, setVideos] = useState([]);

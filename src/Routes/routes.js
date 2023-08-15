@@ -132,6 +132,7 @@ import Grade from "../Pages/Grades/Grade";
 import CourseDetail from "../Pages/Courses/CourseDetail";
 import Unit from "../Pages/Units/Units";
 import Units from "../Pages/Units/Units";
+import Policy from "../Pages/information/policy/Units";
 import Lessons from "../Pages/Lessons/Lessons";
 import ReportsLessons from "../Pages/ReportsLessons/Lessons";
 // ReportsLessons
@@ -141,6 +142,7 @@ import Books from "../Pages/ebook/BooksList/BooksList";
 import Interactive from "../Pages/Interactive/Interactive";
 import AddQuestions from "../Pages/AddQuestions/AddQuestion";
 import Exam from "../Pages/Exams/Exams";
+import PublicExams from "../Pages/publicexams/Exams";
 import Question from "../Pages/Exams/questions";
 import Subscription from "../Pages/subscription";
 import Student from "../Pages/student";
@@ -154,6 +156,13 @@ import AddVideo from "../Pages/video/Addvideo";
 import UnitVideo from "../Pages/video/UnitVideos/Units";
 import StudentCourses from "../Pages/StudentCourses/StudentCourses";
 import VideoMCQQuestions from "../Pages/video/mcqquestion"
+import ExamQuestion from "../Pages/ExamQuestions/ExamQuestion";
+import Publicexamquestion from "../Pages/PublicExamQuestions/ExamQuestion";
+import UniqQuestion from "../Pages/UnitQuestion/UniqQuestion";
+import StudenCourseUnit from "../Pages/StudentCourses/StudenCourseUnit";
+import StudenCourseUnitVideos from "../Pages/studentcourseunitvideos/StudentCourseUnitVideos";
+import Studentcourseunitvideoslist from "../Pages/StudentCourses/Units/UnitTable/UnitTableList";
+import CallCenter from "../Pages/information/call_center/Units";
 // import DailyIncome from "../Pages/subscription/dailyIncome";
 
 const authProtectedRoutes = [
@@ -195,25 +204,34 @@ const authProtectedRoutes = [
   // reports-list
   { path: "add-material", component: <AddMaterial /> },
   { path: "/coursedetail", component: <CourseDetail /> },
-  { path: "/units", component:  <Units /> },
+  { path: "/units", component: <Units /> },
   { path: "/lessons", component: <Lessons /> },
   { path: "/e-book/add-book", component: <AddBook /> },
   { path: "/e-book", component: <Books /> },
   { path: '/addques', component: <AddQuestions /> },
   // { path: '/interactive', component: <Interactive /> },
   { path: '/exam', component: <Exam /> },
+  { path: '/unitquestion', component: <UniqQuestion /> },
+  { path: '/examquestion', component: <ExamQuestion /> },
+  { path: '/studentcouunits', component: <StudenCourseUnit /> },
   { path: '/questions', component: <Question /> },
   { path: '/subscription', component: <Subscription /> },
   { path: '/endedsubscription', component: <EndedSubscription /> },
+  { path: '/studentcourseunitvideos', component: <StudenCourseUnitVideos /> },
+  { path: '/studentcourseunitvideoslist', component: <Studentcourseunitvideoslist /> },
   { path: '/canceledsubscription', component: <CanceledSubscription /> },
   { path: '/students', component: <Student /> },
   { path: "/videos", component: <Videos /> },
   { path: "/videos/add-video", component: <AddVideo /> },
   { path: "/videos/unit-videos", component: <UnitVideo /> },
   { path: "/grade", component: <Grade /> },
-  { path: "/universities", component: <Universities />},
-  { path: "/StudentCourses", component: <StudentCourses/> },
+  { path: "/universities", component: <Universities /> },
+  { path: "/StudentCourses", component: <StudentCourses /> },
   { path: "/video/VideoMCQQuestions", component: <VideoMCQQuestions /> },
+  { path: "/publicexam", component: <PublicExams /> },
+  { path: "/publicexamquestion", component: <Publicexamquestion /> },
+  { path: "/policy", component: <Policy /> },
+  { path: "/callcenter", component: <CallCenter /> },
 
 
   // {path:'/dailyIncome',component:<DailyIncome />},

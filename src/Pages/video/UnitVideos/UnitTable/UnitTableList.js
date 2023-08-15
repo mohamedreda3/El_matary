@@ -32,7 +32,7 @@ const UnitListTable = ({ Units, courseData, showHideUnit }) => {
                                 cell.cell.row.original.hidden
                             }</span>;
 
-                    default:
+                    default: 
                         return <span className="badge badge-pill badge-soft-success font-size-12">
                             {
                                 cell.cell.row.original.hidden

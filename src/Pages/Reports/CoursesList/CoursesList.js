@@ -71,7 +71,7 @@ const Reports = () => {
         <React.Fragment>
             <div className="page-content">
                 <Container fluid={true}>
-                    <Breadcrumbs title="Courses" breadcrumbItem="Course List" />
+                    <Breadcrumbs title="Reports" breadcrumbItem="Reports List" />
                     <Row>
                         <Col lg={12}>
                             <Card>

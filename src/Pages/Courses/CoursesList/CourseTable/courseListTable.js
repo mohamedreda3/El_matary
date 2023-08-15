@@ -16,6 +16,8 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
   const [rowdata, setrowdata] = useState({});
   const [image, setimage] = useState(false);
 
+  // const navigate=useNavigate();
+
   const handleupdatecourse = () => {
     const formdata = new FormData();
     formdata.append("image", image);
@@ -151,6 +153,21 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
                 <i className="bx bx-dots-horizontal-rounded"></i>
               </DropdownToggle>
               <DropdownMenu className="dropdown-menu-end">
+                <DropdownItem>
+                  <span onClick={
+                    () => {
+                      console.log(cell.cell.row.original.course_id);
+                      navigate("/exam",{ state:{course_data:cell.cell.row.original} })
+                      // setshowcourseedit(true);
+                      // setrowdata(cell.cell.row.original);
+                      // console.log(cell.cell.row.original)
+                    }
+                  }>
+                    <button className='btn btn-primary' style={{ width: "100%" }}>Exams</button>
+                  </span>
+                </DropdownItem>
+
+
                 <DropdownItem>
                   <span onClick={
                     () => {

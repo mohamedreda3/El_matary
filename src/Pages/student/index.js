@@ -83,7 +83,6 @@ const Student = () => {
             <div className="page-content">
                 <Container fluid={true}>
                     <Breadcrumbs title="Units" breadcrumbItem="Unit List" />
-
                     <Row>
                         <Col lg={12}>
                             <Card>
@@ -93,7 +92,7 @@ const Student = () => {
                                             <Form className="stu_her" onChange={formValue => formValue}>
                                                 {university && university.length ?
                                                     <Form.Group controlId="inputPicker">
-                                                        <Form.ControlLabel>Unveristy:</Form.ControlLabel>
+                                                        <Form.ControlLabel>Unversity:</Form.ControlLabel>
                                                         <Form.Control name="university_id" accepter={InputPicker} data={university.map((item) => { return { label: item.university_name, value: item.university_id } })} onChange={(e) => setUnivId(e)} />
                                                     </Form.Group> : null
                                                 }
@@ -111,7 +110,6 @@ const Student = () => {
                                                     </Form.Group> : null
                                                 }
                                                 <Form.Group controlId="radio">
-
                                                     <Form.ControlLabel>have_sub :</Form.ControlLabel>
                                                     <Form.Control name="have_sub" onChange={(e) => {
                                                         setDataSend({
