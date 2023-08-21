@@ -47,7 +47,7 @@ const UnitVideo = () => {
     const [UnitVideos, setUnitVideos] = useState(false)
     const location = useLocation();
     const [showupdate, setshowupdate] = useState(false);
-    const [showconf2,setshowconf2]=useState(false);
+    const [showconf2, setshowconf2] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState(false);
     const [Units, setUnits] = useState(false);
 
@@ -160,7 +160,7 @@ const UnitVideo = () => {
 
     const [video_data, setVideoData] = useState(location.state);
     const [Video, setVideo] = useState(false);
-    const [showconf,setshowconf]=useState(false);
+    const [showconf, setshowconf] = useState(false);
     const selectVideoData = async () => {
         const videos_data = await axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/select_video_data.php", { video_id: video_data?.video_id ? video_data?.video_id : video_data?.source_video_id ? video_data?.source_video_id : null });
         setVideoData(videos_data.message);
@@ -226,9 +226,9 @@ const UnitVideo = () => {
 
                                 <DropdownItem onClick={
                                     () => {
-                                      setrowdata(cell.cell.row.original);
-                                      setshowconf(true);
-                                      //handleupdatestatus(cell.cell.row.original)
+                                        setrowdata(cell.cell.row.original);
+                                        setshowconf(true);
+                                        //handleupdatestatus(cell.cell.row.original)
                                     }
                                 }>
                                     {
@@ -238,8 +238,8 @@ const UnitVideo = () => {
 
                                 <DropdownItem onClick={
                                     () => {
-                                      setrowdata(cell.cell.row.original);
-                                      setshowconf2(true);
+                                        setrowdata(cell.cell.row.original);
+                                        setshowconf2(true);
                                         // handleupdatefree(cell.cell.row.original)
                                     }
                                 }>
@@ -273,7 +273,12 @@ const UnitVideo = () => {
         }
     }
 
-
+    const playVimeoVideo = () => {
+        const vimeoIframe = document?.getElementById("vimeoIframe");
+        console.log(document?.getElementById("vimeoIframe"));
+        vimeoIframe.contentWindow.document.querySelector(".js-password").value = 1234;
+        vimeoIframe.contentWindow.document.querySelector(".player .vp-overlay-wrapper .form form").submit();
+    }
 
     return (
         <React.Fragment>
@@ -299,7 +304,10 @@ const UnitVideo = () => {
                                 </p>
 
                             </div>
-                            <button className="btn btn-primary" onClick={() => setVideoShow(true)}>Show Video</button>
+                            <button className="btn btn-primary" onClick={() => {
+                                setVideoShow(true);
+                                playVimeoVideo()
+                            }}>Show Video</button>
                         </CardBody>
                     </Card>
                     <Row>
@@ -561,11 +569,12 @@ const UnitVideo = () => {
                         <div className="videoB_body">
                             <h3>Vimeo</h3>
                             {/* {console.log("Video", video_data)} */}
-                            {video_data?.vimeo_data && video_data?.vimeo_data.length ? <iframe src={video_data?.vimeo_data} width="370"></iframe> : <h5>No Video</h5>}
+                            {video_data?.vimeo_data && video_data?.vimeo_data.length ?
+                                <iframe src={video_data?.vimeo_data} width="370" id="vimeoIframe"></iframe> : <h5>No Video</h5>}
                         </div>
                         <div className="videoB_body">
                             <h3>Publitio</h3>
-                            {video_data?.publitio_data && video_data?.publitio_data.length ? <iframe src={video_data?.publitio_data} width="370"></iframe> : <h5>No Video</h5>}
+                            {video_data?.publitio_data && video_data?.publitio_data.length ? <iframe src={"https://camp-coding.tech/dr_elmatary/publitio_player?q=" + video_data?.publitio_data} width="370"></iframe> : <h5>No Video</h5>}
 
                         </div>
                     </div>
@@ -575,42 +584,42 @@ const UnitVideo = () => {
 
             <ToastContainer />
             {
-              showconf ? (
-                <Confirm
-                  id={rowdata.unit_id}
-                  cancleoper={() => {
-                    setshowconf(false)
-                  }}
-                  confirmoper={() => {
-                    const send_data = {
-                      hidden_value: rowdata.hidden == "no" ? "yes" : "no",
-                      question_id: rowdata.question_id
-                    }
-                    handleupdatestatus(rowdata)
-                    setshowconf(false);
-                  }}
-                  status={rowdata.hidden == 'no' ? 'hide' : 'show'}
-                  comp={'unit video'} />
-              ) : (null)
+                showconf ? (
+                    <Confirm
+                        id={rowdata.unit_id}
+                        cancleoper={() => {
+                            setshowconf(false)
+                        }}
+                        confirmoper={() => {
+                            const send_data = {
+                                hidden_value: rowdata.hidden == "no" ? "yes" : "no",
+                                question_id: rowdata.question_id
+                            }
+                            handleupdatestatus(rowdata)
+                            setshowconf(false);
+                        }}
+                        status={rowdata.hidden == 'no' ? 'hide' : 'show'}
+                        comp={'unit video'} />
+                ) : (null)
             }
             {
-              showconf2 ? (
-                <ConfirmPaid
-                  id={rowdata.unit_id}
-                  cancleoperpaid={() => {
-                    setshowconf2(false)
-                  }}
-                  confirmoperpaid={() => {
-                    const send_data = {
-                      hidden_value: rowdata.hidden == "no" ? "yes" : "no",
-                      question_id: rowdata.question_id
-                    }
-                    handleupdatefree(rowdata)
-                    setshowconf2(false);
-                  }}
-                  status={rowdata.hidden == 'no' ? 'free' : 'paid'}
-                  comp={'unit video'} />
-              ) : (null)
+                showconf2 ? (
+                    <ConfirmPaid
+                        id={rowdata.unit_id}
+                        cancleoperpaid={() => {
+                            setshowconf2(false)
+                        }}
+                        confirmoperpaid={() => {
+                            const send_data = {
+                                hidden_value: rowdata.hidden == "no" ? "yes" : "no",
+                                question_id: rowdata.question_id
+                            }
+                            handleupdatefree(rowdata)
+                            setshowconf2(false);
+                        }}
+                        status={rowdata.hidden == 'no' ? 'free' : 'paid'}
+                        comp={'unit video'} />
+                ) : (null)
             }
 
         </React.Fragment >

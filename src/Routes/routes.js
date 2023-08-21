@@ -163,6 +163,8 @@ import StudenCourseUnit from "../Pages/StudentCourses/StudenCourseUnit";
 import StudenCourseUnitVideos from "../Pages/studentcourseunitvideos/StudentCourseUnitVideos";
 import Studentcourseunitvideoslist from "../Pages/StudentCourses/Units/UnitTable/UnitTableList";
 import CallCenter from "../Pages/information/call_center/Units";
+import ResultExamListTable from "../Pages/Exams/ExamTable/ExamResultTableList";
+import DoNotMarry from "../Pages/donontmarry";
 // import DailyIncome from "../Pages/subscription/dailyIncome";
 
 const authProtectedRoutes = [
@@ -230,6 +232,8 @@ const authProtectedRoutes = [
   { path: "/video/VideoMCQQuestions", component: <VideoMCQQuestions /> },
   { path: "/publicexam", component: <PublicExams /> },
   { path: "/publicexamquestion", component: <Publicexamquestion /> },
+  { path: "/exam_result", component: <ResultExamListTable /> },
+  { path: "/DoNotMarry", component: <DoNotMarry /> },
   { path: "/policy", component: <Policy /> },
   { path: "/callcenter", component: <CallCenter /> },
 

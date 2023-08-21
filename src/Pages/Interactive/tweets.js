@@ -124,8 +124,7 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
         tweetstxt += '//camp//' + tweets[i]?.tweet_value + '//camp//';
       }
     }
-    const en = (tweetstxt.split("</p>").join("").replace(/<p>/g, '//camp//').replace(/<\/p><p>/g, '').replace(/<br>/g, '')
-    .replace(/<p>/g, '').replace(/<\/p>/g, '//camp//').replace(/<strong>/g, '<B>').replace(/<\/strong>/g, '</B>'));
+    const en = (tweetstxt.split("</p>").join("").replace(/<\/p><p>/g, '//camp//').replace(/<p>/g, '').replace(/<\/p>/g, '').replace(/<br>/g, '').replace(/<p>/g, '').replace(/<strong>/g, '<B>').replace(/<\/strong>/g, '</B>'));
     const data_send = {
       "tweet_value": en,
       "tweet_title": e.currentTarget.tweet_title.value,
@@ -170,8 +169,7 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
         tweetstxt += '//camp//' + tweets[i]?.tweet_value + '//camp//';
       }
     }
-    const en = (tweetstxt.split("</p>").join("").replace(/<p>/g, '//camp//').replace(/<\/p><p>/g, '').replace(/<br>/g, '')
-      .replace(/<p>/g, '').replace(/<\/p>/g, '//camp//').replace(/<strong>/g, '<B>').replace(/<\/strong>/g, '</B>'));
+    const en = (tweetstxt.split("</p>").join("").replace(/<\/p><p>/g, '//camp//').replace(/<p>/g, '').replace(/<\/p>/g, '').replace(/<br>/g, '').replace(/<p>/g, '').replace(/<strong>/g, '<B>').replace(/<\/strong>/g, '</B>'));
     const data_send = {
       "course_id": CourseId,
       "unit_id": unitId,

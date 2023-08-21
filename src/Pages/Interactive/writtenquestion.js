@@ -64,10 +64,9 @@ const WrittenQuestions = ({ CourseId, allunitdata, unitId, cd }) => {
       }
     }
 
-    const en = (questionstxt.split("</p>").join("").replace(/<p>/g, '//camp//').replace(/<\/p><p>/g, '').replace(/<br>/g, '')
-      .replace(/<p>/g, '').replace(/<\/p>/g, '//camp//').replace(/<strong>/g, '<B>').replace(/<\/strong>/g, '</B>'));
-// </p><p>
-console.log(en)
+    const en = (questionstxt.split("</p>").join("").replace(/<\/p><p>/g, '//camp//').replace(/<p>/g, '').replace(/<\/p>/g, '').replace(/<br>/g, '').replace(/<p>/g, '').replace(/<strong>/g, '<B>').replace(/<\/strong>/g, '</B>'));
+    // </p><p>
+    console.log(en)
     // console.log("original after : ", en.replace(/\/\/camp\/\//g, '<p><br></p>').replace(/<B>/g, '<strong>').replace(/<\/B>/g, '</strong>'));
 
     const data_send = {
@@ -76,7 +75,7 @@ console.log(en)
       "course_id": CourseId,
       "unit_id": unitId
     }
-    console.log("Edit",data_send)
+    console.log("Edit", data_send)
     const add = await axios.post("https://camp-coding.tech/dr_elmatary/admin/wqs/insert_wqs.php", data_send);
     if (add.status == "success") {
       toast.success("Added")
@@ -144,8 +143,7 @@ console.log(en)
       }
     }
 
-    const en = (questionstxt.split("</p>").join("").replace(/<p>/g, '//camp//').replace(/<\/p><p>/g, '').replace(/<br>/g, '')
-    .replace(/<p>/g, '').replace(/<\/p>/g, '//camp//').replace(/<strong>/g, '<B>').replace(/<\/strong>/g, '</B>'));
+    const en = (questionstxt.split("</p>").join("").replace(/<\/p><p>/g, '//camp//').replace(/<p>/g, '').replace(/<\/p>/g, '').replace(/<br>/g, '').replace(/<p>/g, '').replace(/<strong>/g, '<B>').replace(/<\/strong>/g, '</B>'));
     const data_send = {
       "course_id": CourseId,
       "unit_id": unitId,
@@ -400,7 +398,7 @@ console.log(en)
                           </button>
                         </div>
                       </Col>
-                   
+
                     </Row>
                   </div>
                 </div>

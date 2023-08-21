@@ -63,8 +63,7 @@ const WrittenQuestions = ({ CourseId, allunitdata, unitId, cd }) => {
       }
     }
 
-    const en = (questionstxt.split("</p>").join("").replace(/<p>/g, '//camp//').replace(/<\/p><p>/g, '').replace(/<br>/g, '')
-      .replace(/<p>/g, '').replace(/<\/p>/g, '//camp//').replace(/<strong>/g, '<B>').replace(/<\/strong>/g, '</B>'));
+    const en = (questionstxt.split("</p>").join("").replace(/<\/p><p>/g, '//camp//').replace(/<p>/g, '').replace(/<\/p>/g, '').replace(/<br>/g, '').replace(/<p>/g, '').replace(/<strong>/g, '<B>').replace(/<\/strong>/g, '</B>'));
     // </p><p>
     console.log(en)
     // console.log("original after : ", en.replace(/\/\/camp\/\//g, '<p><br></p>').replace(/<B>/g, '<strong>').replace(/<\/B>/g, '</strong>'));
@@ -172,6 +171,7 @@ const WrittenQuestions = ({ CourseId, allunitdata, unitId, cd }) => {
   const [selectedFlashCard, setFlashCard] = useState(false);
   const [Units, setUnits] = useState(false);
   const [itemReport, setItemReport] = useState(false);
+  const [studentdata, setstudentdata] = useState({});
   const getReports = async () => {
     setItemLoader(true)
     const reports = await axios.post("https://camp-coding.tech/dr_elmatary/admin/reports/select_reports.php", {
@@ -200,6 +200,17 @@ const WrittenQuestions = ({ CourseId, allunitdata, unitId, cd }) => {
     } catch (err) {
       console.log(err);
     }
+  }
+  const getstudentdata = (id) => {
+    console.log(id)
+    const data_send = {
+      student_id: id,
+    }
+    axios.post("https://camp-coding.tech/dr_elmatary/admin/students/select_studnet_info.php", JSON.stringify(data_send))
+      .then((res) => {
+        console.log(res);
+        setstudentdata(res.message);
+      }).catch(err => console.log(err))
   }
   useEffect(() => {
     getUnits();
@@ -240,7 +251,7 @@ const WrittenQuestions = ({ CourseId, allunitdata, unitId, cd }) => {
       {
         Header: 'view',
         Cell: (cell) => {
-          return <button className="btn btn-primary" onClick={() => { setView(true); setItem(cell.cell.row.original) }}>
+          return <button className="btn btn-primary" onClick={() => { setView(true); setItem(cell.cell.row.original.student_data); console.log(cell.cell.row.original.student_data); getstudentdata(cell.cell.row.original.student_data?.student_id) }}>
             View
           </button>
         }
@@ -267,9 +278,9 @@ const WrittenQuestions = ({ CourseId, allunitdata, unitId, cd }) => {
         }
       },
       {
-        Header: 'Concat With Student',
+        Header: 'contact With Student',
         Cell: (cell) => {
-          return <a href={"https://wa.me/+2" + cell?.cell?.row?.original?.student_data?.phone} target="_blanck" style={{ color: "green", display: "block", width: "100%", textAlign: "center", fontSize: "22px", height: "100%" }}><WhatsApp /></a>
+          return <a href={"https://wa.me/+2" + cell?.cell?.row?.original?.student_data?.phone} target="_blank" style={{ color: "green", display: "block", width: "100%", textAlign: "center", fontSize: "22px", height: "100%" }}><WhatsApp /></a>
         }
 
       },
@@ -390,11 +401,22 @@ const WrittenQuestions = ({ CourseId, allunitdata, unitId, cd }) => {
               <Col md={12}>
                 <div>
                   <h3 style={{ width: "fit-content", padding: "10px 18px 10px 0", borderBottom: ".4px solid #80808054" }}>Report Type : {item?.report_type}</h3>
-
                   <div>
-                    <h5 style={{ width: "fit-content", padding: "10px 18px 10px 0", borderBottom: ".4px solid #80808054" }}>Written Question Details </h5>
+                    <h5 style={{ width: "fit-content", padding: "10px 18px 10px 0", borderBottom: ".4px solid #80808054" }}>Student Details </h5>
 
                     <h3> {item?.wq_title} </h3>
+                    <div className="student_infoflash">
+                      <img src={studentdata.student_avater_url} alt="" />
+                      <div>
+                        <h4>{studentdata.student_name}</h4>
+                        <p>{studentdata.student_email}</p>
+                        <p>{studentdata.phone}</p>
+                        {studentdata?.university_name && studentdata?.grade_title ? (
+                          <p>{studentdata?.university_name}-{studentdata?.grade_title}</p>
+                        ) : (null)}
+                        <a href={"https://wa.me/+2" + studentdata?.phone} target="_blank" style={{ color: "green", display: "block", width: "100%", textAlign: "center", fontSize: "22px", height: "100%" }}><WhatsApp /></a>
+                      </div>
+                    </div>
                     <p>
                       {item?.wq_value?.split("//camp//")?.map((item, index) => {
                         if (index < 4) {

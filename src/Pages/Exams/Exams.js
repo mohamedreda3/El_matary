@@ -46,29 +46,29 @@ const Exam = () => {
   // console.log(data)
 
 
-  const {course_data}=location.state;
+  const { course_data } = location.state;
   // console.log(course_id)
 
   const navigate = useNavigate();
 
 
-  const [examdata,setexamdata]=useState({
-    exam_name:'',
-    timer:'',
-    end_date:'',
-    start_date:'',
+  const [examdata, setexamdata] = useState({
+    exam_name: '',
+    timer: '',
+    end_date: '',
+    start_date: '',
   })
-  const [courses,setcourses]=useState([]);
+  const [courses, setcourses] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [assignexamshow, setassignexamshow] = useState(false);
-  const [addloading,setaddloading]=useState(false);
-  const [exams,setexams]=useState([]);
+  const [addloading, setaddloading] = useState(false);
+  const [exams, setexams] = useState([]);
 
-  const [selectedexam,setselectedexam]=useState("");
+  const [selectedexam, setselectedexam] = useState("");
 
-  const [coursesassined,setcoursesassined]=useState([]);
+  const [coursesassined, setcoursesassined] = useState([]);
 
-  const [assignloading,setassignloading]=useState(false);
+  const [assignloading, setassignloading] = useState(false);
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -84,100 +84,100 @@ const Exam = () => {
   // deadLineChecked
 
 
-  const getExams=()=>{
-    const data_send={
-      course_id:course_data.course_id
+  const getExams = () => {
+    const data_send = {
+      course_id: course_data.course_id
     }
     // console.log(data_send)
 
-    axios.post("https://camp-coding.tech/dr_elmatary/admin/Exams/select_exam.php",JSON.stringify(data_send))
-    .then((res)=>{
-      console.log(res)
-      setexams(res.message);
-      setselectedexam(res?.message[0]?.exam_id);
-    }).catch(err=>console.log(err))
+    axios.post("https://camp-coding.tech/dr_elmatary/admin/Exams/select_exam.php", JSON.stringify(data_send))
+      .then((res) => {
+        console.log(res)
+        setexams(res.message);
+        setselectedexam(res?.message[0]?.exam_id);
+      }).catch(err => console.log(err))
   }
 
-  const getcourses=()=>{
+  const getcourses = () => {
     axios.get("https://camp-coding.tech/dr_elmatary/admin/courses/select_courses.php")
-    .then((res)=>{
-      // console.log(res);
-      setcourses(res);
-      setexamdata({...examdata,course_id:res[0].course_id})
-    })
+      .then((res) => {
+        // console.log(res);
+        setcourses(res);
+        setexamdata({ ...examdata, course_id: res[0].course_id })
+      })
   }
 
-  const handleaddexam=()=>{
+  const handleaddexam = () => {
     setaddloading(true);
-    const datasend={
+    const datasend = {
       ...examdata,
-      course_id:course_data.course_id
+      course_id: course_data.course_id
     };
     console.log(datasend)
-    axios.post("https://camp-coding.tech/dr_elmatary/admin/Exams/insert_exam.php",JSON.stringify(datasend))
-    .then((res)=>{
-      console.log(res)
-      if(res.status=='success'){
-        toast.success("exam has added successfully");
-      }
-      else if(res.status=='error'){
-        toast.error(res.message);
-      }
-      else{
-        toast.error("SomeThing Went Error");
-      }
-      getExams()
-    }).catch(err=>console.log(err))
-    .finally(()=>{
-      setaddloading(false);
-    });
+    axios.post("https://camp-coding.tech/dr_elmatary/admin/Exams/insert_exam.php", JSON.stringify(datasend))
+      .then((res) => {
+        console.log(res)
+        if (res.status == 'success') {
+          toast.success("exam has added successfully");
+        }
+        else if (res.status == 'error') {
+          toast.error(res.message);
+        }
+        else {
+          toast.error("SomeThing Went Error");
+        }
+        getExams()
+      }).catch(err => console.log(err))
+      .finally(() => {
+        setaddloading(false);
+      });
   }
 
 
-  const hanldeassign=()=>{
+  const hanldeassign = () => {
     setassignexamshow(false)
     setassignloading(true);
 
-    const coursesdata=[...coursesassined];
+    const coursesdata = [...coursesassined];
     console.log(coursesdata)
-    let courses_data="";
-    for(let i=0;i<coursesdata.length;i++){
-      if(i==0){
-        courses_data+=coursesdata[i].value
+    let courses_data = "";
+    for (let i = 0; i < coursesdata.length; i++) {
+      if (i == 0) {
+        courses_data += coursesdata[i].value
       }
-      else{
-        courses_data+="***matary***"+coursesdata[i].value;
+      else {
+        courses_data += "***matary***" + coursesdata[i].value;
       }
     }
     console.log(courses_data);
 
 
-    const data_send={
-      exam_id:selectedexam,
+    const data_send = {
+      exam_id: selectedexam,
       courses_data
     }
-    axios.post("https://camp-coding.tech/dr_elmatary/admin/Exams/assign_exam_to_course.php",JSON.stringify(data_send))
-    .then((res)=>{
-      console.log(res);
-      if(res.status=='success'){
-        toast.success(res.message);
-      }
-      else if(res.status=='error'){
-        toast.error(res.message);
-      }
-      else {
-        toast.error("Something Went Error");
-      }
-    }).catch(err=>console.log(err))
-    .finally(()=>{
-      setassignloading(false);
-    })
+    axios.post("https://camp-coding.tech/dr_elmatary/admin/Exams/assign_exam_to_course.php", JSON.stringify(data_send))
+      .then((res) => {
+        console.log(res);
+        if (res.status == 'success') {
+          toast.success(res.message);
+        }
+        else if (res.status == 'error') {
+          toast.error(res.message);
+        }
+        else {
+          toast.error("Something Went Error");
+        }
+      }).catch(err => console.log(err))
+      .finally(() => {
+        setassignloading(false);
+      })
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     getcourses();
     getExams();
-  },[])
+  }, [])
   return (
     <React.Fragment>
       <div className="page-content">
@@ -195,9 +195,10 @@ const Exam = () => {
                           <div>
                             <button
                               type="button"
-                              className="btn btn-success mb-4"
+                              className="btn btn-success"
                               data-bs-toggle="modal"
                               data-bs-target="#addCourseModal"
+                              style={{ whiteSpace: "nowrap", width: "fit-content" }}
                               onClick={() => {
                                 showModal();
                               }}
@@ -205,6 +206,7 @@ const Exam = () => {
                               <i className="mdi mdi-plus me-1"></i> Add Exam
                             </button>
                           </div>
+                           
                         </Col>
                         <Col className="col-sm">
                           <div>
@@ -222,7 +224,7 @@ const Exam = () => {
                             </button>
                           </div>
                         </Col>
-                      
+
                       </Row>
                     </div>
                   </div>
@@ -268,8 +270,8 @@ const Exam = () => {
                 id="exam_name"
                 placeholder="exam name"
                 required
-                onChange={(e)=>{
-                  setexamdata({...examdata,exam_name:e.target.value})
+                onChange={(e) => {
+                  setexamdata({ ...examdata, exam_name: e.target.value })
                 }}
               />
             </div>
@@ -345,7 +347,7 @@ const Exam = () => {
                       sx={{ mb: 1 }}
                       alignItems="center"
                       style={{
-                        padding:"0.47rem 0.75rem"
+                        padding: "0.47rem 0.75rem"
                       }}
                     >
                       <Slider
@@ -355,7 +357,7 @@ const Exam = () => {
                         valueLabelDisplay="auto"
                         onChange={(e) => {
                           // console.log(e.target.value)
-                          setexamdata({...examdata,timer:e.target.value})
+                          setexamdata({ ...examdata, timer: e.target.value })
                         }}
                       />
                     </Stack>
@@ -389,9 +391,9 @@ const Exam = () => {
                 {deadLineChecked ? (
                   <div className="inputField withtext">
                     <label htmlFor="time">Start Date</label>
-                    <Input onChange={(e)=>{
+                    <Input onChange={(e) => {
                       // console.log(moment(e.timeStamp).format('Y-M-D H:m:s'))
-                      setexamdata({...examdata,start_date:moment(Date.now()).format('Y-M-D H:m:s')})
+                      setexamdata({ ...examdata, start_date: moment(Date.now()).format('Y-M-D H:m:s') })
                     }} type="date" />
                   </div>
                 ) : null}
@@ -417,35 +419,35 @@ const Exam = () => {
                   placeholder="end exam"
                   required
                   checked={deadLineChecked}
-                  // onChange={(e) => setDeadLineChecked(e.currentTarget.checked)}
+                // onChange={(e) => setDeadLineChecked(e.currentTarget.checked)}
                 />
                 {deadLineChecked ? (
                   <div className="inputField withtext">
                     <label htmlFor="time">end Date</label>
-                    <Input onChange={(e)=>{
+                    <Input onChange={(e) => {
                       // console.log(e)
                       // console.log(moment(Date.now()).format('Y-M-D H:m:s'));
-                      setexamdata({...examdata,end_date:moment(Date.now()).format('Y-M-D H:m:s')})
+                      setexamdata({ ...examdata, end_date: moment(Date.now()).format('Y-M-D H:m:s') })
                     }} type="date" />
                   </div>
                 ) : null}
               </div>
             </div>
             {
-              addloading?(
+              addloading ? (
                 <div style={{
-                  textAlign:'end'
-                 }}>
-                  <Spinner style={{ color:'blue' }}/>
+                  textAlign: 'end'
+                }}>
+                  <Spinner style={{ color: 'blue' }} />
                 </div>
-              ):(
+              ) : (
                 <button
-              className="btn btn-success"
-              style={{ margin: "10px 0 0 auto" }}
-            >
-              {" "}
-              Add Exam{" "}
-            </button>
+                  className="btn btn-success"
+                  style={{ margin: "10px 0 0 auto" }}
+                >
+                  {" "}
+                  Add Exam{" "}
+                </button>
               )
             }
           </form>
@@ -473,12 +475,12 @@ const Exam = () => {
 
             <div className="inputField withtext">
               <label htmlFor="exam_name">Exam Name</label>
-              <select onChange={(e)=>{
+              <select onChange={(e) => {
                 // set
                 setselectedexam(e.target.value);
               }} value={selectedexam} className="form-control" name="" id="">
                 {
-                  exams.map((item)=>{
+                  exams.map((item) => {
                     return (
                       <option value={item.exam_id}>{item.exam_name}</option>
                     )
@@ -492,23 +494,23 @@ const Exam = () => {
             <div className="inputField withtext">
               <label htmlFor="exam_name">Course</label>
               <Select
-                onChange={(e)=>{
-                console.log(e)
-                setcoursesassined(e);
+                onChange={(e) => {
+                  console.log(e)
+                  setcoursesassined(e);
                 }}
                 // defaultValue={[...courses]}
                 isMulti
                 name="colors"
-                options={courses.map(item=>{return {label: item.course_name,value: item.course_id}})}
+                options={courses.map(item => { return { label: item.course_name, value: item.course_id } })}
                 className="basic-multi-select"
                 classNamePrefix="select"
               />
             </div>
-            <div style={{ marginTop:'30px',textAlign:'end' }}>
+            <div style={{ marginTop: '30px', textAlign: 'end' }}>
               {
-                assignloading?(
-                  <Spinner style={{ color:'blue' }}/>
-                ):(
+                assignloading ? (
+                  <Spinner style={{ color: 'blue' }} />
+                ) : (
                   <button className="btn btn-success">assign</button>
                 )
               }
@@ -518,7 +520,7 @@ const Exam = () => {
 
 
       </div>
-      <ToastContainer/>
+      <ToastContainer />
     </React.Fragment>
   );
 };

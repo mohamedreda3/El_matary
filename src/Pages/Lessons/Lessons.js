@@ -214,11 +214,6 @@ const Lessons = () => {
       Header: "Video Title",
       accessor: "new_title",
     },
-    // {
-    //   Header: "Course Name",
-    //   accessor: "course_name",
-    //   Filter: false,
-    // },
     {
       Header: 'Free',
       Cell: (cell) => {
@@ -239,19 +234,19 @@ const Lessons = () => {
         </DropdownItem>
       }
     },
-    {
-      Header: 'Action',
-      Cell: (cell) => {
-        return (
-          <>
-            <button className="btn btn-primary" onClick={() => {
-              navigate("/videos/unit-videos", { state: cell.cell.row.original })
-            }}>View</button>
+    // {
+    //   Header: 'Action',
+    //   Cell: (cell) => {
+    //     return (
+    //       <>
+    //         <button className="btn btn-primary" onClick={() => {
+    //           navigate("/videos/unit-videos", { state: cell.cell.row.original })
+    //         }}>View</button>
 
-          </>
-        )
-      }
-    },
+    //       </>
+    //     )
+    //   }
+    // },
   ]
 
   const Video = videoData.assign_data;
@@ -480,7 +475,7 @@ const Lessons = () => {
 
                             {videoData_r[0]?.publitio_data && videoData_r[0]?.publitio_data.length ? <p style={{ "margin": "10px 0" }}><span style={{ fontWeight: "900", fontSize: "15px" }}>Publitio Video : </span> <p
                               onClick={() => {
-                                setPubLink(videoData_r[0]?.publitio_data);
+                                setPubLink("https://camp-coding.tech/dr_elmatary/publitio_player?q=" + videoData_r[0]?.publitio_data);
                                 setVimLink(false);
                               }}
                               className="btn btn-primary" >Show Video</p></p> : null}
@@ -488,7 +483,7 @@ const Lessons = () => {
                             {videoData_r[0]?.vimeo_data && videoData_r[0]?.vimeo_data.length ? <p style={{ "margin": "10px 0" }}><span style={{ fontWeight: "900", fontSize: "15px" }}>Vimeo Video : </span> <p
                               onClick={() => {
                                 setPubLink(false);
-                                setVimLink(videoData_r[0]?.publitio_data);
+                                setVimLink(videoData_r[0]?.vimeo_data);
                               }}
                               className="btn btn-primary">Show Video</p></p> : null}
                           </div> : null

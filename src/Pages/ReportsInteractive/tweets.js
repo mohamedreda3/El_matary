@@ -102,6 +102,7 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
   const [item, setItem] = useState(false);
   const [itemLoader, setItemLoader] = useState(false)
   const [itemReport, setItemReport] = useState(false);
+  const [studata,setstudata]=useState({});
   const getTweets = async () => {
     setItemLoader(true)
     const data_send = {
@@ -171,8 +172,7 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
         tweetstxt += '//camp//' + tweets[i]?.tweet_value + '//camp//';
       }
     }
-    const en = (tweetstxt.split("</p>").join("").replace(/<p>/g, '//camp//').replace(/<\/p><p>/g, '').replace(/<br>/g, '')
-      .replace(/<p>/g, '').replace(/<\/p>/g, '//camp//').replace(/<strong>/g, '<B>').replace(/<\/strong>/g, '</B>'));
+    const en = (tweetstxt.split("</p>").join("").replace(/<\/p><p>/g, '//camp//').replace(/<p>/g, '').replace(/<\/p>/g, '').replace(/<br>/g, '').replace(/<p>/g, '').replace(/<strong>/g, '<B>').replace(/<\/strong>/g, '</B>'));
     const data_send = {
       "course_id": CourseId,
       "unit_id": unitId,
@@ -202,12 +202,14 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
   const [selectedUnit, setSelectedUnit] = useState(false);
   const [selectedFlashCard, setFlashCard] = useState(false);
   const [Units, setUnits] = useState(false);
+  const [studentdata,setstudentdata]=useState({});
   const getReports = async () => {
     setItemLoader(true)
     const reports = await axios.post("https://camp-coding.tech/dr_elmatary/admin/reports/select_reports.php", {
       "report_for": "tweets"
     });
     console.log(CourseId)
+    console.log(reports)
     setItemReport(reports?.message?.filter(item => item?.course_id == CourseId)?.filter(item => item?.status == "pending"));
     setItemLoader(false);
   }
@@ -233,8 +235,21 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
     }
   }
 
+  const getstudentdata=(id)=>{
+    const data_send={
+      studnet_id:item.studnet_id
+    }
+    axios.post("https://camp-coding.tech/dr_elmatary/admin/students/select_studnet_info.php",JSON.stringify(data_send))
+    .then((res)=>{
+      console.log(res);
+      setstudentdata(res.message);
+    }).catch(err=>console.log(err))
+  }
+
+
   useEffect(() => {
     getUnits();
+    // getstudentdata();
   }, [selectedCourse])
   const [view, setView] = useState(false)
   const [showSolve, setShowSolve] = useState(false);
@@ -269,9 +284,9 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
       accessor: 'report_type',
     },
     {
-      Header: 'View Student', 
+      Header: 'View Student',
       Cell: (cell) => {
-        return <button className="btn btn-primary" onClick={() => { setView(true); setItem(cell.cell.row.original) }}>
+        return <button className="btn btn-primary" onClick={() => { setView(true); setItem(cell.cell.row.original);setstudata(cell.cell.row.original?.student_data);getstudentdata(cell.cell.row.original?.student_data?.student_id) }}>
           View
         </button>
       }
@@ -403,7 +418,7 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
           <Col lg={12}>
             <Card>
               <CardBody>
-                
+
                 <div id="table-invoices-list">
 
                   {itemLoader ? <Loader /> : <>
@@ -687,6 +702,18 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
                 <div>
                   <div>
                     <h3> {item?.tweet_title} </h3>
+                    <div className="student_infoflash">
+                      <img src={studentdata.student_avater_url} alt="" />
+                      <div>
+                        <h4>{studentdata.student_name}</h4>
+                        <p>{studentdata.student_email}</p>
+                        <p style={{ display:'flex',alignItems:'center' }}>{studentdata.phone}<a href={"https://wa.me/+2" + studentdata?.phone} target="_blank" style={{ color: "green", display: "block", margin:'0px',width: "100%", textAlign: "center", fontSize: "22px", height: "100%" }}><WhatsApp /></a></p>
+                        {studentdata?.university_name&&studentdata?.grade_title?(
+                          <p style={{ marginTop:'-4px' }}>{studentdata?.university_name}-{studentdata?.grade_title}</p>
+                        ):(null)}
+
+                      </div>
+                    </div>
                     <p>
                       {item?.tweet_value?.split("//camp//")?.map((item, index) => {
                         if (index < 4) {

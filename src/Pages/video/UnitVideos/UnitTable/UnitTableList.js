@@ -71,7 +71,7 @@ const UnitListTable = ({ Units, courseData, showHideUnit }) => {
                                         showHideUnit(send_data);
                                     }
                                 }>Show/Hide</DropdownItem>
-                                <DropdownItem>Delete</DropdownItem>
+                                {/* <DropdownItem>Delete</DropdownItem> */}
                             </DropdownMenu>
                         </UncontrolledDropdown>
                     </>

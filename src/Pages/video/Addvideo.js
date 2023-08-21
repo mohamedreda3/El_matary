@@ -10,7 +10,7 @@ import Breadcrumbs from "../../components/Common/Breadcrumb";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { Radio, RadioGroup } from "rsuite";
-
+import { Loader, SelectPicker } from "rsuite";
 const AddVideo = () => {
   document.title = "Add Video | Matary - React Admin & Dashboard Template";
 
@@ -66,6 +66,7 @@ const AddVideo = () => {
   const formRef = useRef();
   const navigate = useNavigate()
   const addVideo = async () => {
+    setLoading(true);
     const send_data =
     {
       "video_title": formRef.current.video_title.value,
@@ -73,20 +74,28 @@ const AddVideo = () => {
       "vimeo_data": formRef.current.vimeo_data.value,
       "publitio_data": formRef.current.publitio_data.value
     }
+    try {
+      const units = await axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/insert_video.php", send_data);
+      console.log(units);
+      if (units.status == "success") {
+        toast.success("Video Added Successfully");
+        setLoading(false);
+        // navigate("/videos");
+      } else {
+        toast.error(units.message);
+        setLoading(false);
+      }
+    } catch (err) {
+        toast.error("Network Error");
+        setLoading(false);
 
-    const units = await axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/insert_video.php", send_data);
-    console.log(units);
-    if (units.status == "success") {
-      toast.success("Added");
-      navigate("/videos");
-    } else {
-      toast.error(units.message);
     }
+
   };
 
   const [pub, setPub] = useState(false);
   const [vim, setVim] = useState(true);
-
+  const [loading, setLoading] = useState(false)
   return (
     <React.Fragment>
       <div className="page-content">
@@ -154,32 +163,32 @@ const AddVideo = () => {
                           />
                         </div>
 
-                        
-                          <div className="mb-0">
-                            <label className="form-label" htmlFor="videodesc">
-                              Vimeo Link
-                            </label>
-                            <input
-                              className="form-control"
-                              id="videodesc"
-                              placeholder="Enter Link"
-                              rows="4"
-                              name="vimeo_data"
-                            />
-                          </div> 
-                        
-                          <div className="mb-0">
-                            <label className="form-label" htmlFor="videodesc">
-                              publitio Link
-                            </label>
-                            <input
-                              className="form-control"
-                              id="videodesc"
-                              placeholder="Enter Link"
-                              rows="4"
-                              name="publitio_data"
-                            />
-                          </div></form>
+
+                        <div className="mb-0">
+                          <label className="form-label" htmlFor="videodesc">
+                            Vimeo Link
+                          </label>
+                          <input
+                            className="form-control"
+                            id="videodesc"
+                            placeholder="Enter Link"
+                            rows="4"
+                            name="vimeo_data"
+                          />
+                        </div>
+
+                        <div className="mb-0">
+                          <label className="form-label" htmlFor="videodesc">
+                            publitio Link
+                          </label>
+                          <input
+                            className="form-control"
+                            id="videodesc"
+                            placeholder="Enter Link"
+                            rows="4"
+                            name="publitio_data"
+                          />
+                        </div></form>
                     </div>
                   </Collapse>
                 </Card>
@@ -195,18 +204,21 @@ const AddVideo = () => {
                 {" "}
                 <i className="bx bx-x me-1"></i> Cancel{" "}
               </Link>
-              <Link
-                to="#"
-                className="btn btn-success"
-                data-bs-toggle="modal"
-                data-bs-target="#success-btn"
-                onClick={() => {
-                  addVideo()
-                }}
-              >
-                {" "}
-                <i className=" bx bx-file me-1"></i> Save{" "}
-              </Link>
+              {
+                !loading ? <Link
+                  to="#"
+                  className="btn btn-success"
+                  data-bs-toggle="modal"
+                  data-bs-target="#success-btn"
+                  onClick={() => {
+                    addVideo()
+                  }}
+                >
+                  {" "}
+                  <i className=" bx bx-file me-1"></i> Save{" "}
+                </Link> : <Loader />
+              }
+
             </Col>
           </Row>
         </Container>

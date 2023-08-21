@@ -12,7 +12,7 @@ import TableContainer from "../../../components/Common/TableContainer";
 import { ExamData } from "../../../CommonData/Data/Exams";
 import moment from "moment";
 
-const ExamListTable = ({exams}) => {
+const ExamListTable = ({ exams }) => {
   const navigate = useNavigate();
   const columns = [
     {
@@ -23,7 +23,7 @@ const ExamListTable = ({exams}) => {
     {
       Header: "exam_name",
       accessor: "exam_name",
-    //   Filter: false,
+      //   Filter: false,
     },
     // {
     //   Header: "exam_details",
@@ -37,8 +37,8 @@ const ExamListTable = ({exams}) => {
     },
     {
       Header: "start date",
-      Cell:(cell)=>{
-        return(
+      Cell: (cell) => {
+        return (
           <span>{moment(cell.cell.row.original.start_date).format('Y-M-D H:m:s')}</span>
         )
       },
@@ -46,9 +46,9 @@ const ExamListTable = ({exams}) => {
     },
     {
       Header: "end date",
-      Cell:(cell)=>{
+      Cell: (cell) => {
         // {console.log(cell)}
-        return(
+        return (
           <span>{moment(cell.cell.row.original.end_date).format('Y-M-D H:m:s')}</span>
         )
       },
@@ -73,9 +73,9 @@ const ExamListTable = ({exams}) => {
                 <DropdownItem
                   onClick={() => {
                     console.log(cell.cell.row.original);
-                    const examdata={...cell.cell.row.original};
+                    const examdata = { ...cell.cell.row.original };
                     navigate("/examquestion", {
-                      state: { examdata},
+                      state: { examdata },
                     });
                   }}
                 >

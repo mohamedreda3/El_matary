@@ -481,7 +481,7 @@ const Lessons = () => {
                             {videoData_r[0]?.vimeo_data && videoData_r[0]?.vimeo_data.length ? <p style={{ "margin": "10px 0" }}><span style={{ fontWeight: "900", fontSize: "15px" }}>Vimeo Video : </span> <p
                               onClick={() => {
                                 setPubLink(false);
-                                setVimLink(videoData_r[0]?.publitio_data);
+                                setVimLink(videoData_r[0]?.vimeo_data);
                               }}
                               className="btn btn-primary">Show Video</p></p> : null}
                           </div> : null

@@ -74,7 +74,7 @@ const BookListTable = () => {
                   Download
                 </a>
 
-                <DropdownItem>Delete</DropdownItem>
+                {/* <DropdownItem>Delete</DropdownItem> */}
               </DropdownMenu>
             </UncontrolledDropdown>
           </>

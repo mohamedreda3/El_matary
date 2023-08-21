@@ -56,9 +56,7 @@ const StudentCourses = () => {
         {
           subs && subs.length ? subs.map((item, index) => {
             return <div
-            onClick={()=>{
-              navigate("/studentcouunits",{state:{data:location?.state?.unitData}})
-            }}
+            
               style={{
                 textAlign: "start",cursor:'pointer'
               }}
@@ -69,7 +67,11 @@ const StudentCourses = () => {
                 //   <span style={{ fontWeight: "900", fontSize: "18px" }}></span> <em style={{ fontStyle: "normal", fontWeight: "300" }}> Active </em>
                 // </h5>
               }
-              <img src={item.course_photo_url} alt="" />
+              <img src={item.course_photo_url} alt="" 
+              onClick={()=>{
+                navigate("/studentcouunits",{state:{data:location?.state?.unitData}})
+              }}
+              />
               <h5 style={{ marginBottom: "15px" }}><span style={{ fontWeight: "900", fontSize: "15px" }}>Course : </span> <em style={{ fontStyle: "normal", fontWeight: "300", fontSize: "14.1px" }}> {item.course_name} </em></h5>
               <div>
                 <p style={{ "margin": 0 }}><span style={{ fontWeight: "900", fontSize: "15px" }}>subscription start date : </span> <em style={{ fontStyle: "normal" }}> {item.student_subscription_start} </em></p>

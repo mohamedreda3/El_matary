@@ -218,7 +218,7 @@ const AddCourse = () => {
                                                     </Col>
 
                                                 </Row>
-                                                <Row>
+                                                {/* <Row>
                                                     <div className="col-md-6">
                                                         <div className="mb-3">
                                                             <label htmlFor="category_id" className="form-label">
@@ -232,7 +232,7 @@ const AddCourse = () => {
                                                             </select>
                                                         </div>
                                                     </div>
-                                                </Row>
+                                                </Row> */}
 
                                                 <Row>
                                                     <div className="col-md-6">

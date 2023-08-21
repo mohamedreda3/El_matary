@@ -37,7 +37,7 @@ import { MenuItem, Select } from "@mui/material";
 import { Loader } from "rsuite";
 
 const Flash_Cards = ({ CourseId, unitId, cd }) => {
-  console.log(unitId)
+  // console.log(unitId)
   const [type, setType] = useState(false);
   const [videoLink, setVideoLink] = useState(false);
 
@@ -79,7 +79,6 @@ const Flash_Cards = ({ CourseId, unitId, cd }) => {
       "unit_id": unitId,
       "author": ""
     }
-    console.log(data_send);
     const add = await axios.post("https://camp-coding.tech/dr_elmatary/admin/flash_cards/add_flash_cards.php", data_send);
     console.log(add);
     if (add.status == "success") {
@@ -139,6 +138,7 @@ const Flash_Cards = ({ CourseId, unitId, cd }) => {
     const reports = await axios.post("https://camp-coding.tech/dr_elmatary/admin/reports/select_reports.php", {
       "report_for": "flash_cards"
     });
+    // console.log(reports);
     setItemReport(reports?.message?.filter(item => item?.course_id == CourseId)?.filter(item => item?.status == "pending"));
     setItemLoader(false);
   }
@@ -199,6 +199,8 @@ const Flash_Cards = ({ CourseId, unitId, cd }) => {
   const [side4, setSide4] = useState(false);
   const [isEditBack, setIsEditBack] = useState(false);
 
+  const [studentdata, setstudentdata] = useState({});
+
   useEffect(() => {
     setIsBack(true)
   }, [side2]);
@@ -226,6 +228,21 @@ const Flash_Cards = ({ CourseId, unitId, cd }) => {
       toast.error(err.message)
     })
   }
+
+  const getstudentdata = (id) => {
+    console.log(id)
+    const data_send = {
+      student_id: id,
+    }
+    axios.post("https://camp-coding.tech/dr_elmatary/admin/students/select_studnet_info.php", JSON.stringify(data_send))
+      .then((res) => {
+        console.log(res);
+        setstudentdata(res.message);
+      }).catch(err => console.log(err))
+  }
+
+
+
   const columns =
     [
       {
@@ -245,7 +262,8 @@ const Flash_Cards = ({ CourseId, unitId, cd }) => {
       {
         Header: 'View Student',
         Cell: (cell) => {
-          return <button className="btn btn-primary" onClick={() => { setView(true); setItem(cell.cell.row.original?.student_data) }}>
+          return <button
+            className="btn btn-primary" onClick={() => { console.log(cell.cell.row.original?.student_data); setView(true); setItem(cell.cell.row.original?.student_data); getstudentdata(cell.cell.row.original?.student_data?.student_id) }}>
             View
           </button>
         }
@@ -272,9 +290,9 @@ const Flash_Cards = ({ CourseId, unitId, cd }) => {
         }
       },
       {
-        Header: 'Concat With Student',
+        Header: 'contact With Student',
         Cell: (cell) => {
-          return <a href={"https://wa.me/+2" + cell?.cell?.row?.original?.student_data?.phone} target="_blanck" style={{ color: "green", display: "block", width: "100%", textAlign: "center", fontSize: "22px", height: "100%" }}><WhatsApp /></a>
+          return <a href={"https://wa.me/+2" + cell?.cell?.row?.original?.student_data?.phone} target="_blank" style={{ color: "green", display: "block", width: "100%", textAlign: "center", fontSize: "22px", height: "100%" }}><WhatsApp /></a>
         }
 
       },
@@ -291,7 +309,7 @@ const Flash_Cards = ({ CourseId, unitId, cd }) => {
                   <DropdownItem onClick={() => {
                     setShowSolve(true);
                     setItem(cell.cell.row.original)
-                  }}>Set As Solved</DropdownItem> 
+                  }}>Set As Solved</DropdownItem>
                   <DropdownItem onClick={() => { setEdit(true); setItem(cell.cell.row.original?.report_item_data); }}>Edit</DropdownItem>
                 </DropdownMenu>
               </UncontrolledDropdown>
@@ -421,7 +439,9 @@ const Flash_Cards = ({ CourseId, unitId, cd }) => {
         </ModalBody>
       </Modal>
 
-      <Modal isOpen={view} toggle={() => setView(false)}>
+      <Modal className="modelflash" style={{
+        minHeight: '300px'
+      }} isOpen={view} toggle={() => setView(false)}>
         <ModalHeader toggle={() => setView(false)} tag="h4">
           Flash Card
         </ModalHeader>
@@ -434,18 +454,36 @@ const Flash_Cards = ({ CourseId, unitId, cd }) => {
             <Row>
 
               <Col md={12}>
-                <h3 style={{ width: "fit-content", padding: "10px 18px 10px 0", borderBottom: ".4px solid #80808054" }}>Report Type : {item?.report_type}</h3>
+                <h3 style={{ width: "fit-content", padding: "-8px 18px 5px 0", borderBottom: ".4px solid #80808054" }}>Report Type : {item?.report_type}</h3>
                 <div>
-                  <h5 style={{ width: "fit-content", padding: "10px 18px 10px 0", borderBottom: ".4px solid #80808054" }}>Written Question Details </h5>
-                  <div class={isEditBack ? "card-flid back" : "card-flid"}>
-                    <div class="card-inner">
+                  <h5 style={{ width: "fit-content", padding: "10px 18px 10px 0", borderBottom: ".4px solid #80808054" }}>Student Details </h5>
+                  <div className="student_infoflash">
+                    <img src={studentdata?.student_avater_url} alt="" />
+                    <div>
+                      <h4>{studentdata?.student_name}</h4>
+                      <p>{studentdata?.student_email}</p>
+                      <p style={{ display: 'flex', alignItems: 'center', flexDirection: "column" }}>
+                        {studentdata?.phone}
+                      </p>
+                      {studentdata?.university_name && studentdata?.grade_title ? (
+                        <p style={{ marginTop: '-4px' }}>{studentdata?.university_name} - {studentdata?.grade_title}</p>
+                      ) : (null)}
+
+                      <a href={"https://wa.me/" + studentdata?.phone}
+
+                        style={{ color: "green", display: "block", margin: '0px', width: "100%", textAlign: "center", fontSize: "22px", height: "100%" }} target="_blanck">
+                        <WhatsApp />
+                      </a>
+
+                    </div>
+                    {/* <div class="card-inner">
                       <div class="card-front">
                         {item?.flash_card_side_1}
                       </div>
                       <div class="card-back">
                         {item?.flash_card_side_2}
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
               </Col>
@@ -453,6 +491,9 @@ const Flash_Cards = ({ CourseId, unitId, cd }) => {
           </Form>
         </ModalBody>
       </Modal>
+
+
+
       {
         showconf ? (
           <Confirm

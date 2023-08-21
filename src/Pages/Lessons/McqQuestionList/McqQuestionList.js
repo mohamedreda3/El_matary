@@ -114,6 +114,12 @@ const McqQuestionList = ({ Units, courseData,updatemcq }) => {
             accessor: 'question_text',
         },
         {
+          Header: 'question Image',
+          Cell: (cell) => {
+            return <img src={cell.cell.row.original.question_image_url} />
+          }
+        },
+        {
           Header:'question  answers',
           Cell: (cell) => {
             return (

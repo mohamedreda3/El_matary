@@ -114,6 +114,7 @@ const SidebarData = [
     icon: "bx bx-store icon nav-icon",
     subItem: [
       { sublabel: "List Students", link: "/students" },
+      { sublabel: "Don't Marry", link: "/DoNotMarry" },
       // { sublabel: "Ended Subscription", link: "/endedsubscription" },
       // { sublabel: "Canceled Subscription", link: "/canceledsubscription" },
       // { sublabel: "Daily Income", link: "/dailyIncome" },

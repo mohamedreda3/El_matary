@@ -330,9 +330,10 @@ const Videos = () => {
                 required>
                 {
                   Courses && Courses.length ? Courses.map((item, index) => {
-                    return <MenuItem value={item.course_id} key={index}>{item.course_name}</MenuItem>
+                    return <MenuItem value={item.course_id} key={index}>{item.course_name} - {item.university_name}</MenuItem>
                   }) : <h3>No Courses</h3>
                 }
+                {console.log(item)}
               </Select>
             </div>
             {
@@ -450,6 +451,7 @@ const Videos = () => {
                 name="new_title"
                 id="new_title"
                 placeholder="Enter new_title"
+                defaultValue={item?.video_title}
               />
             </div>
             <div className="input_Field">
@@ -464,6 +466,7 @@ const Videos = () => {
                 name="video_duration"
                 id="video_duration"
                 placeholder="Enter video duration"
+                defaultValue={item?.video_duration}
               />
             </div>
 
@@ -479,6 +482,7 @@ const Videos = () => {
                 name="vimeo_data"
                 id="vimeo_data"
                 placeholder="Enter vimeo Link"
+                defaultValue={item?.vimeo_data}
               />
             </div>
 
@@ -495,6 +499,7 @@ const Videos = () => {
                 name="publitio_data"
                 id="publitio_data"
                 placeholder="Enter publitio Link"
+                defaultValue={item?.publitio_data}
               />
             </div>
 

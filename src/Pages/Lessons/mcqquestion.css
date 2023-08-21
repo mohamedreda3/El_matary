@@ -10,3 +10,7 @@
   cursor: pointer;
   /* transform: translateY(-50%); */
 }
+
+td img {
+  width: 90px;
+}

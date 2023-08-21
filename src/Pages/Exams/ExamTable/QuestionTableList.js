@@ -44,7 +44,7 @@ const QuestionTableList = () => {
                 <i className="bx bx-dots-horizontal-rounded"></i>
               </DropdownToggle>
               <DropdownMenu className="dropdown-menu-end">
-                <DropdownItem>Edit</DropdownItem>
+                {/* <DropdownItem>Edit</DropdownItem> */}
                 <DropdownItem
                   onClick={() => {
                     console.log(cell.cell.row.original);
@@ -55,7 +55,7 @@ const QuestionTableList = () => {
                 >
                   Show
                 </DropdownItem>
-                <DropdownItem>Delete</DropdownItem>
+                {/* <DropdownItem>Delete</DropdownItem> */}
               </DropdownMenu>
             </UncontrolledDropdown>
           </>

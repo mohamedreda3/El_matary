@@ -46,7 +46,7 @@ const LessonsTableList = () => {
                                       //   navigate("/units",{state:{coursedata:cell.cell.row.original}})
                                       // }}
                                     >Show</DropdownItem>
-                                    <DropdownItem>Delete</DropdownItem>
+                                    {/* <DropdownItem>Delete</DropdownItem> */}
                                 </DropdownMenu>
                             </UncontrolledDropdown>
                         </>
