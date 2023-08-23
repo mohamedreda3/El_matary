@@ -649,7 +649,7 @@ const Tweets = ({ CourseId, unitId, allunitdata, cd }) => {
                 required>
                 {
                   Courses && Courses.length ? Courses.map((item, index) => {
-                    return <MenuItem value={item.course_id} key={index}>{item.course_name}</MenuItem>
+                    return <MenuItem value={item.course_id} key={index}>{item.course_name}  - {item.university_name} - {item.grade_name}</MenuItem>
                   }) : <h3>No Courses</h3>
                 }
               </Select>

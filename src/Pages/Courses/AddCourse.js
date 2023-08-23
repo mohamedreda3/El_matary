@@ -41,7 +41,17 @@ const AddCourse = () => {
         setcol1(false);
         setcol3(false);
     };
+    const [category, setCategory] = useState(false);
 
+    const getCategories = async () => {
+        const getcategories = await axios.get("https://camp-coding.tech/dr_elmatary/admin/courses/select_category.php");
+        console.log(getcategories)
+        setCategory(getcategories);
+    }
+
+    useEffect(() => {
+        getCategories();
+    }, [])
 
     const [selectedFiles, setselectedFiles] = useState([]);
 
@@ -99,20 +109,22 @@ const AddCourse = () => {
         axios.get("https://camp-coding.tech/dr_elmatary/admin/universities/select_universities_grade.php")
             .then((res) => {
                 let filteresedarr = [...res?.message];
-                filteresedarr.filter((item) => item.university_id == selecteduni);
+                filteresedarr = filteresedarr.filter((item) => item.university_id == selecteduni);
+                console.log(selecteduni, "||", res, "||", filteresedarr)
                 setgrades(filteresedarr[0]?.grades);
-                setselectedgrade(filteresedarr[0]?.grades[0].grade_id)
+                setselectedgrade(filteresedarr[0]?.grades[0].grade_id);
             })
     }
-
-    useEffect(() => {
-        getgrades();
-    }, [selecteduni])
-
     useEffect(() => {
         getuniversits();
         // getgrades()
     }, [])
+    useEffect(() => {
+        getgrades();
+    }, [selecteduni])
+
+
+
 
     const image = useRef();
     // https://camp-coding.tech/dr_elmatary/admin/image_uplouder.php
@@ -127,6 +139,7 @@ const AddCourse = () => {
     }
     const courseDate = useRef();
     const navigate = useNavigate();
+    const [selectedCategory, setSelectedCategory] = useState(false)
     const addCourse = async (e) => {
         // e.preventDefault();
         const data_send = {
@@ -134,7 +147,7 @@ const AddCourse = () => {
             "course_price": courseDate.current.course_price.value,
             "course_photo_url": course_photo_url,
             "course_content": courseDate.current.course_content.value,
-            "category_id": 1,
+            "category_id": selectedCategory,
             "university_id": selecteduni,
             "grade_id": selectedgrade
         }
@@ -233,7 +246,24 @@ const AddCourse = () => {
                                                         </div>
                                                     </div>
                                                 </Row> */}
+                                                <div className="mb-3">
+                                                    <label htmlFor="category_id" className="form-label">
+                                                        Category
+                                                    </label>
+                                                    {category && category.length ?
+                                                        <select value={selectedCategory} onChange={(e) => {
+                                                            setSelectedCategory(e.target.value)
+                                                        }} className="form-control" data-trigger name="choices-single-category" id="choices-single-category">
+                                                            {
+                                                                category.map((item, index) => {
+                                                                    return (
+                                                                        <option value={item.category_id}>{item.category_label}</option>
 
+                                                                    )
+                                                                })
+                                                            }
+                                                        </select> : null}
+                                                </div>
                                                 <Row>
                                                     <div className="col-md-6">
                                                         <div className="mb-3">
@@ -254,21 +284,22 @@ const AddCourse = () => {
                                                             </select>
                                                         </div>
                                                     </div>
+
+
                                                     <div className="col-md-6">
                                                         <div className="mb-3">
                                                             <label htmlFor="category_id" className="form-label">
                                                                 Grade
                                                             </label>
-                                                            <select value={selectedgrade} onChange={(e) => {
+                                                            <select onChange={(e) => {
                                                                 setselectedgrade(e.target.value)
                                                             }} className="form-control" data-trigger name="choices-single-category" id="choices-single-category">
-                                                                {
+                                                                {grades && grades.length ? 
                                                                     grades.map((item, index) => {
                                                                         return (
                                                                             <option value={item.grade_id}>{item.grade_name}</option>
-
                                                                         )
-                                                                    })
+                                                                    }) : null
                                                                 }
                                                             </select>
                                                         </div>

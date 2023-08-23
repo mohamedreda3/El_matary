@@ -11,12 +11,53 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import { Radio, RadioGroup } from "rsuite";
 import { Loader, SelectPicker } from "rsuite";
+import { useEffect } from "react";
 const AddVideo = () => {
   document.title = "Add Video | Matary - React Admin & Dashboard Template";
 
   const [col1, setcol1] = useState(true);
   const [col2, setcol2] = useState(false);
   const [col3, setcol3] = useState(false);
+  const [videoName, setVideoName] = useState(null);
+  const [videoUrl, setVideoUrl] = useState(null);
+  const [videoDuration, setVideoDuration] = useState(null);
+  const [videoSwitchOn, setVideoSwitchOn] = useState(null);
+  const duration = useRef();
+
+  const getDuration = () => {
+    duration.current.addEventListener(
+      "loadeddata",
+      function () {
+        console.log("test", duration.current.duration);
+      },
+      false
+    );
+  };
+  const getName = () => {
+    setVideoSwitchOn(
+      videoUrl && videoUrl?.length
+        ? videoUrl?.split(".html")[0]+".m3u8"
+        : null
+    )
+    setVideoName(
+      videoUrl && videoUrl?.length
+        ? videoUrl
+            ?.split("/")
+            [videoUrl?.split("/")?.length - 1].split(".html")[0]
+        : null
+    );
+  };
+
+  useEffect(()=>{
+    getName();
+  },[videoUrl])
+
+  useEffect(() => {
+    if (duration && duration.current) {
+    getDuration();
+    }
+    console.log(videoSwitchOn, videoName, videoDuration, videoUrl, duration.current);
+  }, [videoSwitchOn]);
 
   const t_col1 = () => {
     setcol1(!col1);
@@ -29,8 +70,6 @@ const AddVideo = () => {
     setcol1(false);
     setcol3(false);
   };
-
-
 
   const [selectedFiles, setselectedFiles] = useState([]);
 
@@ -64,18 +103,20 @@ const AddVideo = () => {
   }
 
   const formRef = useRef();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const addVideo = async () => {
     setLoading(true);
-    const send_data =
-    {
-      "video_title": formRef.current.video_title.value,
-      "video_duration": formRef.current.video_duration.value,
-      "vimeo_data": formRef.current.vimeo_data.value,
-      "publitio_data": formRef.current.publitio_data.value
-    }
+    const send_data = {
+      video_title: formRef.current.video_title.value,
+      video_duration: formRef.current.video_duration.value,
+      vimeo_data: formRef.current.vimeo_data.value,
+      publitio_data: formRef.current.publitio_data.value,
+    };
     try {
-      const units = await axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/insert_video.php", send_data);
+      const units = await axios.post(
+        "https://camp-coding.tech/dr_elmatary/admin/videos/insert_video.php",
+        send_data
+      );
       console.log(units);
       if (units.status == "success") {
         toast.success("Video Added Successfully");
@@ -86,22 +127,23 @@ const AddVideo = () => {
         setLoading(false);
       }
     } catch (err) {
-        toast.error("Network Error");
-        setLoading(false);
-
+      toast.error("Network Error");
+      setLoading(false);
     }
-
   };
 
   const [pub, setPub] = useState(false);
   const [vim, setVim] = useState(true);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid={true}>
           <Breadcrumbs title="Ecommerce" breadcrumbItem="Add Video" />
           <Row>
+            {videoUrl && videoUrl.length ? (
+              <iframe ref={duration} src={"https://camp-coding.tech/dr_elmatary/publitio_player?q=" + videoUrl} width="370"></iframe>
+            ) : null}
             <Col lg={12}>
               <div className="custom-accordion" id="addvideo-accordion">
                 <Card>
@@ -147,6 +189,8 @@ const AddVideo = () => {
                             type="text"
                             className="form-control"
                             required
+                            value={videoName}
+                            onChange={(e)=> setVideoName(e.currentTarget.value)}
                           />
                         </div>
 
@@ -160,9 +204,10 @@ const AddVideo = () => {
                             placeholder="Enter Duration ( hh : mm : ss )"
                             rows="4"
                             name="video_duration"
+                            value={videoDuration}
+                            onChange={(e)=> setVideoDuration(e.currentTarget.value)}
                           />
                         </div>
-
 
                         <div className="mb-0">
                           <label className="form-label" htmlFor="videodesc">
@@ -186,14 +231,14 @@ const AddVideo = () => {
                             id="videodesc"
                             placeholder="Enter Link"
                             rows="4"
+                            onChange={(e)=>setVideoUrl(e.currentTarget.value)}
                             name="publitio_data"
                           />
-                        </div></form>
+                        </div>
+                      </form>
                     </div>
                   </Collapse>
                 </Card>
-
-
               </div>
             </Col>
           </Row>
@@ -204,21 +249,22 @@ const AddVideo = () => {
                 {" "}
                 <i className="bx bx-x me-1"></i> Cancel{" "}
               </Link>
-              {
-                !loading ? <Link
+              {!loading ? (
+                <Link
                   to="#"
                   className="btn btn-success"
                   data-bs-toggle="modal"
                   data-bs-target="#success-btn"
                   onClick={() => {
-                    addVideo()
+                    addVideo();
                   }}
                 >
                   {" "}
                   <i className=" bx bx-file me-1"></i> Save{" "}
-                </Link> : <Loader />
-              }
-
+                </Link>
+              ) : (
+                <Loader />
+              )}
             </Col>
           </Row>
         </Container>

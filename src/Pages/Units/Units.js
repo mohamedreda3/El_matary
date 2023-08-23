@@ -58,6 +58,20 @@ const Unit = () => {
     const showModal = () => {
         setIsModalOpen(true);
     };
+    const [clear, showClear] = useState(false);
+    const showClearModal = () => {
+        showClear(true)
+    }
+    const handleClear = async () => {
+        const units = await axios.post("", JSON.stringify({course_id: location.state.coursedata.course_id}));
+        if (units.status) {
+            toast.success(units.message);
+            await getUnits();
+            showClear(false)
+        } else {
+            toast.error(units.message);
+        }
+    }
     const handleOk = async (e) => {
         const send_data = {
             course_id: location.state.coursedata.course_id,
@@ -88,12 +102,13 @@ const Unit = () => {
             toast.error(units.message);
         }
     }
-
+   
 
     if (!location.state) {
         return navigate("/courses-list");
     }
-    console.log(location.state);
+
+
     return (
         <React.Fragment>
             <div className="page-content">
@@ -118,6 +133,19 @@ const Unit = () => {
                                                             }>
                                                             <i className="mdi mdi-plus me-1"></i>
                                                             Add Unit
+                                                        </button>
+                                                    </div>
+                                                </Col>
+                                                <Col className="col-sm">
+                                                    <div>
+                                                        <button type="button" className="btn btn-success mb-4" data-bs-toggle="modal" data-bs-target="#addCourseModal"
+                                                            onClick={
+                                                                () => {
+                                                                    showClearModal();
+                                                                }
+                                                            }>
+                                                            <i className="mdi mdi-plus me-1"></i>
+                                                            Clear Units
                                                         </button>
                                                     </div>
                                                 </Col>
@@ -172,7 +200,7 @@ const Unit = () => {
                             <Input style={
                                 {
                                     width: "100%",
-                                    padding: "10px", 
+                                    padding: "10px",
                                     borderRadius: "4px"
                                 }
                             }
@@ -188,6 +216,44 @@ const Unit = () => {
                             }>
                             {" "}
                             Add Unit{" "} </button>
+                    </form>
+                </Modal>
+
+
+                <Modal title="Clear units"
+                    isOpen={clear}>
+                    <form action="#"
+                        style={
+                            {
+                                padding: "15px",
+                                display: "flex",
+                                flexDirection: "column"
+                            }
+                        }
+                        onSubmit={
+                            (e) => {
+                                e.preventDefault();
+                                // handleOk(e)
+                                handleClear(e);
+                                showClear(false);
+                            }
+                        }>
+                        <CloseButton onClick={
+                            () => showClear(false)
+                        }
+                            style={
+                                { marginLeft: "auto" }
+                            } />
+
+                        <div className="input_Field">
+                            <h2>Are You Sure ..?</h2>
+                        </div>
+                        <button className="btn btn-success"
+                            style={
+                                { margin: "10px 0 0 auto" }
+                            }>
+                            {" "}
+                            Clear{" "} </button>
                     </form>
                 </Modal>
                 <ToastContainer />

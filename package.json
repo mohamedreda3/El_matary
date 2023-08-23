@@ -111,6 +111,8 @@
     ]
   },
   "devDependencies": {
+    "@iconify/icons-icon-park": "^1.2.11",
+    "@iconify/icons-mdi": "^1.2.47",
     "@iconify/react": "^4.1.1"
   }
 }

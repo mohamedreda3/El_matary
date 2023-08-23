@@ -70,3 +70,11 @@
     transition: .5s ease-in-out;
   }
 }
+
+.row> iframe {
+  height: 505px !important;
+}
+
+iframe {
+  height: 505px !important;
+}

@@ -15,19 +15,30 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
   const [showcourseedit, setshowcourseedit] = useState(false);
   const [rowdata, setrowdata] = useState({});
   const [image, setimage] = useState(false);
+  const [selectedGrade, setSelectedGrade] = useState(false);
+  const [selectedUniv, setSelectedUniv] = useState(false);
 
   // const navigate=useNavigate();
+  const [category, setCategory] = useState(false);
 
+  const getCategories = async () => {
+    const getcategories = await axios.get("https://camp-coding.tech/dr_elmatary/admin/courses/select_category.php");
+    console.log(getcategories)
+    setCategory(getcategories);
+  }
+  const [selectedCategory, setSelectedCategory] = useState(false)
+
+  useEffect(() => {
+    getCategories();
+  }, [])
   const handleupdatecourse = () => {
     const formdata = new FormData();
     formdata.append("image", image);
     console.log(rowdata);
-    for (var pair of formdata.entries()) {
-      console.log(pair[0] + ', ' + pair[1]);
-    }
+    alert("Edit Course")
+
     axios.post("https://camp-coding.tech/dr_elmatary/admin/image_uplouder.php", formdata)
       .then((res) => {
-        console.log(res)
 
         const data_send = {
           course_name: rowdata.course_name,
@@ -35,8 +46,9 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
           course_content: rowdata.course_content,
           course_photo_url: !image ? rowdata.course_photo_url : res,
           course_id: rowdata.course_id,
-          grade_id: rowdata.university_id,
-          university_id: rowdata.grade_id,
+          grade_id: selectedGrade,
+          university_id: selectedUniv,
+          category_id: selectedCategory
         }
         axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/edit_course.php", JSON.stringify(data_send))
           .then((res) => {
@@ -46,6 +58,8 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
               toast.success(res.message);
               setrowdata(false);
               getCourses();
+              setSelectedGrade(false);
+              setSelectedUniv(false);
             }
             else if (res.status == 'error') {
               toast.error(res.message);
@@ -60,7 +74,11 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
   }
   const [item, setItem] = useState(false)
   const [copyCourse, setCopyCourse] = useState(false);
-
+  useEffect(() => {
+    setSelectedGrade(rowdata.grade_id);
+    setSelectedUniv(rowdata.university_id);
+    setSelectedCategory(rowdata.category_id)
+  }, [rowdata]);
   const columns = [
     {
       accessor: 'course_photo_url',
@@ -157,7 +175,7 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
                   <span onClick={
                     () => {
                       console.log(cell.cell.row.original.course_id);
-                      navigate("/exam",{ state:{course_data:cell.cell.row.original} })
+                      navigate("/exam", { state: { course_data: cell.cell.row.original } })
                       // setshowcourseedit(true);
                       // setrowdata(cell.cell.row.original);
                       // console.log(cell.cell.row.original)
@@ -252,35 +270,36 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
   const getuniversities = () => {
     axios.get("https://camp-coding.tech/dr_elmatary/admin/universities/select_universities_grade.php")
       .then((res) => {
-        setuniversities(res.message)
+        setuniversities(res.message);
       })
       .catch(err => console.log(err));
   }
 
 
   const getgrades = () => {
-    setgrades(universities.filter(item => item.university_id == rowdata?.university_id)[0]?.grades);
+    setgrades(universities.filter(item => item.university_id == selectedUniv)[0]?.grades);
   }
 
   useEffect(() => {
-    getuniversities()
+    getuniversities();
   }, [])
 
   useEffect(() => {
     getgrades();
-  }, [rowdata?.university_id]);
+    console.log("res", selectedUniv);
+  }, [selectedUniv]);
 
   useEffect(() => {
     if (grades && grades.length) {
-      setrowdata({ ...rowdata, grade_id: grades[0]?.grade_id });
+      setSelectedGrade(grades[0]?.grade_id)
     }
   }, [grades])
 
   const duplicateCourse = (e) => {
     const data_send = {
       course_id: rowdata.course_id,
-      grade_id: rowdata.grade_id,
-      university_id: rowdata.university_id,
+      grade_id: selectedGrade,
+      university_id: selectedUniv,
     }
     console.log(data_send);
     axios.post("https://camp-coding.tech/dr_elmatary/admin/courses/make_copy_from_course.php", JSON.stringify(data_send))
@@ -290,7 +309,9 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
           setshowcourseedit(false);
           toast.success(res.message);
           setrowdata(false);
-          getCourses()
+          getCourses();
+          setSelectedGrade(false);
+          setSelectedUniv(false);
         }
         else if (res.status == 'error') {
           toast.error(res.message);
@@ -383,9 +404,26 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
               />
 
             </div>
+            <div className="mb-3">
+              <label htmlFor="category_id" className="form-label">
+                Category
+              </label>
+              {category && category.length ?
+                <select value={selectedCategory} onChange={(e) => {
+                  setSelectedCategory(e.target.value)
+                }} className="form-control" data-trigger name="choices-single-category" id="choices-single-category">
+                  {
+                    category.map((item, index) => {
+                      return (
+                        <option value={item.category_id}>{item.category_label}</option>
 
+                      )
+                    })
+                  }
+                </select> : null}
+            </div>
             <div className="input_Field">
-              <label htmlFor="">Course URL</label>
+              <label htmlFor="">Course Image</label>
               <Input style={
                 {
                   width: "100%",
@@ -409,7 +447,7 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
               <label htmlFor="">University</label>
               <select onChange={(e) => {
                 setrowdata({ ...rowdata, university_id: e.target.value })
-              }} className="form-control" value={rowdata?.university_id} data-trigger name="choices-single-category" id="" >
+              }} className="form-control" data-trigger name="choices-single-category" id="" >
                 {
                   universities.map((item, index) => {
                     return (
@@ -425,7 +463,7 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
               <label htmlFor="">Grade</label>
               <select onChange={(e) => {
                 setrowdata({ ...rowdata, grade_id: e.target.value })
-              }} className="form-control" value={rowdata?.grade_id} data-trigger name="choices-single-category" id="" >
+              }} className="form-control" data-trigger name="choices-single-category" id="" >
                 {
                   grades && grades.length ? grades.map((item, index) => {
                     return (
@@ -490,7 +528,6 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
           </div>
         </ModalHeader>
         <ModalBody>
-
           <form
             style={
               {
@@ -510,8 +547,10 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
             <div className="input_Field">
               <label htmlFor="">University</label>
               <select onChange={(e) => {
-                setrowdata({ ...rowdata, university_id: e.target.value })
-              }} className="form-control" value={rowdata?.university_id} data-trigger name="choices-single-category" id="" >
+                // setrowdata({ ...rowdata, university_id: e.target.value })
+                setSelectedUniv(e.target.value)
+
+              }} className="form-control" data-trigger name="choices-single-category" id="" >
                 {
                   universities.map((item, index) => {
                     return (
@@ -526,8 +565,9 @@ const CourseListTable = ({ Courses, showHideCourse, getCourses }) => {
             <div className="input_Field">
               <label htmlFor="">Grade</label>
               <select onChange={(e) => {
-                setrowdata({ ...rowdata, grade_id: e.target.value })
-              }} className="form-control" value={rowdata?.grade_id} data-trigger name="choices-single-category" id="" >
+                // setrowdata({ ...rowdata, grade_id: e.target.value })
+                setSelectedGrade(e.target.value)
+              }} className="form-control" data-trigger name="choices-single-category" id="" >
                 {
                   grades && grades.length ? grades.map((item, index) => {
                     return (

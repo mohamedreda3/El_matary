@@ -22,6 +22,9 @@ import {
   FormFeedback,
   CloseButton,
 } from "reactstrap";
+import { Icon } from '@iconify/react';
+import transferUp from '@iconify/icons-mdi/transfer-up';
+import transferDown from '@iconify/icons-mdi/transfer-down';
 import { Form as FormT } from "rsuite"
 import axios from "axios"
 //Import Flatepicker
@@ -196,6 +199,49 @@ const Lessons = () => {
       }).catch(err => console.log(err))
   }
 
+  const [edit, setEdit] = useState(false)
+  const [videoDataEdit, setVideoDataEdit] = useState(false);
+  const [titleNew, setTitleNew] = useState(false);
+  useEffect(() => {
+    console.log(videoDataEdit);
+    setTitleNew(videoDataEdit.new_title)
+  }, [videoDataEdit]);
+
+  const handleEditVideo = async () => {
+    await axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/update_videos_info.php", {
+      "unit_video_id": videoDataEdit.unit_video_id,
+      "new_title": titleNew, // not req
+      "source_video_id": videoDataEdit.source_video_id,
+      "unit_id": videoDataEdit.unit_id,
+      "course_id": videoDataEdit.course_id
+    }).then((res) => {
+      if (res.status == "success") {
+        toast.success("Updated");
+        getUnitsVideos();
+        setVideoDataEdit(false);
+      } else {
+        toast.error(res.message);
+      }
+    })
+  }
+
+  const setStatus = async (video_id, status) => {
+    await axios.post("", {
+      "unit_video_id": videoDataEdit.unit_video_id,
+      "status": status, // not req
+      "source_video_id": video_id,
+      "unit_id": location?.state?.unitData?.unit_id,
+      "course_id": location?.state?.coursedata?.course_id
+    }).then((res) => {
+      if (res.status == "success") {
+        toast.success("Updated");
+        getUnitsVideos();
+        setVideoDataEdit(false);
+      } else {
+        toast.error(res.message);
+      }
+    })
+  }
   const columns = [
     {
       Header: "No",
@@ -203,6 +249,7 @@ const Lessons = () => {
         return (
           <b>
             {cell.cell.row.index + 1}
+            {console.log(cell?.cell)}
           </b>
         )
       }
@@ -213,6 +260,26 @@ const Lessons = () => {
     }, {
       Header: "Video Title",
       accessor: "new_title",
+
+      Cell: (cell) => {
+        return <div style={{ display: "flex", width: "100%", justifyContent: "space-between" }}>
+          <span>{cell.cell.row.original.new_title}</span>
+          <div className="sorts_u">
+            <span style={{ margin: "0 3px", cursor: "pointer" }} onClick={() => setStatus(cell.cell.row.original.video_id, "up")}>
+              <Icon icon={transferUp} color="green" style={{ fontSize: "30px" }} />
+            </span>
+            <span style={{ margin: "0 3px", cursor: "pointer" }} onClick={() => setStatus(cell.cell.row.original.video_id, "down")}>
+              <Icon icon={transferDown} color="red" style={{ fontSize: "30px" }} />
+            </span>
+          </div>
+          <button className="btn btn-primary" onClick={
+            () => {
+              setVideoDataEdit(cell.cell.row.original);
+              setEdit(true);
+            }
+          }>Edit</button></div>
+      }
+
     },
     {
       Header: 'Free',
@@ -234,21 +301,25 @@ const Lessons = () => {
         </DropdownItem>
       }
     },
-    // {
-    //   Header: 'Action',
-    //   Cell: (cell) => {
-    //     return (
-    //       <>
-    //         <button className="btn btn-primary" onClick={() => {
-    //           navigate("/videos/unit-videos", { state: cell.cell.row.original })
-    //         }}>View</button>
+    {
+      Header: 'Action',
+      Cell: (cell) => {
+        return (
+          <h2>
+            <button className="btn btn-danger" onClick={
+              () => {
+                setVideoDataUnAssign(cell.cell.row.original);
+                setUnAssignVideo(true);
+              }
+            }>UnAssign</button>
 
-    //       </>
-    //     )
-    //   }
-    // },
+          </h2>
+        )
+      }
+    },
   ]
-
+  const [videoDataUnAssign, setVideoDataUnAssign] = useState(false);
+  const [unAssignVideo, setUnAssignVideo] = useState(false);
   const Video = videoData.assign_data;
 
   const [videoType, setVideoType] = useState(false)
@@ -261,8 +332,9 @@ const Lessons = () => {
 
   const unitData = location?.state?.unitData?.unit_id;
   const courseData = location?.state?.coursedata?.course_id;
-  const unitdata=location?.state;
-  console.log(unitdata,"sds")
+  const unitdata = location?.state;
+  console.log(unitdata, "sds")
+  const [clear, showClear] = useState(false);
 
   const getUnitsVideos = () => {
     const arr = [];
@@ -314,6 +386,35 @@ const Lessons = () => {
     }
   }
 
+  const unAssignData = async (e) => {
+    const data_send = {
+      "unit_video_id": videoDataUnAssign.unit_video_id
+    }
+    const assign = await axios.post("https://camp-coding.tech/dr_elmatary/admin/videos/remove_assign_video_unit.php", data_send);
+    if (assign.status == "success") {
+      toast.success("Un Assigned");
+      getVideos();
+      getUnitsVideos();
+      setUnAssignVideo(false);
+    } else {
+      toast.error(assign.message);
+    }
+  }
+
+  const showClearModal = () => {
+    showClear(true)
+  }
+  const handleClear = async () => {
+    const units = await axios.post("", JSON.stringify({ unit_id: unitData }));
+    if (units.status) {
+      toast.success(units.message);
+      await getUnits();
+      showClear(false)
+    } else {
+      toast.error(units.message);
+    }
+  }
+
 
   return (
     <React.Fragment>
@@ -338,7 +439,6 @@ const Lessons = () => {
             {type == "Lessons" ? (
               <Fragment>
                 <Breadcrumbs title={location?.state?.coursedata?.course_name} breadcrumbItem={location?.state?.unitData?.unit_name + "  >  Lesson List"} />
-
                 <Row>
                   <Col lg={12}>
                     <Card>
@@ -365,7 +465,23 @@ const Lessons = () => {
                                   </button>
                                 </div>
                               </Col>
-
+                              <Col className="col-sm">
+                                <div>
+                                  <button
+                                    type="button"
+                                    className="btn btn-success mb-4"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#addVideoModal"
+                                    onClick={
+                                      () => {
+                                        showClearModal()
+                                      }
+                                    }
+                                  >
+                                    <i className="mdi mdi-plus me-1"></i> Clear Videos
+                                  </button>
+                                </div>
+                              </Col>
                             </Row>
                           </div>
                         </div>
@@ -537,8 +653,8 @@ const Lessons = () => {
             ) : type == "ebooks" ? (
               <Ebooks CourseId={courseData} unitId={unitData} allunitdata={location?.state?.unitData} cd={location.state.coursedata} />) : type == "mcqquestion" ? (
                 <MCQQuestions CourseId={courseData} unitId={unitdata.unitData} allunitdata={location?.state?.unitData} cd={location.state.coursedata} />) : (
-                  <UniqQuestion unitdata={courseData}/>
-                )}
+              <UniqQuestion unitdata={courseData} />
+            )}
           </div>
         </Container>
         <Modal isOpen={modal} toggle={toggle}>
@@ -579,6 +695,113 @@ const Lessons = () => {
               </Row>
             </Form>
           </ModalBody>
+        </Modal>
+
+        <Modal isOpen={edit} toggle={() => setEdit(!edit)}>
+          <ModalHeader toggle={() => setEdit(!edit)} tag="h4">
+            Edit Video Title
+          </ModalHeader>
+          <ModalBody>
+            <Form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleEditVideo()
+                return false;
+              }}
+            >
+              <Row>
+                <Col md={12}>
+                  <div className="mb-3">
+                    <Label className="form-label">Video Title</Label>
+                    <Input name="orderId" type_2="text" value={titleNew} onChange={(e) => setTitleNew(e.target.value)} />
+                  </div>
+                </Col>
+              </Row>
+              <Row>
+                <Col>
+                  <div className="text-end">
+                    <button
+                      type_2="submit"
+                      className="btn btn-success save-user"
+                    >
+                      Save
+                    </button>
+                  </div>
+                </Col>
+              </Row>
+            </Form>
+          </ModalBody>
+        </Modal>
+
+        <Modal isOpen={unAssignVideo} toggle={() => setUnAssignVideo(!unAssignVideo)}>
+          <ModalHeader tag="h4">
+            Un Assign Video
+          </ModalHeader>
+          <ModalBody>
+            <Form
+              onSubmit={(e) => {
+                e.preventDefault();
+                unAssignData()
+                return false;
+              }}
+            >
+              <Row>
+                <Col md={12}>
+                  <div className="mb-3">
+                    <h1 style={{ color: "red" }}>Are You Sure ..?</h1>
+                  </div>
+                </Col>
+              </Row>
+              <Row>
+                <Col>
+                  <div className="text-end">
+                    <button
+                      type_2="submit"
+                      className="btn btn-success save-user"
+                    >
+                      Confirm
+                    </button>
+                  </div>
+                </Col>
+              </Row>
+            </Form>
+          </ModalBody>
+        </Modal>
+        <Modal title="Clear Videos"
+          isOpen={clear}>
+          <form action="#"
+            style={
+              {
+                padding: "15px",
+                display: "flex",
+                flexDirection: "column"
+              }
+            }
+            onSubmit={
+              (e) => {
+                e.preventDefault();
+                // handleOk(e)
+                handleClear(e);
+                showClear(false);
+              }
+            }>
+            <CloseButton onClick={
+              () => showClear(false)
+            }
+              style={
+                { marginLeft: "auto" }
+              } />
+
+            <div className="input_Field">
+              <h2>Are You Sure ..?</h2>
+            </div>
+            <button className="btn btn-success"
+              style={
+                { margin: "10px 0 0 auto" }
+              }>
+              {" "}
+              Clear{" "} </button>
+          </form>
         </Modal>
         <ToastContainer />
       </div>

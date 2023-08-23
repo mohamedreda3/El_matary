@@ -7,25 +7,56 @@ import TableContainer from '../../../components/Common/TableContainer';
 import axios from 'axios';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { Loader } from 'rsuite';
+import { Icon } from '@iconify/react';
+import transferUp from '@iconify/icons-mdi/transfer-up';
+import transferDown from '@iconify/icons-mdi/transfer-down';
 import { toast } from 'react-toastify';
 import { MenuItem, Select } from '@mui/material';
 const UnitListTable = ({ Units, courseData, setshowconf, setrowdata }) => {
     const navigate = useNavigate();
-
-
+    const [unitData, setUnitData] = useState(false)
+    const setStatus = async (unit_id, status) => {
+        await axios.post("", {
+            "status": status, // not req
+            "unit_id": unit_id,
+            "course_id": courseData.course_id
+        }).then((res) => {
+            if (res.status == "success") {
+                toast.success("Updated");
+                getCourses();
+            } else {
+                toast.error(res.message);
+            }
+        })
+    }
     const columns = [
         {
             Header: "No",
             Cell: (cell) => {
+                console.log(cell)
                 return (
                     <b>
-                        {cell.cell.row.index + 1}
+                        {cell?.cell?.row?.index + 1}
+                        
                     </b>
                 )
             }
         }, {
             Header: 'Unit Title',
             accessor: 'unit_name',
+            Cell: (cell) => {
+                return <div style={{ display: "flex", width: "100%", justifyContent: "space-between" }}>
+                    <span>{cell.cell.row.original.unit_name}</span>
+                    <div className="sorts_u">
+                        <span style={{ margin: "0 3px", cursor: "pointer" }} onClick={() => setStatus(cell.cell.row.original.unit_id, "up")}>
+                            <Icon icon={transferUp} color="green" style={{ fontSize: "30px" }} />
+                        </span>
+                        <span style={{ margin: "0 3px", cursor: "pointer" }} onClick={() => setStatus(cell.cell.row.original.unit_id, "down")}>
+                            <Icon icon={transferDown} color="red" style={{ fontSize: "30px" }} />
+                        </span>
+                    </div>
+                </div>
+            }
         },
         {
             Header: 'Hidden',
@@ -34,8 +65,8 @@ const UnitListTable = ({ Units, courseData, setshowconf, setrowdata }) => {
                     () => {
                         const item = cell.cell.row.original;
                         const send_data = {
-                          status: item.hidden,
-                          unit_id: item.unit_id
+                            status: item.hidden,
+                            unit_id: item.unit_id
                         }
                         setshowconf(true);
                         setrowdata(send_data)
@@ -93,7 +124,7 @@ const UnitListTable = ({ Units, courseData, setshowconf, setrowdata }) => {
             Cell: (cell) => {
                 return (
                     <>
-                        <button className="btn btn-primary" onClick={() =>{ setsetShowCopy(true); setSelectedUnit(cell.cell.row.original.unit_id)}}>Copy</button>
+                        <button className="btn btn-primary" onClick={() => { setsetShowCopy(true); setSelectedUnit(cell.cell.row.original.unit_id) }}>Copy</button>
                     </>
                 )
             }
@@ -152,6 +183,7 @@ const UnitListTable = ({ Units, courseData, setshowconf, setrowdata }) => {
                 data={Units}
                 isGlobalFilter={true}
                 customPageSize={10}
+                
                 className="Invoice table" /> : !Units.length ? <h2>No Units</h2> : <Loader />
         }
 
@@ -197,7 +229,7 @@ const UnitListTable = ({ Units, courseData, setshowconf, setrowdata }) => {
                                 required>
                                 {
                                     Courses && Courses.length ? Courses.map((item, index) => {
-                                        return <MenuItem value={item.course_id} key={index}>{item.course_name}</MenuItem>
+                                        return <MenuItem value={item.course_id} key={index}>{item.course_name}  - {item.university_name} - {item.grade_name}</MenuItem>
                                     }) : <h3>No Courses</h3>
                                 }
                             </Select>

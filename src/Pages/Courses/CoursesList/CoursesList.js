@@ -71,34 +71,44 @@ const Courses = () => {
         setUnivs(selct_univs.message);
     }
 
-    const [selectedUnivs, setSelectedUnivs] = useState([])
+
+    const [selectedUnivs, setSelectedUnivs] = useState(false)
 
 
     useEffect(() => {
         getCourses();
         getUnivs();
     }, []);
-
+    const [filterGrades, setFilterGrades] = useState(false);
+    const [selectGrades, setSelectGrades] = useState(false);
+    const getFilterGrades = () => {
+        setFilterGrades(univs?.filter((item) => item.university_id == selectedUnivs)[0]?.grades)
+    }
     useEffect(() => {
-        const arr = [];
-        console.log("Courses", selectedUnivs);
-        if (selectedUnivs && selectedUnivs.length) {
-            setCourses(
-                selectedUnivs?.map((u_item, u_index) => {
-                    filteredCourses.map((item, index) => {
-                        console.log(item)
-                        if (item.university_id
-                            === u_item.university_id
-                        ) {
-                            return arr.push(item);
-                        }
-                    })
-                }))
-            setCourses([...arr]);
+        let arr = [];
+        if (filteredCourses && filteredCourses.length)
+            arr = filteredCourses.filter(item => item?.university_id == selectedUnivs)
+        setCourses([...arr]);
+        if (selectedUnivs) {
+            getFilterGrades();
         } else {
-            getCourses();
+            setFilterGrades(false)
+            setCourses(filteredCourses);
         }
     }, [selectedUnivs]);
+
+    useEffect(() => {
+        let arr = [];
+        if (filteredCourses && filteredCourses.length) {
+            if (selectGrades) {
+                arr = filteredCourses.filter(item => item?.grade_id == selectGrades)
+                setCourses([...arr]);
+            } else {
+                arr = filteredCourses.filter(item => item?.university_id == selectedUnivs)
+                setCourses([...arr]);
+            }
+        }
+    }, [selectGrades]);
 
     return (
         <React.Fragment>
@@ -111,7 +121,27 @@ const Courses = () => {
 
                                 return <span className={
                                     selectedUnivs && selectedUnivs.length &&
-                                        selectedUnivs?.map((f_item) => f_item.university_id)?.find(class_item => class_item == item?.university_id)
+                                        selectedUnivs == item?.university_id
+                                        ?
+                                        "active"
+                                        :
+                                        ""
+                                }
+                                    onClick={() =>
+                                        selectedUnivs == item?.university_id ? setSelectedUnivs(false) : setSelectedUnivs(item?.university_id)
+                                    }>
+                                    {item?.university_name}
+                                </span>
+                            }) : null
+                        }</div>
+
+                    <div className="univs">
+                        {
+                            filterGrades && filterGrades.length ? filterGrades.map((item, index) => {
+
+                                return <span className={
+                                    selectGrades && selectGrades.length &&
+                                        selectGrades == item?.grade_id
                                         ?
                                         "active"
                                         :
@@ -119,10 +149,9 @@ const Courses = () => {
                                 }
                                     onClick={() =>
 
-                                        !selectedUnivs?.map((f_item) => f_item?.university_id)?.find(class_item => class_item == item?.university_id) ?
-                                            setSelectedUnivs([...selectedUnivs, { university_id: item?.university_id }]) : setSelectedUnivs(selectedUnivs.filter(fc_item => fc_item.university_id != item?.university_id))}
-                                >
-                                    {item?.university_name}
+                                        selectGrades == item?.grade_id ? setSelectGrades(false) : setSelectGrades(item?.grade_id)
+                                    }>
+                                    {item?.grade_name}
                                 </span>
                             }) : null
                         }</div>
